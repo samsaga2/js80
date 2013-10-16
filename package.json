@@ -1,0 +1,8 @@
+{
+  "name": "js80",
+  "dependencies": {
+    "mocha": "~1.13.0",
+    "should": "~2.0.1",
+    "underscore": "~1.5.2"
+  }
+}
