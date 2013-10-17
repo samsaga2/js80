@@ -21,10 +21,10 @@ describe('asm inst', function() {
   });
 
   it('ld a,l', function() {
-    should(z80.asm('ld a,b')).be.eql([0x78+5]);
+    should(z80.asm('ld a,l')).be.eql([0x78+5]);
   });
 
   it('ld b,(hl)', function() {
-    should(z80.asm('ld a,b')).be.eql([0x46]);
+    should(z80.asm('ld b,(hl)')).be.eql([0x46]);
   });
 });

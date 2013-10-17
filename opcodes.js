@@ -1,7 +1,7 @@
 'use strict';
 
 // http://map.grauw.nl/resources/z80instr.php
-module.exports = [
+var opcodes = [
       {inst:"ADC A,(HL)", z80Timing:"7", r800Timing:"2", opcodes:"8E"},
       {inst:"ADC A,(IX+o)", z80Timing:"19", r800Timing:"5", opcodes:"DD 8E oo"},
       {inst:"ADC A,(IY+o)", z80Timing:"19", r800Timing:"5", opcodes:"FD 8E oo"},
