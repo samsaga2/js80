@@ -68,4 +68,8 @@ describe('asm inst', function() {
   it('dw 1,2,3', function() {
     should(z80.asm('dw 1,2,3')).be.eql([1,0,2,0,3,0]);
   });
+
+  it('ds 5', function() {
+    should(z80.asm('ds 5')).be.eql([0,0,0,0,0]);
+  });
 });
