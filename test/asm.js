@@ -1,14 +1,18 @@
 'use strict';
 
 var should = require('should')
-  , asm = require ('../asm');
+  , z80 = require ('../z80');
 
 describe('assemble opcodes', function() {
   it('nop', function() {
-        should(asm.code('nop')).be.eql([0]);
+    should(z80.asm('nop')).be.eql([0]);
   });
 
   it('ret', function() {
-    should(asm.code('ret')).be.eql([0xc9]);
+    should(z80.asm('ret')).be.eql([0xc9]);
+  });
+
+  it('xor a', function() {
+    should(z80.asm('xor a')).be.eql([0xa8+7]);
   });
 });
