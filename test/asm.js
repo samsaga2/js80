@@ -55,4 +55,9 @@ describe('asm inst', function() {
   it('ld a,2*3+4*5', function() {
     should(z80.asm('ld a,2*3+4*5')).be.eql([0x3e, 2*3+4*5]);
   });
+
+  it('org 8000h -- nop', function() {
+    should(z80.asm('org 8000h\nnop')).be.eql([0]);
+    should(z80.offset).be.eql(0x8001);
+  });
 });
