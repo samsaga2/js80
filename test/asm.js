@@ -88,4 +88,8 @@ describe('asm inst', function() {
     should(z80.asm('org 8000h\ntest_label nop')).be.eql([0]);
     should(z80.getLabel('test_label')).be.eql(0x8000);
   });
+
+  it('multiple inst per line', function() {
+    should(z80.asm('nop $ xor a')).be.eql([0, 0xa8+7]);
+  });
 });

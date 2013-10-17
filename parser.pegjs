@@ -3,7 +3,11 @@ Start
 
 Program
   = i:Line EOF { return i; }
-  / i:Line LineTerminator+ j:Program { return [i,j]; }
+  / i:Line EOS j:Program { return [i,j]; }
+
+EOS
+  = LineTerminator+
+  / "$"
 
 Line
   = __ i:Inst __ { return [i]; }
