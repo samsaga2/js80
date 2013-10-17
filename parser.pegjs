@@ -6,7 +6,10 @@ Lines
   / i:Line { return i; }
 
 Line
-  = Blank? i:Inst Blank? { return [i]; }
+  = Blank? i:Inst Blank? SingleLineComment? Blank? { return [i]; }
+
+SingleLineComment
+  = "//" (!LineTerminator .)*
 
 Int3
   = n:Number { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
