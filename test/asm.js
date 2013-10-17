@@ -60,4 +60,12 @@ describe('asm inst', function() {
     should(z80.asm('org 8000h\nnop')).be.eql([0]);
     should(z80.offset).be.eql(0x8001);
   });
+
+  it('db 1,2,3', function() {
+    should(z80.asm('db 1,2,3')).be.eql([1,2,3]);
+  });
+
+  it('dw 1,2,3', function() {
+    should(z80.asm('dw 1,2,3')).be.eql([1,0,2,0,3,0]);
+  });
 });

@@ -395,7 +395,7 @@ function buildOpcodes(opcodes) {
   var output = _.map(opcodes.split(' '), tryParseHex);
   return util.format('%j', output)
          .replace(/"/g, '')
-         .replace('nn,nn', 'nn&255,nn>>8');
+         .replace('nn,nn', 'nn[0],nn[1]');
 }
 
 function build(inst) {
