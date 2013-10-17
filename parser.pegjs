@@ -18,14 +18,14 @@ Offset8
   / "-" n:Number { if(n>127) throw new Error('Value overflow'); return -n; } // TODO
 
 TableR
-  = "a"i    { return 7; }
-  / "b"i    { return 0; }
-  / "c"i    { return 1; }
-  / "d"i    { return 2; }
-  / "e"i    { return 3; }
-  / "h"i    { return 4; }
-  / "l"i    { return 5; }
-  / "(hl)"i { return 6; }
+  = "A"i    { return 7; }
+  / "B"i    { return 0; }
+  / "C"i    { return 1; }
+  / "D"i    { return 2; }
+  / "E"i    { return 3; }
+  / "H"i    { return 4; }
+  / "L"i    { return 5; }
+  / "(HL)"i { return 6; }
 
 TableIXp
   = "IXh"i  { return 4; }
