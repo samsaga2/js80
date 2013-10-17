@@ -379,11 +379,11 @@ function buildArg(arg) {
   switch(arg) {
     case 'b'      : return ' b:Int3';
     case 'n'      : return ' nn:Int8';
-    case '(n)'    : return ' "(" Blank? nn:Int8 Blank? ")"';
+    case '(n)'    : return ' "(" _ nn:Int8 _ ")"';
     case 'nn'     : return ' nn:Int16';
-    case '(nn)'   : return ' "(" Blank? nn:Int16 Blank? ")"';
-    case '(IX+o)' : return ' "(" Blank? "IX"i Blank? oo:Offset8 Blank? ")"';
-    case '(IY+o)' : return ' "(" Blank? "IY"i Blank? oo:Offset8 Blank? ")"';
+    case '(nn)'   : return ' "(" _ nn:Int16 _ ")"';
+    case '(IX+o)' : return ' "(" _ "IX"i _ oo:Offset8 _ ")"';
+    case '(IY+o)' : return ' "(" _ "IY"i _ oo:Offset8 _ ")"';
     case 'r'      : return ' r:TableR';
     case 'IXp'    : return ' p:TableIXp';
     case 'IYq'    : return ' q:TableIYq';
@@ -403,10 +403,10 @@ function build(inst) {
   var i = inst.inst.split(/[\ ,]/);
   rule += util.format('"%s"i', i[0]);
   if(i.length > 1) {
-    rule = rule + ' Blank' + buildArg(i[1]);
+    rule = rule + ' _' + buildArg(i[1]);
   }
   if(i.length > 2) {
-    rule = rule + ' Comma' + buildArg(i[2]);
+    rule = rule + ' _ "," _' + buildArg(i[2]);
   }
 
     return util.format(
