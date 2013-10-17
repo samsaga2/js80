@@ -3,39 +3,40 @@
 var _ = require('underscore')
   , parser = require('./parser');
 
-module.exports = {
-  offset: 0,
-  labels: {},
+function Z80() {
+  this.offset = 0;
+  this.labels = {};
+}
 
-  reset: function() {
-    this.offset = 0;
-    this.labels = {};
-  },
-
-  asm: function(code) {
-    var ast = parser.parse(code);
-    var bytes = _.filter(_.flatten(ast), function(i) {
-                  return i !== '';
-                });
-    this.offset += bytes.length;
-    return bytes;
-  },
-
-  org: function(n) {
-    this.offset = n;
-  },
-
-  defineLabel: function(name) {
-    if(this.labels[name]) {
-      throw new Error('Label '+name+' already exists');
+Z80.prototype.asm = function(code) {
+  var ast = _.flatten(parser.parse(code));
+  var bytes = [];
+  var self = this;
+  _.each(ast, function(ast) {
+    if(ast.org) {
+      self.offset = ast.org;
+    } else if(ast.label) {
+      self.defineLabel(ast.label);
+    } else {
+      bytes.push(ast);
+      self.offset++;
     }
-    this.labels[name] = this.offset;
-  },
+  });
+  return bytes;
+}
 
-  getLabel: function(name) {
-    if(!this.labels[name]) {
-      throw new Error('Unknow label ' + name);
-    }
-    return this.labels[name];
+Z80.prototype.defineLabel = function(name) {
+  if(this.labels[name]) {
+    throw new Error('Label '+name+' already exists');
   }
-};
+  this.labels[name] = this.offset;
+}
+
+Z80.prototype.getLabel = function(name) {
+  if(!this.labels[name]) {
+    throw new Error('Unknow label ' + name);
+  }
+  return this.labels[name];
+}
+
+module.exports = Z80;

@@ -1,7 +1,3 @@
-{
-        var z80 = require('./z80');
-}
-
 Start
   = Program
 
@@ -15,7 +11,7 @@ EOS
 
 Line
   = __ i:Inst __ { return [i]; }
-  / __ l:Label _ i:Inst? __ { z80.defineLabel(l); return i; }
+  / __ l:Label _ i:Inst? __ { return [{label:l}, i]; }
   
 Label
   = i:Identifier ":"? { return i; }
@@ -135,7 +131,7 @@ TableIYq
 //
 Inst
   = Z80
-  / "ORG"i _ e:Expr { z80.org(e); return ''; }
+  / "ORG"i _ e:Expr { return {org:e}; }
   / "DB"i _ head:(Int8 / String) _ tail:(_ "," _ (Int8 / String))* { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
   / "DW"i _ head:Int16 _ tail:(_ "," _ Int16)* { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
   / "DS"i _ e:Expr { return [].slice.call(new Uint8Array(e)); }
