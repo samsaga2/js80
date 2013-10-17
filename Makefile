@@ -10,7 +10,10 @@ clean:
 parser.js: parser.pegjs
 	$(PEG) parser.pegjs
 
-test: parser.js
+z80parser.js: z80parser.pegjs
+	$(PEG) z80parser.pegjs
+
+test: parser.js z80parser.js
 	$(MOCHA)
 
 .PHONY: all test

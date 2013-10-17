@@ -1,28 +1,22 @@
 'use strict';
 
-var _ = require('underscore')
-  , parser = require('./parser');
+var parser = require('./parser')
+  , z80parser = require('./z80parser');
 
 function Z80() {
   this.offset = 0;
   this.labels = {};
 }
 
-Z80.prototype.asm = function(code) {
-  var ast = _.flatten(parser.parse(code));
-  var bytes = [];
-  var self = this;
-  _.each(ast, function(ast) {
-    if(ast.org) {
-      self.offset = ast.org;
-    } else if(ast.label) {
-      self.defineLabel(ast.label);
-    } else {
-      bytes.push(ast);
-      self.offset++;
-    }
-  });
+function parseInst(ast) {
+  var code = ast.inst;
+  var bytes = z80parser.parse(code);
   return bytes;
+}
+
+Z80.prototype.asm = function(code) {
+  var ast = parser.parse(code);
+  return parseInst(ast);
 }
 
 Z80.prototype.defineLabel = function(name) {
