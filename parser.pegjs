@@ -1,8 +1,12 @@
 Start
-  = Line
+  = Lines
+
+Lines
+  = i:Line LineTerminator+ j:Lines { return [i,j]; }
+  / i:Line { return i; }
 
 Line
-  = i:Inst { return [i]; }
+  = Blank? i:Inst Blank? { return [i]; }
 
 Int3
   = n:Number { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
@@ -39,7 +43,11 @@ Comma
   = Blank? "," Blank?
 
 Number
-  = text:[0-9]+ { return Number(text.join("")); }
+  = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }
+  / text:[0-1]+ "b"  { return parseInt(text.join(""), 2); }
+  / "0x" text:[0-9]+ { return parseInt(text.join(""), 16); }
+  / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
+  / text:[0-9]+ { return parseInt(text.join("")); }
 
 Blank
   = [\t\v\f \u00A0\uFEFF]+
@@ -144,7 +152,7 @@ Inst
   / "IM"i Blank "1"i                                                                		{ return [0xED,0x56]; } // IM 1
   / "IM"i Blank "2"i                                                                		{ return [0xED,0x5E]; } // IM 2
   / "IN"i Blank "A"i Comma "(C)"i                                                   		{ return [0xED,0x78]; } // IN A,(C)
-  / "IN"i Blank "A"i Comma "(n)"i                                                   		{ return [0xDB,nn]; } // IN A,(n)
+  / "IN"i Blank "A"i Comma "(" Blank? nn:Int8 Blank? ")"                            		{ return [0xDB,nn]; } // IN A,(n)
   / "IN"i Blank "B"i Comma "(C)"i                                                   		{ return [0xED,0x40]; } // IN B,(C)
   / "IN"i Blank "C"i Comma "(C)"i                                                   		{ return [0xED,0x48]; } // IN C,(C)
   / "IN"i Blank "D"i Comma "(C)"i                                                   		{ return [0xED,0x50]; } // IN D,(C)
@@ -306,7 +314,7 @@ Inst
   / "OUT"i Blank "(C)"i Comma "E"i                                                  		{ return [0xED,0x59]; } // OUT (C),E
   / "OUT"i Blank "(C)"i Comma "H"i                                                  		{ return [0xED,0x61]; } // OUT (C),H
   / "OUT"i Blank "(C)"i Comma "L"i                                                  		{ return [0xED,0x69]; } // OUT (C),L
-  / "OUT"i Blank "(n)"i Comma "A"i                                                  		{ return [0xD3,nn]; } // OUT (n),A
+  / "OUT"i Blank "(" Blank? nn:Int8 Blank? ")" Comma "A"i                           		{ return [0xD3,nn]; } // OUT (n),A
   / "OUTD"i                                                                         		{ return [0xED,0xAB]; } // OUTD
   / "OUTI"i                                                                         		{ return [0xED,0xA3]; } // OUTI
   / "POP"i Blank "AF"i                                                              		{ return [0xF1]; } // POP AF

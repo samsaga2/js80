@@ -29,6 +29,10 @@ describe('asm inst', function() {
   });
 
   it('set 2,(ix+10)', function() {
-    should(z80.asm('set 2,(ix+10)')).be.eql([0xDD, 0xCB, 10, 0xC6+8*2]);
+    should(z80.asm('set 2,(ix+10)')).be.eql([0xdd, 0xcb, 10, 0xc6+8*2]);
+  });
+
+  it('out (0x98),a; or 5', function() {
+    should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
   });
 });

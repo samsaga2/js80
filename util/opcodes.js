@@ -379,6 +379,7 @@ function buildArg(arg) {
   switch(arg) {
     case 'b'      : return ' b:Int3';
     case 'n'      : return ' nn:Int8';
+    case '(n)'    : return ' "(" Blank? nn:Int8 Blank? ")"';
     case 'nn'     : return ' nn:Int16';
     case '(nn)'   : return ' "(" Blank? nn:Int16 Blank? ")"';
     case '(IX+o)' : return ' "(" Blank? "IX"i Blank? oo:Offset8 Blank? ")"';
