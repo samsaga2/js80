@@ -76,4 +76,16 @@ describe('asm inst', function() {
   it('db "hello", 0', function() {
     should(z80.asm('db "hello", 0')).be.eql([104,101,108,108,111,0]);
   });
+
+  it('label', function() {
+    z80.reset();
+    should(z80.asm('org 8000h\ntest_label: nop')).be.eql([0]);
+    should(z80.getLabel('test_label')).be.eql(0x8000);
+  });
+
+  it('label without dots', function() {
+    z80.reset();
+    should(z80.asm('org 8000h\ntest_label nop')).be.eql([0]);
+    should(z80.getLabel('test_label')).be.eql(0x8000);
+  });
 });

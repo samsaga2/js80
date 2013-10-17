@@ -5,9 +5,11 @@ var _ = require('underscore')
 
 module.exports = {
   offset: 0,
+  labels: {},
 
-  org: function(n) {
-    this.offset = n;
+  reset: function() {
+    this.offset = 0;
+    this.labels = {};
   },
 
   asm: function(code) {
@@ -17,5 +19,23 @@ module.exports = {
                 });
     this.offset += bytes.length;
     return bytes;
+  },
+
+  org: function(n) {
+    this.offset = n;
+  },
+
+  defineLabel: function(name) {
+    if(this.labels[name]) {
+      throw new Error('Label '+name+' already exists');
+    }
+    this.labels[name] = this.offset;
+  },
+
+  getLabel: function(name) {
+    if(!this.labels[name]) {
+      throw new Error('Unknow label ' + name);
+    }
+    return this.labels[name];
   }
 };

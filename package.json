@@ -1,9 +1,11 @@
 {
   "name": "js80",
   "dependencies": {
-    "mocha": "~1.13.0",
-    "should": "~2.0.1",
     "underscore": "~1.5.2",
     "pegjs": "~0.7.0"
+  },
+  "devDependencies": {
+    "mocha": "~1.13.0",
+    "should": "~2.0.1"
   }
 }

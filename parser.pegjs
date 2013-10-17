@@ -7,6 +7,10 @@ Program
 
 Line
   = __ i:Inst __ { return [i]; }
+  / __ l:Label _ i:Inst? __ { require('./z80').defineLabel(l); return i; }
+  
+Label
+  = i:Identifier ":"? { return i; }
 
 //
 // chars
@@ -19,6 +23,9 @@ Whitespace
 
 LineTerminator
   = [\n\r\u2028\u2029]
+
+Identifier
+  = head:[a-zA-Z_] tail:[a-zA-Z0-9_]* { return head + tail.join(""); }
 
 //
 // whitespace
