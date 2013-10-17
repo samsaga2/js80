@@ -9,8 +9,11 @@ function Z80() {
 }
 
 function parseInst(ast) {
-  var code = ast.inst;
-  var bytes = z80parser.parse(code);
+  var template = ast.inst;
+  if(ast.src) {
+    template += " " + ast.src.id;
+  }
+  var bytes = z80parser.parse(template);
   return bytes;
 }
 
