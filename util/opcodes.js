@@ -1,7 +1,10 @@
 'use strict';
 
+var _ = require('underscore')
+  , util = require('util');
+
 // http://map.grauw.nl/resources/z80instr.php
-var opcodes = [
+var insts = [
       {inst:"ADC A,(HL)", z80Timing:"7", r800Timing:"2", opcodes:"8E"},
       {inst:"ADC A,(IX+o)", z80Timing:"19", r800Timing:"5", opcodes:"DD 8E oo"},
       {inst:"ADC A,(IY+o)", z80Timing:"19", r800Timing:"5", opcodes:"FD 8E oo"},
@@ -363,3 +366,56 @@ var opcodes = [
       {inst:"XOR IXp", z80Timing:"8", r800Timing:"2", opcodes:"DD A8+p"},
       {inst:"XOR IYq", z80Timing:"8", r800Timing:"2", opcodes:"FD A8+q"}
 ];
+
+function tryParseHex(value) {
+  return value.replace(/([0-9A-F]+)/g, '0x$1');
+}
+
+function lpad(t, n) {
+  return (t + (new Array(n+1).join(' '))).substr(0, n);
+}
+
+function buildArg(arg) {
+  switch(arg) {
+    case 'b'      : return ' b:Int3';
+    case 'n'      : return ' nn:Int8';
+    case 'nn'     : return ' nn:Int16';
+    case '(nn)'   : return ' "(" Blank? nn:Int16 Blank? ")"';
+    case '(IX+o)' : return ' "(" Blank? "IX"i Blank? oo:Offset8 Blank? ")"';
+    case '(IY+o)' : return ' "(" Blank? "IY"i Blank? oo:Offset8 Blank? ")"';
+    case 'r'      : return ' r:TableR';
+    case 'IXp'    : return ' p:TableIXp';
+    case 'IYq'    : return ' q:TableIYq';
+    default    : return util.format(' "%s"i', arg);
+  }
+}
+
+function buildOpcodes(opcodes) {
+  var output = _.map(opcodes.split(' '), tryParseHex);
+  return util.format('%j', output)
+         .replace(/"/g, '')
+         .replace('nn,nn', 'nn&255,nn>>8');
+}
+
+function build(inst) {
+  var rule = "";
+  var i = inst.inst.split(/[\ ,]/);
+  rule += util.format('"%s"i', i[0]);
+  if(i.length > 1) {
+    rule = rule + ' Blank' + buildArg(i[1]);
+  }
+  if(i.length > 2) {
+    rule = rule + ' Comma' + buildArg(i[2]);
+  }
+
+    return util.format(
+        "%s\t\t{ return %s; } // %s",
+        lpad(rule, 80),
+        buildOpcodes(inst.opcodes),
+        inst.inst);
+}
+
+console.log("  = %s", build(_.first(insts)));
+_.each(_.rest(insts), function(inst) {
+  console.log("  / %s", build(inst));
+});

@@ -27,4 +27,8 @@ describe('asm inst', function() {
   it('ld b,(hl)', function() {
     should(z80.asm('ld b,(hl)')).be.eql([0x46]);
   });
+
+  it('set 2,(ix+10)', function() {
+    should(z80.asm('set 2,(ix+10)')).be.eql([0xDD, 0xCB, 10, 0xC6+8*2]);
+  });
 });
