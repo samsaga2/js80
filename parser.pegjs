@@ -6,10 +6,23 @@ Lines
   / i:Line { return i; }
 
 Line
-  = Blank? i:Inst Blank? SingleLineComment? Blank? { return [i]; }
+  = Blank? i:Inst Blank? { return [i]; }
+
+Blank
+  = (Whitespace / Comment)*
+
+Whitespace
+  = [\t\v\f \u00A0\uFEFF]
+
+Comment
+  = SingleLineComment
+  / MultiLineComment
 
 SingleLineComment
   = "//" (!LineTerminator .)*
+
+MultiLineComment
+  = "/*" (!"*/" .)* "*/"
 
 Int3
   = n:Number { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
@@ -51,9 +64,6 @@ Number
   / "0x" text:[0-9]+ { return parseInt(text.join(""), 16); }
   / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
   / text:[0-9]+ { return parseInt(text.join("")); }
-
-Blank
-  = [\t\v\f \u00A0\uFEFF]+
 
 LineTerminator
   = [\n\r\u2028\u2029]
