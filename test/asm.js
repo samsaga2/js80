@@ -72,4 +72,8 @@ describe('asm inst', function() {
   it('ds 5', function() {
     should(z80.asm('ds 5')).be.eql([0,0,0,0,0]);
   });
+
+  it('db "hello", 0', function() {
+    should(z80.asm('db "hello", 0')).be.eql([104,101,108,108,111,0]);
+  });
 });

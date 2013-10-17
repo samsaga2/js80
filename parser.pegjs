@@ -50,7 +50,7 @@ MultiLineCommentNoLineTerminator
   = "/*" (!("*/" / LineTerminator) .)* "*/"
 
 //
-// numbers
+// basic types
 //
 Int3
   = n:Expr { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
@@ -72,6 +72,9 @@ Number
   / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
   / text:[0-9]+ { return parseInt(text.join("")); }
 
+String
+  = '"' s:(!'"' .)* '"' { var n = []; for(var i = 0; i < s.length; i++) n.push(s[i][1].charCodeAt(0)); return n; }
+  
 //
 // expressions
 //
@@ -118,7 +121,7 @@ TableIYq
 Inst
   = Z80
   / "ORG"i _ e:Expr { require('./z80').org(e); return ''; }
-  / "DB"i _ head:Int8  _ tail:(_ "," _ Int8)*  { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
+  / "DB"i _ head:(Int8 / String) _ tail:(_ "," _ (Int8 / String))* { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
   / "DW"i _ head:Int16 _ tail:(_ "," _ Int16)* { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
   / "DS"i _ e:Expr { return [].slice.call(new Uint8Array(e)); }
 
