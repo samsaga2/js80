@@ -18,4 +18,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('xor a')).be.eql([0xa8+7]);
   });
+
+  it('ld a,1', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,1')).be.eql([0x3e, 1]);
+  });
 });

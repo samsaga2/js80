@@ -1,7 +1,8 @@
 'use strict';
 
 var parser = require('./parser')
-  , z80parser = require('./z80parser');
+  , z80parser = require('./z80parser')
+  , _ = require('underscore');
 
 function Z80() {
   this.offset = 0;
@@ -10,11 +11,18 @@ function Z80() {
 
 function parseInst(ast) {
   var template = ast.inst;
-  if(ast.src) {
-    template += " " + ast.src.id;
-  }
-  var bytes = z80parser.parse(template);
-  return bytes;
+  var sep = ' ';
+  _.each(ast.args, function(arg) {
+    if(arg.id) {
+      template += sep + arg.id;
+    } else if(arg.num) {
+      template += sep + arg.num;
+    } else {
+      throw new Error('Internal error ' + arg);
+    }
+    sep = ',';
+  });
+  return z80parser.parse(template);
 }
 
 Z80.prototype.asm = function(code) {
