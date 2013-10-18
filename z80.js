@@ -51,18 +51,6 @@ function buildArg(arg) {
 }
 
 Z80.prototype.parseInst = function(ast) {
-  // special func
-  if(ast.inst === 'db' && ast.args.length > 0) {
-    return _.flatten(_.map(ast.args, function(i) {
-                       if(i.str) {
-                         return _.map(i.str, function(i) { return i.charCodeAt(0); });
-                       } else {
-                         return evalExpr(i.expr);
-                       }
-                     }));
-  }
-
-  // z80 inst
   var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
@@ -76,20 +64,27 @@ Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
   var bytes = [];
   _.each(ast, function(i) {
+    var newBytes = null;
     if("inst" in i) {
-      var b = this.parseInst(i);
-      bytes = bytes.concat(b);
-      this.offset += b.length;
+      newBytes = this.parseInst(i);
     } else if("org" in i) {
       this.offset = evalExpr(i.org.expr);
     } else if("ds" in i) {
-      var b = [].slice.call(new Uint8Array(evalExpr(i.ds.expr)));
-      bytes = bytes.concat(b);
-      this.offset += b.length;
+      newBytes = [].slice.call(new Uint8Array(evalExpr(i.ds.expr)));
     } else if("dw" in i) {
-      var b = _.flatten(_.map(i.dw, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
-      bytes = bytes.concat(b);
-      this.offset += b.length;
+      newBytes = _.flatten(_.map(i.dw, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
+    } else if("db" in i) {
+      newBytes = _.flatten(_.map(i.db, function(i) {
+                             if(i.str) {
+                               return _.map(i.str, function(i) { return i.charCodeAt(0); });
+                             } else {
+                               return evalExpr(i.expr);
+                             }
+                           }));
+    }
+    if(newBytes) {
+      bytes = bytes.concat(newBytes);
+      this.offset += newBytes.length;
     }
   }, this);
   return bytes;
