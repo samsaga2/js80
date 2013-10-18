@@ -74,10 +74,10 @@ describe('asm inst', function() {
     should(z80.asm('ld a,10+1-4+5')).be.eql([0x3e, 10+1-4+5]);
   });
 
-  // it('ld a,2*3+4*5', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('ld a,2*3+4*5')).be.eql([0x3e, 2*3+4*5]);
-  // });
+  it('ld a,2*3+4*5', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,2*3+4*5')).be.eql([0x3e, 2*3+4*5]);
+  });
 
   // it('org 8000h -- nop', function() {
   //   var z80 = new Z80();

@@ -22,6 +22,8 @@ function evalExpr(expr) {
     switch(expr.unary) {
       case '+': return _.reduce(values, function(memo, num) { return memo + num; }, 0);
       case '-': return _.reduce(_.rest(values), function(memo, num) { return memo - num; }, _.first(values));
+      case '*': return _.reduce(_.rest(values), function(memo, num) { return memo * num; }, _.first(values));
+      case '/': return _.reduce(_.rest(values), function(memo, num) { return memo / num; }, _.first(values));
     }
   }
 
