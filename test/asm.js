@@ -130,4 +130,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('nop $ test: xor a $ ret')).be.eql([0, 0xa8+7, 0xc9]);
   });
+
+  it('call label', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h $ test_label: nop $ call test_label')).be.eql([0, 0xcd, 0, 0x80]);
+  });
 });
