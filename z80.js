@@ -34,9 +34,9 @@ function evalExpr(expr) {
   throw new Error(util.format('Internal error %j', expr));
 }
 
-function buildArg(arg) {
+function buildTemplateArg(arg) {
     if(arg.ptr) {
-      return "(" + buildArg(arg.ptr) + ")";
+      return "(" + buildTemplateArg(arg.ptr) + ")";
     } else if(arg.offset_ptr) {
       if(arg.offset_ptr.offset >= 0) {
         return "(" + arg.offset_ptr.id + "+" + arg.offset_ptr.offset + ")";
@@ -54,7 +54,7 @@ Z80.prototype.parseInst = function(ast) {
   var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
-    template += sep + buildArg(arg);
+    template += sep + buildTemplateArg(arg);
     sep = ',';
   });
   return z80parser.parse(template);
