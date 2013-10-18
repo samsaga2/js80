@@ -100,10 +100,10 @@ describe('asm inst', function() {
     should(z80.asm('ds 5')).be.eql([0,0,0,0,0]);
   });
 
-  // it('db "hello", 0', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('db "hello", 0')).be.eql([104,101,108,108,111,0]);
-  // });
+  it('db "hello", 0', function() {
+    var z80 = new Z80();
+    should(z80.asm('db "hello", 0')).be.eql([104,101,108,108,111,0]);
+  });
 
   // it('label', function() {
   //   var z80 = new Z80();

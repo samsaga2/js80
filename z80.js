@@ -17,7 +17,7 @@ function Z80() {
 function evalExpr(expr) {
   if(expr.id) {
     return expr.id;
-  } else if(expr.num) {
+  } else if("num" in expr) {
     return expr.num;
   } else if(expr.neg) {
     return -evalExpr(expr.neg);
@@ -56,7 +56,13 @@ Z80.prototype.parseInst = function(ast) {
     this.offset = evalExpr(ast.args[0].expr);
     return null;
   } else if(ast.inst === 'db' && ast.args.length > 0) {
-    return _.map(ast.args, function(i) { return evalExpr(i.expr); });
+    return _.flatten(_.map(ast.args, function(i) {
+                       if(i.str) {
+                         return _.map(i.str, function(i) { return i.charCodeAt(0); });
+                       } else {
+                         return evalExpr(i.expr);
+                       }
+                     }));
   } else if(ast.inst === 'dw' && ast.args.length > 0) {
     return _.flatten(_.map(ast.args, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
   } else if(ast.inst === 'ds' && ast.args.length === 1) {

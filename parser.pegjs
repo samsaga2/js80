@@ -28,6 +28,7 @@ Arg
 //
 Expr
   = e:ExprAdd { return {expr:e}; }
+  / e:String { return {str:e}; }
 
 ExprAdd
   = left:ExprMul _ right:([+-] ExprMul)+ {
@@ -58,6 +59,9 @@ Number
   / "0x" text:[0-9]+ { return parseInt(text.join(""), 16); }
   / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
   / text:[0-9]+ { return parseInt(text.join("")); }
+
+String
+  = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }
 
 Identifier
   = head:[a-zA-Z_] tail:[a-zA-Z0-9_]* { return head + tail.join(""); }
