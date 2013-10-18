@@ -97,7 +97,7 @@ describe('asm inst', function() {
   it('org 8000h -- nop', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h\nnop')).be.eql([0]);
-    should(z80.offset).be.eql(0x8001);
+    should(z80.org + z80.offset).be.eql(0x8001);
   });
 
   it('db 1,2,3', function() {
@@ -139,5 +139,10 @@ describe('asm inst', function() {
   it('jp label', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h $ test_label: nop $ jp test_label')).be.eql([0, 0xc3, 0, 0x80]);
+  });
+
+  it('jp label second pass', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h $ main: call test_label $ test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 });

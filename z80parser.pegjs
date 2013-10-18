@@ -7,6 +7,9 @@ Start
 _
   = [\t\v\f \u00A0\uFEFF]*
 
+Identifier
+  = head:[a-zA-Z_] tail:[a-zA-Z0-9_]* { return head + tail.join(""); }
+
 //
 // basic types
 //
@@ -18,10 +21,12 @@ Int8
 
 Int16
   = n:Number { if(n<-32767||n>32768) throw new Error('Value overflow'); else return [n&255, n>>8]; }
+  / i:Identifier { return [{low:i}, {high:i}]; }
 
 Offset8
-  = "+" n:Number { if(n>128) throw new Error('Value overflow'); else return n; } // TODO
-  / "-" n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
+  = "+"? n:Number { if(n>128) throw new Error('Value overflow'); else return n; } // TODO
+  / "-"  n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
+  / "+"? i:Identifier { return [{relative:i}]; }
 
 Number
   = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }

@@ -10,17 +10,15 @@ function reduce(l, func) {
 }
 
 function Z80() {
+  this.org = 0;
   this.offset = 0;
   this.labels = {};
+  this.secondPass = {};
 }
 
 Z80.prototype.evalExpr = function(expr) {
   if(expr.id) {
-    if(expr.id in this.labels) {
-      return this.labels[expr.id];
-    } else {
-      return expr.id;
-    }
+    return expr.id;
   } else if("num" in expr) {
     return expr.num;
   } else if(expr.neg) {
@@ -86,7 +84,7 @@ Z80.prototype.parseCode = function(code) {
   if("inst" in code) {
     bytes = this.parseInst(code);
   } else if("org" in code) {
-    this.offset = this.evalExpr(code.org.expr);
+    this.org = this.evalExpr(code.org.expr);
   } else if("ds" in code) {
     bytes = [].slice.call(new Uint8Array(this.evalExpr(code.ds.expr)));
   } else if("dw" in code) {
@@ -102,7 +100,16 @@ Z80.prototype.parseCode = function(code) {
   }
   if(bytes) {
     bytes = _.flatten(bytes);
-    this.offset += bytes.length;
+    bytes = _.map(bytes, function(b) {
+              if(_.isObject(b)) {
+                this.secondPass[this.offset] = b;
+                this.offset++;
+                return 0;
+              } else {
+                this.offset++;
+                return b;
+              }
+            }, this);
   }
   return bytes;
 }
@@ -117,16 +124,32 @@ Z80.prototype.parseLine = function(line) {
   return [];
 }
 
+Z80.prototype.asmSecondPass = function(bytes) {
+  bytes = _.clone(bytes);
+  _.each(this.secondPass, function(value, key) {
+    if(value.low) {
+      bytes[key] = this.labels[value.low]&255;
+    } else if(value.high) {
+      bytes[key] = this.labels[value.high]>>8;
+    } else {
+      throw new Error('Internal error');
+    }
+  }, this);
+  this.secondPass = {};
+  return bytes;
+}
+
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  return _.flatten(_.map(ast, this.parseLine, this));
+  var bytes = _.flatten(_.map(ast, this.parseLine, this));
+  return this.asmSecondPass(bytes);
 }
 
 Z80.prototype.defineLabel = function(name) {
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.labels[name] = this.offset;
+  this.labels[name] = this.org + this.offset;
 }
 
 Z80.prototype.getLabel = function(name) {
