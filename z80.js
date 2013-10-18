@@ -10,6 +10,10 @@ function Z80() {
   this.labels = {};
 }
 
+function reduce(l, func) {
+  return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
+}
+
 function evalExpr(expr) {
   if(expr.id) {
     return expr.id;
@@ -20,10 +24,10 @@ function evalExpr(expr) {
   } else if(expr.unary) {
     var values = _.map(expr.args, evalExpr);
     switch(expr.unary) {
-      case '+': return _.reduce(values, function(memo, num) { return memo + num; }, 0);
-      case '-': return _.reduce(_.rest(values), function(memo, num) { return memo - num; }, _.first(values));
-      case '*': return _.reduce(_.rest(values), function(memo, num) { return memo * num; }, _.first(values));
-      case '/': return _.reduce(_.rest(values), function(memo, num) { return memo / num; }, _.first(values));
+      case '+': return reduce(values, function(l, r) { return l+r; });
+      case '-': return reduce(values, function(l, r) { return l-r; });
+      case '*': return reduce(values, function(l, r) { return l*r; });
+      case '/': return reduce(values, function(l, r) { return l/r; });
     }
   }
 
