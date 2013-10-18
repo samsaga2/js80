@@ -54,10 +54,10 @@ describe('asm inst', function() {
     should(z80.asm('nop // comment')).be.eql([0]);
   });
 
-  // it('nop /* ... */', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('nop /* comment\ncomment 2\ncomment3\n*/\nnop')).be.eql([0, 0]);
-  // });
+  it('nop /* ... */', function() {
+    var z80 = new Z80();
+    should(z80.asm('nop /* comment\ncomment 2\ncomment3\n*/\nnop')).be.eql([0, 0]);
+  });
 
   // it('ld a,1+2+3', function() {
   //   var z80 = new Z80();

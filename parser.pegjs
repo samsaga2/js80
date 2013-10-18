@@ -9,7 +9,7 @@ Program
   = Lines
 
 Lines
-  = head:Inst tail:(LineTerminator Inst)* { return [head].concat(_.map(tail, function(i) { return i[1]; })); }
+  = __ head:Inst tail:(__ LineTerminator __ Inst)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Inst
   = inst:Identifier _ args:Args? { return {inst:inst, args:args}; }
