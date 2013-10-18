@@ -63,8 +63,6 @@ Z80.prototype.parseInst = function(ast) {
   } else if(ast.inst === 'dw' && ast.args.length > 0) {
     return _.flatten(_.map(ast.args, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
   } else if(ast.inst === 'ds' && ast.args.length === 1) {
-    var n = evalExpr(ast.args[0].expr);
-    return [].slice.call(new Uint8Array(n));
   }
 
   // z80 inst
@@ -82,10 +80,15 @@ Z80.prototype.asm = function(code) {
   var bytes = [];
   _.each(ast, function(i) {
     if("inst" in i) {
-      bytes = bytes.concat(this.parseInst(i));
-      this.offset += bytes.length;
+      var b = this.parseInst(i);
+      bytes = bytes.concat(b);
+      this.offset += b.length;
     } else if("org" in i) {
       this.offset = evalExpr(i.org.expr);
+    } else if("ds" in i) {
+      var b = [].slice.call(new Uint8Array(evalExpr(i.ds.expr)));
+      bytes = bytes.concat(b);
+      this.offset += b.length;
     }
   }, this);
   return bytes;
