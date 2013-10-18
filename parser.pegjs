@@ -28,7 +28,6 @@ InstArgs
 Arg
   = "(" _ "ix"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
   / "(" _ "iy"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
-  / "(" a:Arg ")" { return {ptr:a}; }
   / Expr
 
 //
@@ -60,6 +59,7 @@ ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
   / num:Number { return {num:num}; }
   / id:Identifier { return {id:id}; }
+  / "(" e:ExprAdd ")" { return {paren:e}; }
 
 Number
   = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }

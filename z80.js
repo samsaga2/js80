@@ -43,6 +43,14 @@ function buildTemplateArg(arg) {
       } else {
         return "(" + arg.offset_ptr.id + "-" + -arg.offset_ptr.offset + ")";
       }
+    } else if(arg.expr.paren) {
+      if("id" in arg.expr.paren) {
+        return "(" + arg.expr.paren.id + ")";
+      } else if("num" in arg.expr.paren) {
+        return "(" + arg.expr.paren.num + ")";
+      } else {
+        return buildTemplateArg(arg.paren);
+      }
     } else if(arg.expr) {
       return evalExpr(arg.expr).toString();
     } else {
