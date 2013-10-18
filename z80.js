@@ -60,9 +60,6 @@ Z80.prototype.parseInst = function(ast) {
                          return evalExpr(i.expr);
                        }
                      }));
-  } else if(ast.inst === 'dw' && ast.args.length > 0) {
-    return _.flatten(_.map(ast.args, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
-  } else if(ast.inst === 'ds' && ast.args.length === 1) {
   }
 
   // z80 inst
@@ -87,6 +84,10 @@ Z80.prototype.asm = function(code) {
       this.offset = evalExpr(i.org.expr);
     } else if("ds" in i) {
       var b = [].slice.call(new Uint8Array(evalExpr(i.ds.expr)));
+      bytes = bytes.concat(b);
+      this.offset += b.length;
+    } else if("dw" in i) {
+      var b = _.flatten(_.map(i.dw, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
       bytes = bytes.concat(b);
       this.offset += b.length;
     }

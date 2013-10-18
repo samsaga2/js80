@@ -14,6 +14,7 @@ Lines
 Line
   = "org"i _ n:Expr { return {org:n}; }
   / "ds"i _ n:Expr { return {ds:n}; }
+  / "dw"i _ head:Expr tail:(_ "," _ Expr)* { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / inst:Identifier _ args:InstArgs? { return {inst:inst, args:args}; }
 
 InstArgs
