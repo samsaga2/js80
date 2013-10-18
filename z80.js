@@ -35,27 +35,34 @@ function evalExpr(expr) {
 }
 
 function buildTemplateArg(arg) {
-    if(arg.ptr) {
-      return "(" + buildTemplateArg(arg.ptr) + ")";
-    } else if(arg.offset_ptr) {
-      if(arg.offset_ptr.offset >= 0) {
-        return "(" + arg.offset_ptr.id + "+" + arg.offset_ptr.offset + ")";
+  if(arg.expr.paren) {
+    var p = arg.expr.paren;
+    if("id" in p) {
+      return "(" + p.id + ")";
+    } else if("num" in p) {
+      return "(" + p.num + ")";
+    } else if("unary" in p && p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'ix') {
+      var n = evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(n < 0) {
+        return '(ix' + n + ')';
       } else {
-        return "(" + arg.offset_ptr.id + "-" + -arg.offset_ptr.offset + ")";
+        return '(ix+' + n + ')';
       }
-    } else if(arg.expr.paren) {
-      if("id" in arg.expr.paren) {
-        return "(" + arg.expr.paren.id + ")";
-      } else if("num" in arg.expr.paren) {
-        return "(" + arg.expr.paren.num + ")";
+    } else if("unary" in p && p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'iy') {
+      var n = evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(n < 0) {
+        return '(iy' + n + ')';
       } else {
-        return buildTemplateArg(arg.paren);
+        return '(iy+' + n + ')';
       }
-    } else if(arg.expr) {
-      return evalExpr(arg.expr).toString();
     } else {
-      throw new Error(util.format('Internal error %j', arg));
+      return buildTemplateArg(arg.paren);
     }
+  } else if(arg.expr) {
+    return evalExpr(arg.expr).toString();
+  } else {
+    throw new Error(util.format('Internal error %j', arg));
+  }
 }
 
 Z80.prototype.parseInst = function(ast) {

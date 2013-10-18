@@ -26,9 +26,7 @@ InstArgs
   = head:Arg tail:(_ "," _ Arg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Arg
-  = "(" _ "ix"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
-  / "(" _ "iy"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
-  / Expr
+  = Expr
 
 //
 // Expr
