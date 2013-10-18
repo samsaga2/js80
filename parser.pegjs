@@ -12,6 +12,14 @@ Lines
   = __ head:Line tail:(__ LineTerminator __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Line
+  = l:Label _ c:Command { return {label:l, line:c}; }
+  / l:Label { return {label:l}; }
+  / c:Command { return {line:c}; }
+
+Label
+  = l:Identifier ":" { return l; }
+
+Command
   = "org"i _ n:Expr { return {org:n}; }
   / "ds"i _ n:Expr { return {ds:n}; }
   / "dw"i _ head:Expr tail:(_ "," _ Expr)* { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }

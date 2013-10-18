@@ -77,34 +77,44 @@ Z80.prototype.parseInst = function(ast) {
   return z80parser.parse(template);
 }
 
+Z80.prototype.parseCode = function(code) {
+  var bytes = [];
+  if("inst" in code) {
+    bytes = this.parseInst(code);
+  } else if("org" in code) {
+    this.offset = evalExpr(code.org.expr);
+  } else if("ds" in code) {
+    bytes = [].slice.call(new Uint8Array(evalExpr(code.ds.expr)));
+  } else if("dw" in code) {
+    bytes = _.flatten(_.map(code.dw, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
+  } else if("db" in code) {
+    bytes = _.flatten(_.map(code.db, function(i) {
+                        if(i.str) {
+                          return _.map(i.str, function(i) { return i.charCodeAt(0); });
+                        } else {
+                          return evalExpr(i.expr);
+                        }
+                      }));
+  }
+  if(bytes) {
+    this.offset += bytes.length;
+  }
+  return bytes;
+}
+
+Z80.prototype.parseLine = function(line) {
+  if("label" in line) {
+    this.defineLabel(line.label);
+  }
+  if("line" in line) {
+    return this.parseCode(line.line);
+  }
+  return [];
+}
+
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  var bytes = [];
-  _.each(ast, function(i) {
-    var newBytes = null;
-    if("inst" in i) {
-      newBytes = this.parseInst(i);
-    } else if("org" in i) {
-      this.offset = evalExpr(i.org.expr);
-    } else if("ds" in i) {
-      newBytes = [].slice.call(new Uint8Array(evalExpr(i.ds.expr)));
-    } else if("dw" in i) {
-      newBytes = _.flatten(_.map(i.dw, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
-    } else if("db" in i) {
-      newBytes = _.flatten(_.map(i.db, function(i) {
-                             if(i.str) {
-                               return _.map(i.str, function(i) { return i.charCodeAt(0); });
-                             } else {
-                               return evalExpr(i.expr);
-                             }
-                           }));
-    }
-    if(newBytes) {
-      bytes = bytes.concat(newBytes);
-      this.offset += newBytes.length;
-    }
-  }, this);
-  return bytes;
+  return _.flatten(_.map(ast, this.parseLine, this));
 }
 
 Z80.prototype.defineLabel = function(name) {

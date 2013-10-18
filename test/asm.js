@@ -120,11 +120,11 @@ describe('asm inst', function() {
     should(z80.asm('db "hello", 0')).be.eql([104,101,108,108,111,0]);
   });
 
-  // it('label', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('org 8000h\ntest_label: nop')).be.eql([0]);
-  //   should(z80.getLabel('test_label')).be.eql(0x8000);
-  // });
+  it('label', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h\ntest_label: nop')).be.eql([0]);
+    should(z80.getLabel('test_label')).be.eql(0x8000);
+  });
 
   // it('label without dots', function() {
   //   var z80 = new Z80();
