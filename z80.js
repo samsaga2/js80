@@ -39,7 +39,7 @@ function parseInst(ast) {
 
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  return parseInst(ast);
+  return _.flatten(_.map(ast, parseInst));
 }
 
 Z80.prototype.defineLabel = function(name) {

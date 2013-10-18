@@ -44,10 +44,10 @@ describe('asm inst', function() {
     should(z80.asm('set 2,(iy+11)')).be.eql([0xdd, 0xcb, 11, 0xc6+8*2]);
   });
 
-  // it('out (0x98),a -- or 5', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
-  // });
+  it('out (0x98),a -- or 5', function() {
+    var z80 = new Z80();
+    should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
+  });
 
   // it('nop // comment', function() {
   //   var z80 = new Z80();

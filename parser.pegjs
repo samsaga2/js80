@@ -1,14 +1,21 @@
+{
+  var _ = require('underscore');
+}
+
 Start
   = Program
 
 Program
-  = Inst
+  = Lines
+
+Lines
+  = head:Inst tail:(LineTerminator Inst)* { return [head].concat(_.map(tail, function(i) { return i[1]; })); }
 
 Inst
   = inst:Identifier _ args:Args? { return {inst:inst, args:args}; }
 
 Args
-  = head:Arg tail:(_ "," _ Arg)* { var n = [head]; for(var i = 0; i < tail.length; i++) n.push(tail[i][3]); return n; }
+  = head:Arg tail:(_ "," _ Arg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Arg
   = num:Number { return {num:num}; }
@@ -35,6 +42,9 @@ Identifier
 
 Whitespace
   = [\t\v\f \u00A0\uFEFF]
+
+LineTerminator
+  = [\n\r\u2028\u2029]
 
 //
 // whitespace
