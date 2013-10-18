@@ -9,17 +9,23 @@ function Z80() {
   this.labels = {};
 }
 
+function buildArg(arg) {
+    if(arg.id) {
+      return arg.id;
+    } else if(arg.num) {
+      return arg.num;
+    } else if(arg.ptr) {
+      return "(" + buildArg(arg.ptr) + ")";
+    } else {
+      throw new Error('Internal error ' + arg);
+    }
+}
+
 function parseInst(ast) {
   var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
-    if(arg.id) {
-      template += sep + arg.id;
-    } else if(arg.num) {
-      template += sep + arg.num;
-    } else {
-      throw new Error('Internal error ' + arg);
-    }
+    template += sep + buildArg(arg);
     sep = ',';
   });
   return z80parser.parse(template);

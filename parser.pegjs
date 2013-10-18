@@ -13,6 +13,7 @@ Args
 Arg
   = num:Number { return {num:num}; }
   / id:Identifier { return {id:id}; }
+  / "(" a:Arg ")" { return {ptr:a}; }
 
 //
 // Expr
