@@ -5,13 +5,13 @@ var parser = require('./parser')
   , util = require('util')
   , _ = require('underscore');
 
+function reduce(l, func) {
+  return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
+}
+
 function Z80() {
   this.offset = 0;
   this.labels = {};
-}
-
-function reduce(l, func) {
-  return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
 }
 
 function evalExpr(expr) {
@@ -50,7 +50,14 @@ function buildArg(arg) {
     }
 }
 
-function parseInst(ast) {
+Z80.prototype.parseInst = function(ast) {
+  // special func
+  if(ast.inst === 'org' && ast.args.length === 1 && ast.args[0].expr) {
+    this.offset = evalExpr(ast.args[0].expr);
+    return null;
+  }
+
+  // z80 inst
   var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
@@ -62,7 +69,10 @@ function parseInst(ast) {
 
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  return _.flatten(_.map(ast, parseInst));
+  var bytes = _.flatten(_.map(ast, this.parseInst, this), this);
+  bytes = _.filter(bytes, function(i) { return i !== null; });
+  this.offset += bytes.length;
+  return bytes;
 }
 
 Z80.prototype.defineLabel = function(name) {
