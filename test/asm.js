@@ -145,4 +145,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h $ main: call test_label $ test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
+
+  it('jp local label', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h $ main: $ call main.test_label $ .test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
+  });
 });

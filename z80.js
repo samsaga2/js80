@@ -14,6 +14,7 @@ function Z80() {
   this.offset = 0;
   this.labels = {};
   this.secondPass = {};
+  this.lastDefinedLabel = "";
 }
 
 Z80.prototype.evalExpr = function(expr) {
@@ -146,6 +147,11 @@ Z80.prototype.asm = function(code) {
 }
 
 Z80.prototype.defineLabel = function(name) {
+  if(name[0] === '.') {
+    name = this.lastDefinedLabel + name;
+  } else {
+    this.lastDefinedLabel = name;
+  }
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
   }

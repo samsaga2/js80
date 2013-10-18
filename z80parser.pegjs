@@ -8,7 +8,7 @@ _
   = [\t\v\f \u00A0\uFEFF]*
 
 Identifier
-  = head:[a-zA-Z_] tail:[a-zA-Z0-9_]* { return head + tail.join(""); }
+  = head:[a-zA-Z_\.] tail:[a-zA-Z0-9_\.]* { return head + tail.join(""); }
 
 //
 // basic types
