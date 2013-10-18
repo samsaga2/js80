@@ -85,20 +85,20 @@ describe('asm inst', function() {
     should(z80.offset).be.eql(0x8001);
   });
 
-  // it('db 1,2,3', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('db 1,2,3')).be.eql([1,2,3]);
-  // });
+  it('db 1,2,3', function() {
+    var z80 = new Z80();
+    should(z80.asm('db 1,2,3')).be.eql([1,2,3]);
+  });
 
-  // it('dw 1,2,3', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('dw 1,2,3')).be.eql([1,0,2,0,3,0]);
-  // });
+  it('dw 1,2,3', function() {
+    var z80 = new Z80();
+    should(z80.asm('dw 1,2,3')).be.eql([1,0,2,0,3,0]);
+  });
 
-  // it('ds 5', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('ds 5')).be.eql([0,0,0,0,0]);
-  // });
+  it('ds 5', function() {
+    var z80 = new Z80();
+    should(z80.asm('ds 5')).be.eql([0,0,0,0,0]);
+  });
 
   // it('db "hello", 0', function() {
   //   var z80 = new Z80();

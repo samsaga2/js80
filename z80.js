@@ -52,9 +52,16 @@ function buildArg(arg) {
 
 Z80.prototype.parseInst = function(ast) {
   // special func
-  if(ast.inst === 'org' && ast.args.length === 1 && ast.args[0].expr) {
+  if(ast.inst === 'org' && ast.args.length === 1) {
     this.offset = evalExpr(ast.args[0].expr);
     return null;
+  } else if(ast.inst === 'db' && ast.args.length > 0) {
+    return _.map(ast.args, function(i) { return evalExpr(i.expr); });
+  } else if(ast.inst === 'dw' && ast.args.length > 0) {
+    return _.flatten(_.map(ast.args, function(i) { var n = evalExpr(i.expr); return [n&255, n>>8]; }));
+  } else if(ast.inst === 'ds' && ast.args.length === 1) {
+    var n = evalExpr(ast.args[0].expr);
+    return [].slice.call(new Uint8Array(n));
   }
 
   // z80 inst
