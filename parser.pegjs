@@ -9,7 +9,7 @@ Program
   = Lines
 
 Lines
-  = __ head:Line tail:(__ LineTerminator __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = __ head:Line tail:(__ (LineTerminator/"$") __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Line
   = l:Label _ c:Command { return {label:l, line:c}; }

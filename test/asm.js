@@ -126,8 +126,8 @@ describe('asm inst', function() {
     should(z80.getLabel('test_label')).be.eql(0x8000);
   });
 
-  // it('multiple inst per line', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('nop $ xor a')).be.eql([0, 0xa8+7]);
-  // });
+  it('multiple inst per line', function() {
+    var z80 = new Z80();
+    should(z80.asm('nop $ test: xor a $ ret')).be.eql([0, 0xa8+7, 0xc9]);
+  });
 });
