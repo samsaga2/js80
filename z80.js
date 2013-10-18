@@ -52,10 +52,7 @@ function buildArg(arg) {
 
 Z80.prototype.parseInst = function(ast) {
   // special func
-  if(ast.inst === 'org' && ast.args.length === 1) {
-    this.offset = evalExpr(ast.args[0].expr);
-    return null;
-  } else if(ast.inst === 'db' && ast.args.length > 0) {
+  if(ast.inst === 'db' && ast.args.length > 0) {
     return _.flatten(_.map(ast.args, function(i) {
                        if(i.str) {
                          return _.map(i.str, function(i) { return i.charCodeAt(0); });
@@ -82,9 +79,15 @@ Z80.prototype.parseInst = function(ast) {
 
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  var bytes = _.flatten(_.map(ast, this.parseInst, this), this);
-  bytes = _.filter(bytes, function(i) { return i !== null; });
-  this.offset += bytes.length;
+  var bytes = [];
+  _.each(ast, function(i) {
+    if("inst" in i) {
+      bytes = bytes.concat(this.parseInst(i));
+      this.offset += bytes.length;
+    } else if("org" in i) {
+      this.offset = evalExpr(i.org.expr);
+    }
+  }, this);
   return bytes;
 }
 

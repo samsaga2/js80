@@ -12,10 +12,8 @@ Lines
   = __ head:Line tail:(__ LineTerminator __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Line
-  = Inst
-
-Inst
-  = inst:Identifier _ args:Args? { return {inst:inst, args:args}; }
+  = "org"i _ n:Expr { return {org:n}; }
+  / inst:Identifier _ args:Args? { return {inst:inst, args:args}; }
 
 Args
   = head:Arg tail:(_ "," _ Arg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
