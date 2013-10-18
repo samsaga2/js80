@@ -49,10 +49,10 @@ describe('asm inst', function() {
     should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
   });
 
-  // it('nop // comment', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('nop // comment')).be.eql([0]);
-  // });
+  it('nop // comment', function() {
+    var z80 = new Z80();
+    should(z80.asm('nop // comment')).be.eql([0]);
+  });
 
   // it('nop /* ... */', function() {
   //   var z80 = new Z80();

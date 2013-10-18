@@ -50,4 +50,27 @@ LineTerminator
 // whitespace
 //
 _
-  = Whitespace*
+  = (Whitespace / CommentNoLineTerminator)*
+
+__
+  = (Whitespace / Comment)*
+
+//
+// comments
+//
+Comment
+  = SingleLineComment
+  / MultiLineComment
+
+SingleLineComment
+  = "//" (!LineTerminator .)*
+
+MultiLineComment
+  = "/*" (!"*/" .)* "*/"
+
+CommentNoLineTerminator
+  = SingleLineComment
+  / MultiLineCommentNoLineTerminator
+
+MultiLineCommentNoLineTerminator
+  = "/*" (!("*/" / LineTerminator) .)* "*/"
