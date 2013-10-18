@@ -24,11 +24,11 @@ Offset8
   / "-" n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
 
 Number
-  = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }
-  / text:[0-1]+ "b"  { return parseInt(text.join(""), 2); }
-  / "0x" text:[0-9]+ { return parseInt(text.join(""), 16); }
-  / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
-  / text:[0-9]+ { return parseInt(text.join("")); }
+  = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }
+  / s:([+-])? text:[0-1]+ "b"  { return parseInt(s+text.join(""), 2); }
+  / s:([+-])? "0x" text:[0-9]+ { return parseInt(s+text.join(""), 16); }
+  / s:([+-])? "0b" text:[0-1]+ { return parseInt(s+text.join(""), 2); }
+  / s:([+-])? text:[0-9]+ { return parseInt(s+text.join("")); }
 
 //
 // tables

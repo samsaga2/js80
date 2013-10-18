@@ -84,6 +84,16 @@ describe('asm inst', function() {
     should(z80.asm('ld a,2*3+4*5')).be.eql([0x3e, 2*3+4*5]);
   });
 
+  it('ld a,(1+2)-3', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,(1+2)-3')).be.eql([0x3e, (1+2)-3]);
+  });
+
+  it('ld a,(1+2)-(3+4)', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,(1+2)-(3+4)')).be.eql([0x3e, (1+2)-(3+4)]);
+  });
+
   it('org 8000h -- nop', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h\nnop')).be.eql([0]);

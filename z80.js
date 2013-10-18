@@ -21,6 +21,8 @@ function evalExpr(expr) {
     return expr.num;
   } else if(expr.neg) {
     return -evalExpr(expr.neg);
+  } else if(expr.paren) {
+    return evalExpr(expr.paren);
   } else if(expr.unary) {
     var values = _.map(expr.args, evalExpr);
     switch(expr.unary) {
