@@ -2,6 +2,7 @@
 
 var parser = require('./parser')
   , z80parser = require('./z80parser')
+  , util = require('util')
   , _ = require('underscore');
 
 function Z80() {
@@ -9,12 +10,26 @@ function Z80() {
   this.labels = {};
 }
 
+function evalExpr(expr) {
+  if(expr.id) {
+    return expr.id;
+  } else if(expr.num) {
+    return expr.num;
+  } else if(expr.neg) {
+    return -evalExpr(expr.neg);
+  } else if(expr.unary) {
+    var values = _.map(expr.args, evalExpr);
+    switch(expr.unary) {
+      case '+': return _.reduce(values, function(memo, num) { return memo + num; }, 0);
+      case '-': return _.reduce(_.rest(values), function(memo, num) { return memo - num; }, _.first(values));
+    }
+  }
+
+  throw new Error(util.format('Internal error %j', expr));
+}
+
 function buildArg(arg) {
-    if(arg.id) {
-      return arg.id;
-    } else if(arg.num) {
-      return arg.num;
-    } else if(arg.ptr) {
+    if(arg.ptr) {
       return "(" + buildArg(arg.ptr) + ")";
     } else if(arg.offset_ptr) {
       if(arg.offset_ptr.offset >= 0) {
@@ -22,8 +37,10 @@ function buildArg(arg) {
       } else {
         return "(" + arg.offset_ptr.id + "-" + -arg.offset_ptr.offset + ")";
       }
+    } else if(arg.expr) {
+      return evalExpr(arg.expr).toString();
     } else {
-      throw new Error('Internal error ' + arg);
+      throw new Error(util.format('Internal error %j', arg));
     }
 }
 

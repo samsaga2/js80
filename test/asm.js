@@ -59,15 +59,20 @@ describe('asm inst', function() {
     should(z80.asm('nop /* comment\ncomment 2\ncomment3\n*/\nnop')).be.eql([0, 0]);
   });
 
-  // it('ld a,1+2+3', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('ld a,1+2+3')).be.eql([0x3e, 1+2+3]);
-  // });
+  it('ld a,1+2+3', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,1+2+3')).be.eql([0x3e, 1+2+3]);
+  });
 
-  // it('ld a,3-2-1', function() {
-  //   var z80 = new Z80();
-  //   should(z80.asm('ld a,3-2-1')).be.eql([0x3e, 3-2-1]);
-  // });
+  it('ld a,3-2-1', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,3-2-1')).be.eql([0x3e, 3-2-1]);
+  });
+
+  it('ld a,10+1-4+5', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,10+1-4+5')).be.eql([0x3e, 10+1-4+5]);
+  });
 
   // it('ld a,2*3+4*5', function() {
   //   var z80 = new Z80();

@@ -18,15 +18,35 @@ Args
   = head:Arg tail:(_ "," _ Arg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Arg
-  = num:Number { return {num:num}; }
-  / id:Identifier { return {id:id}; }
-  / "(" _ "ix"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
+  = "(" _ "ix"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
   / "(" _ "iy"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
   / "(" a:Arg ")" { return {ptr:a}; }
+  / Expr
 
 //
 // Expr
 //
+Expr
+  = e:ExprAdd { return {expr:e}; }
+
+ExprAdd
+  = left:ExprPrimary _ right:([+-] ExprPrimary)+ {
+  var n=[left].concat(_.map(right, function(i) {
+    if(i[0]==='-') {
+     return {neg:i[1]};
+    } else {
+     return i[1];
+    }
+  }));
+  return {unary:"+", args:n};
+}
+  / ExprPrimary
+
+ExprPrimary
+  = "-" e:ExprPrimary { return {neg:e}; }
+  / num:Number { return {num:num}; }
+  / id:Identifier { return {id:id}; }
+
 Number
   = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }
   / text:[0-1]+ "b"  { return parseInt(text.join(""), 2); }
@@ -34,12 +54,12 @@ Number
   / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
   / text:[0-9]+ { return parseInt(text.join("")); }
 
-//
-// chars
-//
 Identifier
   = head:[a-zA-Z_] tail:[a-zA-Z0-9_]* { return head + tail.join(""); }
 
+//
+// chars
+//
 Whitespace
   = [\t\v\f \u00A0\uFEFF]
 
