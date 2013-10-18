@@ -16,6 +16,12 @@ function buildArg(arg) {
       return arg.num;
     } else if(arg.ptr) {
       return "(" + buildArg(arg.ptr) + ")";
+    } else if(arg.offset_ptr) {
+      if(arg.offset_ptr.offset >= 0) {
+        return "(" + arg.offset_ptr.id + "+" + arg.offset_ptr.offset + ")";
+      } else {
+        return "(" + arg.offset_ptr.id + "-" + -arg.offset_ptr.offset + ")";
+      }
     } else {
       throw new Error('Internal error ' + arg);
     }

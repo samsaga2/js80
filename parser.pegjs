@@ -13,6 +13,8 @@ Args
 Arg
   = num:Number { return {num:num}; }
   / id:Identifier { return {id:id}; }
+  / "(" _ "ix"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
+  / "(" _ "iy"i _ ("+" / "-") _ num:Number ")" { return {offset_ptr:{id:"ix", offset:num}}; }
   / "(" a:Arg ")" { return {ptr:a}; }
 
 //
