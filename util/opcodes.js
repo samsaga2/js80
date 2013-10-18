@@ -384,6 +384,7 @@ function buildArg(arg) {
     case '(nn)'   : return ' "(" _ nn:Int16 _ ")"';
     case '(IX+o)' : return ' "(" _ "IX"i _ oo:Offset8 _ ")"';
     case '(IY+o)' : return ' "(" _ "IY"i _ oo:Offset8 _ ")"';
+    case 'o'      : return ' oo:Offset8';
     case 'r'      : return ' r:TableR';
     case 'IXp'    : return ' p:TableIXp';
     case 'IYq'    : return ' q:TableIYq';

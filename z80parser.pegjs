@@ -136,7 +136,7 @@ Z80
   / "DEC"i _ "L"i                                                                   		{ return [0x2D]; } // DEC L
   / "DEC"i _ "SP"i                                                                  		{ return [0x3B]; } // DEC SP
   / "DI"i                                                                           		{ return [0xF3]; } // DI
-  / "DJNZ"i _ "o"i                                                                  		{ return [0x10,oo]; } // DJNZ o
+  / "DJNZ"i _ oo:Offset8                                                            		{ return [0x10,oo]; } // DJNZ o
   / "EI"i                                                                           		{ return [0xFB]; } // EI
   / "EX"i _ "(SP)"i _ "," _ "HL"i                                                   		{ return [0xE3]; } // EX (SP),HL
   / "EX"i _ "(SP)"i _ "," _ "IX"i                                                   		{ return [0xDD,0xE3]; } // EX (SP),IX
@@ -191,11 +191,11 @@ Z80
   / "JP"i _ "PE"i _ "," _ nn:Int16                                                  		{ return [0xEA,nn[0],nn[1]]; } // JP PE,nn
   / "JP"i _ "PO"i _ "," _ nn:Int16                                                  		{ return [0xE2,nn[0],nn[1]]; } // JP PO,nn
   / "JP"i _ "Z"i _ "," _ nn:Int16                                                   		{ return [0xCA,nn[0],nn[1]]; } // JP Z,nn
-  / "JR"i _ "o"i                                                                    		{ return [0x18,oo]; } // JR o
-  / "JR"i _ "C"i _ "," _ "o"i                                                       		{ return [0x38,oo]; } // JR C,o
-  / "JR"i _ "NC"i _ "," _ "o"i                                                      		{ return [0x30,oo]; } // JR NC,o
-  / "JR"i _ "NZ"i _ "," _ "o"i                                                      		{ return [0x20,oo]; } // JR NZ,o
-  / "JR"i _ "Z"i _ "," _ "o"i                                                       		{ return [0x28,oo]; } // JR Z,o
+  / "JR"i _ oo:Offset8                                                              		{ return [0x18,oo]; } // JR o
+  / "JR"i _ "C"i _ "," _ oo:Offset8                                                 		{ return [0x38,oo]; } // JR C,o
+  / "JR"i _ "NC"i _ "," _ oo:Offset8                                                		{ return [0x30,oo]; } // JR NC,o
+  / "JR"i _ "NZ"i _ "," _ oo:Offset8                                                		{ return [0x20,oo]; } // JR NZ,o
+  / "JR"i _ "Z"i _ "," _ oo:Offset8                                                 		{ return [0x28,oo]; } // JR Z,o
   / "LD"i _ "(BC)"i _ "," _ "A"i                                                    		{ return [0x02]; } // LD (BC),A
   / "LD"i _ "(DE)"i _ "," _ "A"i                                                    		{ return [0x12]; } // LD (DE),A
   / "LD"i _ "(HL)"i _ "," _ nn:Int8                                                 		{ return [0x36,nn]; } // LD (HL),n
