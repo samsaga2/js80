@@ -69,6 +69,8 @@ Z80.prototype.buildTemplateArg = function(arg) {
     } else {
       return this.buildTemplateArg(arg.paren);
     }
+  } else if (arg.expr && arg.expr.id && this.labels[arg.expr.id]) {
+    return this.labels[arg.expr.id].toString();
   } else if(arg.expr) {
     return this.evalExpr(arg.expr).toString();
   } else {
@@ -119,6 +121,9 @@ Z80.prototype.parseInst = function(code) {
                return this.evalExpr(i.expr);
              }
            }, this);
+  } else if('equ' in code) {
+    this.defineLabel(code.equ.label, this.evalExpr(code.equ.value.expr));
+    return null;
   }
 }
 
@@ -133,11 +138,17 @@ Z80.prototype.parseLine = function(line) {
 }
 
 Z80.prototype.asmSecondPass = function(bytes) {
-  bytes = _.clone(bytes);
   _.each(this.secondPass, function(value, key) {
-    var n = this.labels[value.label] || this.labels[this.lastDefinedLabel + value.label];
-    if(_.isUndefined(n)) {
-      throw new Error('Unknown label ' + value.label);
+    var n = value.value;
+    if(value.label) {
+      if(value.label[0] === '.') {
+        n = this.labels[this.lastDefinedLabel + value.label];
+      } else {
+        n = this.labels[value.label];
+      }
+      if(_.isUndefined(n)) {
+        throw new Error('Unknown label ' + value.label);
+      }
     }
     switch(value.type) {
       case 'low':
@@ -151,17 +162,17 @@ Z80.prototype.asmSecondPass = function(bytes) {
         if(rel < - 128 || rel > 127) {
           throw new Error('Offset too large');
         }
-        bytes[key] = compl2(rel);
+        bytes[key] = rel;
         break;
       default:
         throw new Error('Internal error');
     }
   }, this);
-  this.secondPass = {};
   return bytes;
 }
 
 Z80.prototype.asm = function(code) {
+  this.secondPass = {};
   var offset = this.offset;
   var ast = parser.parse(code);
   var bytes = _.chain(ast)
@@ -169,7 +180,7 @@ Z80.prototype.asm = function(code) {
               .filter(function(i) { return i !== null; })
               .flatten()
               .value();
-  bytes = this.asmSecondPass(bytes);
+  bytes = _.map(this.asmSecondPass(bytes), compl2);
   for(var i = 0; i < bytes.length; i++) {
     this.output[offset + i] = bytes[i];
   }
@@ -184,7 +195,7 @@ Z80.prototype.saveImage = function(fname) {
   fs.writeFileSync(fname, buffer, 'binary');
 }
 
-Z80.prototype.defineLabel = function(name) {
+Z80.prototype.defineLabel = function(name, value) {
   if(name[0] === '.') {
     name = this.lastDefinedLabel + name;
   } else {
@@ -193,7 +204,7 @@ Z80.prototype.defineLabel = function(name) {
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.labels[name] = this.org + this.offset;
+  this.labels[name] = value || (this.org + this.offset);
 }
 
 Z80.prototype.getLabel = function(name) {

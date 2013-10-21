@@ -20,13 +20,14 @@ Int8
   = n:Number { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
 
 Int16
-  = n:Number { if(n<-32767||n>32768) throw new Error('Value overflow'); else return [n&255, n>>8]; }
+  = n:Number { return [{type:'low', value:n}, {type:'high', value:n}]; }
   / i:Identifier { return [{type:'low', label:i}, {type:'high', label:i}]; }
 
 Offset8
-  = "+"? n:Number { if(n>128) throw new Error('Value overflow'); else return n; } // TODO
-  / "-"  n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
-  / "+"? i:Identifier { return {type:'relative', label:i}; }
+  = "+" n:Number { return n; }
+  / "-" n:Number { return -n; }
+  / n:Number { return {type:'relative', value:n}; }
+  / i:Identifier { return {type:'relative', label:i}; }
 
 Number
   = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }
