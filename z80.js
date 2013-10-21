@@ -135,18 +135,26 @@ Z80.prototype.parseLine = function(line) {
 Z80.prototype.asmSecondPass = function(bytes) {
   bytes = _.clone(bytes);
   _.each(this.secondPass, function(value, key) {
-    if(value.low) {
-      bytes[key] = this.labels[value.low]&255;
-    } else if(value.high) {
-      bytes[key] = this.labels[value.high]>>8;
-    } else if(value.relative) {
-      var rel = this.labels[value.relative] - value.next;
-      if(rel < - 128 || rel > 127) {
-        throw new Error('Offset too large');
-      }
-      bytes[key] = compl2(rel);
-    } else {
-      throw new Error('Internal error');
+    var n = this.labels[value.label] || this.labels[this.lastDefinedLabel + value.label];
+    if(_.isUndefined(n)) {
+      throw new Error('Unknown label ' + value.label);
+    }
+    switch(value.type) {
+      case 'low':
+        bytes[key] = n&255;
+        break;
+      case 'high':
+        bytes[key] = n>>8;
+        break;
+      case 'relative':
+        var rel = n - value.next;
+        if(rel < - 128 || rel > 127) {
+          throw new Error('Offset too large');
+        }
+        bytes[key] = compl2(rel);
+        break;
+      default:
+        throw new Error('Internal error');
     }
   }, this);
   this.secondPass = {};

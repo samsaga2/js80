@@ -21,12 +21,12 @@ Int8
 
 Int16
   = n:Number { if(n<-32767||n>32768) throw new Error('Value overflow'); else return [n&255, n>>8]; }
-  / i:Identifier { return [{low:i}, {high:i}]; }
+  / i:Identifier { return [{type:'low', label:i}, {type:'high', label:i}]; }
 
 Offset8
   = "+"? n:Number { if(n>128) throw new Error('Value overflow'); else return n; } // TODO
   / "-"  n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
-  / "+"? i:Identifier { return {relative:i}; }
+  / "+"? i:Identifier { return {type:'relative', label:i}; }
 
 Number
   = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }
