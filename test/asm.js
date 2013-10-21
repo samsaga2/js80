@@ -151,9 +151,14 @@ describe('asm inst', function() {
     should(z80.asm('org 8000h $ main: $ call main.test_label $ .test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 
-  it('local label', function() {
+  it('local label 2', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h $ main: $ call main.test_label $ .test_label: nop $ jp .test_label')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
+  });
+
+  it('local label 3', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h $ main: $ call main.1 $ .1: nop $ jp .1')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
   });
 
   it('empty code', function() {
