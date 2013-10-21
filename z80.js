@@ -3,13 +3,15 @@
 var parser = require('./parser')
   , z80parser = require('./z80parser')
   , util = require('util')
-  , _ = require('underscore');
+  , _ = require('underscore')
+  , fs = require('fs');
 
 function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
 }
 
 function Z80() {
+  this.output = [];
   this.org = 0;
   this.offset = 0;
   this.labels = {};
@@ -101,9 +103,12 @@ Z80.prototype.parseCode = function(code) {
   }
   if(bytes) {
     bytes = _.flatten(bytes);
-    bytes = _.map(bytes, function(b) {
+    bytes = _.map(bytes, function(b, index) {
               if(_.isObject(b)) {
                 this.secondPass[this.offset] = b;
+                if(b.relative) {
+                  this.secondPass[this.offset].next = bytes.length - index + this.org;
+                }
                 this.offset++;
                 return 0;
               } else {
@@ -132,6 +137,16 @@ Z80.prototype.asmSecondPass = function(bytes) {
       bytes[key] = this.labels[value.low]&255;
     } else if(value.high) {
       bytes[key] = this.labels[value.high]>>8;
+    } else if(value.relative) {
+      var rel = this.labels[value.relative] - value.next;
+      if(rel < -127 || rel > 128) {
+        throw new Error('Label too far');
+      }
+      if(rel < 0) {
+        bytes[key] = 0xff + rel - 3;
+      } else {
+        bytes[key] = rel - 1;
+      }
     } else {
       throw new Error('Internal error');
     }
@@ -141,9 +156,27 @@ Z80.prototype.asmSecondPass = function(bytes) {
 }
 
 Z80.prototype.asm = function(code) {
+  var offset = this.offset;
   var ast = parser.parse(code);
   var bytes = _.flatten(_.map(ast, this.parseLine, this));
-  return this.asmSecondPass(bytes);
+  bytes = this.asmSecondPass(bytes);
+  for(var i = 0; i < bytes.length; i++) {
+    this.output[offset + i] = bytes[i];
+  }
+  return bytes;
+}
+
+Z80.prototype.saveImage = function(fname) {
+  var buffer = new Buffer(this.output.length);
+  for(var i = 0; i < this.output.length; i++) {
+    buffer[i] = this.output[i];
+  }
+  fs.writeFile(fname, buffer, 'binary', function(err) {
+    if(err) {
+      throw err;
+    }
+    console.log('Saved %s', fname);
+  });
 }
 
 Z80.prototype.defineLabel = function(name) {

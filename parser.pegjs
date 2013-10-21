@@ -3,13 +3,10 @@
 }
 
 Start
-  = Program
-
-Program
-  = Lines
+  = l:Lines __ LineTerminator* { return l; }
 
 Lines
-  = __ head:Line tail:(__ (LineTerminator/"$") __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = __ head:Line tail:(__ (LineTerminator/"$")+ __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Line
   = l:Label _ c:Command { return {label:l, line:c}; }
@@ -70,7 +67,7 @@ ExprPrimary
 Number
   = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }
   / text:[0-1]+ "b"  { return parseInt(text.join(""), 2); }
-  / "0x" text:[0-9]+ { return parseInt(text.join(""), 16); }
+  / "0x" text:[0-9a-fA-F]+ { return parseInt(text.join(""), 16); }
   / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
   / text:[0-9]+ { return parseInt(text.join("")); }
 
@@ -88,6 +85,9 @@ Whitespace
 
 LineTerminator
   = [\n\r\u2028\u2029]
+
+EOF
+  = !.
 
 //
 // whitespace
