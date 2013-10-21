@@ -11,16 +11,11 @@ if(process.argv.length > 4 || process.argv.length === 2) {
 var input = process.argv[2];
 var output = 'a.out';
 
-if(process.argv.length == 2) {
+if(process.argv.length == 4) {
   output = process.argv[3];
 }
 
-fs.readFile(input, 'utf8', function(err, data) {
-  if(err) {
-    console.log(err);
-  } else {
-    var z80 = new Z80();
-    z80.asm(data);
-    z80.saveImage(output);
-  }
-});
+var data = fs.readFileSync(input, 'utf8');
+var z80 = new Z80();
+z80.asm(data);
+z80.saveImage(output);
