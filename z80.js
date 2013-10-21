@@ -10,6 +10,10 @@ function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
 }
 
+function compl2(v) {
+  return (v<0) ? (256+v) : v;
+}
+
 function Z80() {
   this.output = [];
   this.org = 0;
@@ -72,52 +76,50 @@ Z80.prototype.buildTemplateArg = function(arg) {
   }
 }
 
-Z80.prototype.parseInst = function(ast) {
+Z80.prototype.parseAsmInst = function(ast) {
   var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
     template += sep + this.buildTemplateArg(arg);
     sep = ',';
   }, this);
-  return z80parser.parse(template);
+  var bytes = z80parser.parse(template);
+  return this.parseBytes(bytes);
 }
 
-Z80.prototype.parseCode = function(code) {
-  var bytes = [];
+Z80.prototype.parseBytes = function(bytes) {
+  bytes = _.map(bytes, function(b, index) {
+           if(_.isObject(b)) {
+             this.secondPass[this.offset + index] = b;
+             b.next = this.org + this.offset + bytes.length;
+             return 0;
+           } else {
+             return b;
+           }
+          }, this);
+  this.offset += bytes.length;
+  return bytes;
+}
+
+Z80.prototype.parseInst = function(code) {
   if("inst" in code) {
-    bytes = this.parseInst(code);
+    return this.parseAsmInst(code);
   } else if("org" in code) {
     this.org = this.evalExpr(code.org.expr);
+    return null;
   } else if("ds" in code) {
-    bytes = [].slice.call(new Uint8Array(this.evalExpr(code.ds.expr)));
+    return [].slice.call(new Uint8Array(this.evalExpr(code.ds.expr)));
   } else if("dw" in code) {
-    bytes = _.map(code.dw, function(i) { var n = this.evalExpr(i.expr); return [n&255, n>>8]; }, this);
+    return _.map(code.dw, function(i) { var n = this.evalExpr(i.expr); return [n&255, n>>8]; }, this);
   } else if("db" in code) {
-    bytes = _.map(code.db, function(i) {
-              if(i.str) {
-                return _.map(i.str, function(i) { return i.charCodeAt(0); });
-              } else {
-                return this.evalExpr(i.expr);
-              }
-            }, this);
+    return _.map(code.db, function(i) {
+             if(i.str) {
+               return _.map(i.str, function(i) { return i.charCodeAt(0); });
+             } else {
+               return this.evalExpr(i.expr);
+             }
+           }, this);
   }
-  if(bytes) {
-    bytes = _.flatten(bytes);
-    bytes = _.map(bytes, function(b, index) {
-              if(_.isObject(b)) {
-                this.secondPass[this.offset] = b;
-                if(b.relative) {
-                  this.secondPass[this.offset].next = bytes.length - index + this.org;
-                }
-                this.offset++;
-                return 0;
-              } else {
-                this.offset++;
-                return b;
-              }
-            }, this);
-  }
-  return bytes;
 }
 
 Z80.prototype.parseLine = function(line) {
@@ -125,7 +127,7 @@ Z80.prototype.parseLine = function(line) {
     this.defineLabel(line.label);
   }
   if("line" in line) {
-    return this.parseCode(line.line);
+    return this.parseInst(line.line);
   }
   return [];
 }
@@ -138,15 +140,11 @@ Z80.prototype.asmSecondPass = function(bytes) {
     } else if(value.high) {
       bytes[key] = this.labels[value.high]>>8;
     } else if(value.relative) {
-      var rel = this.labels[value.relative] - value.next;
-      if(rel < -127 || rel > 128) {
-        throw new Error('Label too far');
+      var rel =  this.labels[value.relative] - value.next;
+      if(rel < - 128 || rel > 127) {
+        throw new Error('Offset too large');
       }
-      if(rel < 0) {
-        bytes[key] = 0xff + rel - 3;
-      } else {
-        bytes[key] = rel - 1;
-      }
+      bytes[key] = compl2(rel);
     } else {
       throw new Error('Internal error');
     }
@@ -158,7 +156,11 @@ Z80.prototype.asmSecondPass = function(bytes) {
 Z80.prototype.asm = function(code) {
   var offset = this.offset;
   var ast = parser.parse(code);
-  var bytes = _.flatten(_.map(ast, this.parseLine, this));
+  var bytes = _.chain(ast)
+              .map(this.parseLine, this)
+              .filter(function(i) { return i !== null; })
+              .flatten()
+              .value();
   bytes = this.asmSecondPass(bytes);
   for(var i = 0; i < bytes.length; i++) {
     this.output[offset + i] = bytes[i];
@@ -171,12 +173,7 @@ Z80.prototype.saveImage = function(fname) {
   for(var i = 0; i < this.output.length; i++) {
     buffer[i] = this.output[i];
   }
-  fs.writeFile(fname, buffer, 'binary', function(err) {
-    if(err) {
-      throw err;
-    }
-    console.log('Saved %s', fname);
-  });
+  fs.writeFileSync(fname, buffer, 'binary');
 }
 
 Z80.prototype.defineLabel = function(name) {

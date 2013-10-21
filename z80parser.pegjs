@@ -26,7 +26,7 @@ Int16
 Offset8
   = "+"? n:Number { if(n>128) throw new Error('Value overflow'); else return n; } // TODO
   / "-"  n:Number { if(n>127) throw new Error('Value overflow'); else return -n; } // TODO
-  / "+"? i:Identifier { return [{relative:i}]; }
+  / "+"? i:Identifier { return {relative:i}; }
 
 Number
   = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }

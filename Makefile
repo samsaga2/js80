@@ -21,4 +21,9 @@ testrom: util/test.rom
 util/test.rom: util/test.asm parser.js z80parser.js
 	./util/js80asm util/test.asm util/test.rom
 
-.PHONY: all test
+debug:
+	@pkill mocha; true
+	$(MOCHA) --debug-brk &
+	chromium-browser http://127.0.0.1:8080/debug?port=5858
+
+.PHONY: all test debug
