@@ -140,7 +140,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
     } else if(value.high) {
       bytes[key] = this.labels[value.high]>>8;
     } else if(value.relative) {
-      var rel =  this.labels[value.relative] - value.next;
+      var rel = this.labels[value.relative] - value.next;
       if(rel < - 128 || rel > 127) {
         throw new Error('Offset too large');
       }

@@ -5,13 +5,12 @@ all: test
 
 clean:
 	rm -f parser.js util/test.rom
-	rm -rf node_modules
 
 parser.js: parser.pegjs
-	$(PEG) parser.pegjs
+	$(PEG) --track-line-and-column parser.pegjs
 
 z80parser.js: z80parser.pegjs
-	$(PEG) z80parser.pegjs
+	$(PEG) --track-line-and-column z80parser.pegjs
 
 test: parser.js z80parser.js
 	$(MOCHA)

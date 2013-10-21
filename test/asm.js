@@ -158,7 +158,7 @@ describe('asm inst', function() {
 
   it('djnz label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ test: nop $ djnz test')).be.eql([0, 0x10, 0xfb]);
+    should(z80.asm('org 8000h $ test: nop $ djnz test')).be.eql([0, 0x10, 0xfd]);
   });
 
   it('jr label', function() {

@@ -9,7 +9,7 @@ Lines
   = __ head:Line tail:(__ (LineTerminator/"$")+ __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 Line
-  = l:Label _ c:Command { return {label:l, line:c}; }
+  = l:Label _ c:Command { return {label:l, line:c, lineIndex:line}; }
   / l:Label { return {label:l}; }
   / c:Command { return {line:c}; }
 
