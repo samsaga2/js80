@@ -66,6 +66,7 @@ ExprShift
 
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
+  / "$" { return {id:'__here__'}; }
   / num:Number { return {num:num}; }
   / id:Identifier { return {id:id}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }

@@ -49,7 +49,7 @@ describe('asm inst', function() {
     should(z80.asm('set 2,(iy-10-1-2)')).be.eql([0xfd, 0xcb, 256+(-10-1-2), 0xc6+8*2]);
   });
 
-  it('out (0x98),a -- or 5', function() {
+  it('out (0x98),a \\ or 5', function() {
     var z80 = new Z80();
     should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
   });
@@ -94,7 +94,7 @@ describe('asm inst', function() {
     should(z80.asm('ld a,(1+2)-(3+4)')).be.eql([0x3e, 256+((1+2)-(3+4))]);
   });
 
-  it('org 8000h -- nop', function() {
+  it('org 8000h \\ nop', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h\nnop')).be.eql([0]);
     should(z80.org + z80.offset).be.eql(0x8001);
@@ -189,5 +189,15 @@ describe('asm inst', function() {
   it('ld a,1<<1+2', function() {
     var z80 = new Z80();
     should(z80.asm('ld a,1<<1+2')).be.eql([0x3e, (1<<1)+2]);
+  });
+
+  it('org 8000h \\ ld hl,$', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h\\ld hl,$')).be.eql([0x21, 0, 0x80]);
+  });
+
+  it('org 8000h \\ ld hl,$+2', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h\\ld hl,$+2')).be.eql([0x21, 2, 0x80]);
   });
 });

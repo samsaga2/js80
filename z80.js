@@ -32,7 +32,11 @@ Z80.prototype.inferenceLabel = function(label) {
 }
 
 Z80.prototype.evalExpr = function(expr) {
-  if(expr.id) {
+  if (expr.id === '__here__') {
+    return this.offset + this.org;
+  } else if (expr.id && this.labels[expr.id]) {
+    return this.labels[expr.id].toString();
+  } else if(expr.id) {
     return expr.id;
   } else if("num" in expr) {
     return expr.num;
@@ -43,10 +47,10 @@ Z80.prototype.evalExpr = function(expr) {
   } else if(expr.unary) {
     var values = _.map(expr.args, this.evalExpr, this);
     switch(expr.unary) {
-      case '+': return reduce(values, function(l, r) { return l+r; });
-      case '-': return reduce(values, function(l, r) { return l-r; });
-      case '*': return reduce(values, function(l, r) { return l*r; });
-      case '/': return reduce(values, function(l, r) { return l/r; });
+      case '+':  return reduce(values, function(l, r) { return l+r; });
+      case '-':  return reduce(values, function(l, r) { return l-r; });
+      case '*':  return reduce(values, function(l, r) { return l*r; });
+      case '/':  return reduce(values, function(l, r) { return l/r; });
       case '<<': return reduce(values, function(l, r) { return l<<r; });
       case '>>': return reduce(values, function(l, r) { return l>>r; });
     }
@@ -79,8 +83,6 @@ Z80.prototype.buildTemplateArg = function(arg) {
     } else {
       return this.buildTemplateArg(arg.paren);
     }
-  } else if (arg.expr && arg.expr.id && this.labels[arg.expr.id]) {
-    return this.labels[arg.expr.id].toString();
   } else if(arg.expr) {
     return this.evalExpr(arg.expr).toString();
   } else {
