@@ -23,6 +23,7 @@ Command
   / "dw"i _ head:Expr tail:(_ "," _ Expr)* { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "db"i _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "module"i _ i:Identifier { return {module:i}; }
+  / "include"i _ s:String { return {include:s}; }
   / inst:Identifier _ args:InstArgs? { return {inst:inst, args:args}; }
 
 DbExpr
