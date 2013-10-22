@@ -213,6 +213,8 @@ describe('asm inst', function() {
 
   it('ds fill', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\nop\\ds 0x8000+0x2000-$').length).be.eql(0x2000);
+    var bytes = z80.asm('org 8000h\\nop\\ds 0x8000+0x2000-$,0xff');
+    should(bytes.length).be.eql(0x2000);
+    should(bytes[1]).be.equal(255);
   });
 });

@@ -130,7 +130,9 @@ Z80.prototype.parseInst = function(code) {
     this.org = this.evalExpr(code.org.expr);
     return null;
   } else if("ds" in code) {
-    return [].slice.call(new Uint8Array(this.evalExpr(code.ds.expr)));
+    var len = this.evalExpr(code.ds.len.expr);
+    var value = this.evalExpr(code.ds.value.expr);
+    return _.map(_.range(len), function() {return value;});
   } else if("dw" in code) {
     return _.map(code.dw, function(i) { var ix = this.evalExpr(i.expr); return [ix&255, ix>>8]; }, this);
   } else if("db" in code) {
