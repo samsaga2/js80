@@ -210,4 +210,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('include "util/test.asm"').length).not.be.eql(0);
   });
+
+  it('ds fill', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h\\nop\\ds 0x8000+0x2000-$').length).be.eql(0x2000);
+  });
 });
