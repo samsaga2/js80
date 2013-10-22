@@ -23,6 +23,14 @@ function Z80() {
   this.lastDefinedLabel = "";
 }
 
+Z80.prototype.inferenceLabel = function(label) {
+  if(label[0] === '.') {
+    return this.lastDefinedLabel + label;
+  } else {
+    return label;
+  }
+}
+
 Z80.prototype.evalExpr = function(expr) {
   if(expr.id) {
     return expr.id;
@@ -141,11 +149,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
   _.each(this.secondPass, function(value, key) {
     var n = value.value;
     if(value.label) {
-      if(value.label[0] === '.') {
-        n = this.labels[this.lastDefinedLabel + value.label];
-      } else {
-        n = this.labels[value.label];
-      }
+      n = this.labels[this.inferenceLabel(value.label)];
       if(_.isUndefined(n)) {
         throw new Error('Unknown label ' + value.label);
       }
