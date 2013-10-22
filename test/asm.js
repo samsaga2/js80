@@ -200,4 +200,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h\\ld hl,$+2')).be.eql([0x21, 2, 0x80]);
   });
+
+  it('modules', function() {
+    var z80 = new Z80();
+    should(z80.asm('org 8000h\\module m1\\l1: nop\\module m2\\l2: nop\\module m3\\ld hl,m1.l1+m2.l2')).be.eql([0,0,0x21,1,(0x80+0x80)&255]);
+  });
 });

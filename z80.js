@@ -21,30 +21,42 @@ function Z80() {
   this.labels = {};
   this.secondPass = {};
   this.lastDefinedLabel = "";
+  this.module = "";
 }
 
 Z80.prototype.inferenceLabel = function(label) {
   if(label[0] === '.') {
-    return this.lastDefinedLabel + label;
-  } else {
-    return label;
+    label = this.lastDefinedLabel + label;
   }
+  if(this.module && label.split('.').length < 2) {
+    label = this.module + '.' + label;
+  }
+  return label;
 }
 
 Z80.prototype.evalExpr = function(expr) {
   if (expr.id === '__here__') {
     return this.offset + this.org;
-  } else if (expr.id && this.labels[expr.id]) {
-    return this.labels[expr.id].toString();
-  } else if(expr.id) {
+  }
+  if (expr.id) {
+    var l = this.inferenceLabel(expr.id);
+    if (l in this.labels) {
+      return this.labels[l];
+    }
+  }
+  if(expr.id) {
     return expr.id;
-  } else if("num" in expr) {
+  }
+  if('num' in expr) {
     return expr.num;
-  } else if(expr.neg) {
+  }
+  if(expr.neg) {
     return -this.evalExpr(expr.neg);
-  } else if(expr.paren) {
+  }
+  if(expr.paren) {
     return this.evalExpr(expr.paren);
-  } else if(expr.unary) {
+  }
+  if(expr.unary) {
     var values = _.map(expr.args, this.evalExpr, this);
     switch(expr.unary) {
       case '+':  return reduce(values, function(l, r) { return l+r; });
@@ -62,10 +74,10 @@ Z80.prototype.evalExpr = function(expr) {
 Z80.prototype.buildTemplateArg = function(arg) {
   if(arg.expr.paren) {
     var p = arg.expr.paren;
-    if("id" in p) {
-      return "(" + p.id + ")";
-    } else if("num" in p) {
-      return "(" + p.num + ")";
+    if('id' in p) {
+      return util.format('(%s)', p.id);
+    } else if('num' in p) {
+      return util.format('(%d)', p.num);
     } else if(p.unary === '+' && ['ix','iy'].indexOf(p.args[0].id.toString().toLowerCase()) > -1) {
       var reg = p.args[0].id.toString().toLowerCase();
       var offset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
@@ -130,6 +142,11 @@ Z80.prototype.parseInst = function(code) {
   } else if('equ' in code) {
     this.defineLabel(code.equ.label, this.evalExpr(code.equ.value.expr));
     return null;
+  } else if('module' in code) {
+    this.module = code.module;
+    return null;
+  } else {
+    throw new Error('Internal error');
   }
 }
 
@@ -145,22 +162,22 @@ Z80.prototype.parseLine = function(line) {
 
 Z80.prototype.asmSecondPass = function(bytes) {
   _.each(this.secondPass, function(value, key) {
-    var ix = value.value;
+    var offset = value.value;
     if(value.label) {
-      ix = this.labels[this.inferenceLabel(value.label)];
-      if(_.isUndefined(ix)) {
+      offset = this.labels[this.inferenceLabel(value.label)];
+      if(_.isUndefined(offset)) {
         throw new Error('Unknown label ' + value.label);
       }
     }
     switch(value.type) {
       case 'low':
-        bytes[key] = ix&255;
+        bytes[key] = offset&255;
         break;
       case 'high':
-        bytes[key] = ix>>8;
+        bytes[key] = (offset>>8)&255;
         break;
       case 'relative':
-        var rel = ix - value.next;
+        var rel = offset - value.next;
         if(rel < - 128 || rel > 127) {
           throw new Error('Offset too large');
         }
@@ -199,9 +216,15 @@ Z80.prototype.saveImage = function(fname) {
 
 Z80.prototype.defineLabel = function(name, value) {
   if(name[0] === '.') {
+    if(name.indexOf('.') > 0) {
+      throw new Error('Invalid label name');
+    }
     name = this.lastDefinedLabel + name;
   } else {
     this.lastDefinedLabel = name;
+  }
+  if(this.module.length > 0) {
+    name = this.module + '.' + name;
   }
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
