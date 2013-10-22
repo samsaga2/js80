@@ -63,18 +63,18 @@ Z80.prototype.buildTemplateArg = function(arg) {
     } else if("num" in p) {
       return "(" + p.num + ")";
     } else if("unary" in p && p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'ix') {
-      var n = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
-      if(n < 0) {
-        return '(ix' + n + ')';
+      var ixOffset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(ixOffset < 0) {
+        return '(ix' + ixOffset + ')';
       } else {
-        return '(ix+' + n + ')';
+        return '(ix+' + ixOffset + ')';
       }
     } else if("unary" in p && p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'iy') {
-      var n = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
-      if(n < 0) {
-        return '(iy' + n + ')';
+      var iyOffset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(iyOffset < 0) {
+        return '(iy' + iyOffset + ')';
       } else {
-        return '(iy+' + n + ')';
+        return '(iy+' + iyOffset + ')';
       }
     } else {
       return this.buildTemplateArg(arg.paren);
@@ -122,7 +122,7 @@ Z80.prototype.parseInst = function(code) {
   } else if("ds" in code) {
     return [].slice.call(new Uint8Array(this.evalExpr(code.ds.expr)));
   } else if("dw" in code) {
-    return _.map(code.dw, function(i) { var n = this.evalExpr(i.expr); return [n&255, n>>8]; }, this);
+    return _.map(code.dw, function(i) { var ix = this.evalExpr(i.expr); return [ix&255, ix>>8]; }, this);
   } else if("db" in code) {
     return _.map(code.db, function(i) {
              if(i.str) {
@@ -149,22 +149,22 @@ Z80.prototype.parseLine = function(line) {
 
 Z80.prototype.asmSecondPass = function(bytes) {
   _.each(this.secondPass, function(value, key) {
-    var n = value.value;
+    var ix = value.value;
     if(value.label) {
-      n = this.labels[this.inferenceLabel(value.label)];
-      if(_.isUndefined(n)) {
+      ix = this.labels[this.inferenceLabel(value.label)];
+      if(_.isUndefined(ix)) {
         throw new Error('Unknown label ' + value.label);
       }
     }
     switch(value.type) {
       case 'low':
-        bytes[key] = n&255;
+        bytes[key] = ix&255;
         break;
       case 'high':
-        bytes[key] = n>>8;
+        bytes[key] = ix>>8;
         break;
       case 'relative':
-        var rel = n - value.next;
+        var rel = ix - value.next;
         if(rel < - 128 || rel > 127) {
           throw new Error('Offset too large');
         }
