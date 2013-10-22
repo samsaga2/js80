@@ -66,19 +66,13 @@ Z80.prototype.buildTemplateArg = function(arg) {
       return "(" + p.id + ")";
     } else if("num" in p) {
       return "(" + p.num + ")";
-    } else if(p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'ix') {
-      var ixOffset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
-      if(ixOffset < 0) {
-        return '(ix' + ixOffset + ')';
+    } else if(p.unary === '+' && ['ix','iy'].indexOf(p.args[0].id.toString().toLowerCase()) > -1) {
+      var reg = p.args[0].id.toString().toLowerCase();
+      var offset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(offset < 0) {
+        return util.format('(%s%d)', reg, offset);
       } else {
-        return '(ix+' + ixOffset + ')';
-      }
-    } else if(p.unary === '+' && p.args[0].id.toString().toLowerCase() === 'iy') {
-      var iyOffset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
-      if(iyOffset < 0) {
-        return '(iy' + iyOffset + ')';
-      } else {
-        return '(iy+' + iyOffset + ')';
+        return util.format('(%s+%d)', reg, offset);
       }
     } else {
       return this.buildTemplateArg(arg.paren);
