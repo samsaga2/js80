@@ -128,37 +128,37 @@ describe('asm inst', function() {
 
   it('multiple inst per line', function() {
     var z80 = new Z80();
-    should(z80.asm('nop $ test: xor a $ ret')).be.eql([0, 0xa8+7, 0xc9]);
+    should(z80.asm('nop\\test: xor a\\ret')).be.eql([0, 0xa8+7, 0xc9]);
   });
 
   it('call label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ test_label: nop $ call test_label')).be.eql([0, 0xcd, 0, 0x80]);
+    should(z80.asm('org 8000h\\test_label: nop\\call test_label')).be.eql([0, 0xcd, 0, 0x80]);
   });
 
   it('jp label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ test_label: nop $ jp test_label')).be.eql([0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\\test_label: nop\\jp test_label')).be.eql([0, 0xc3, 0, 0x80]);
   });
 
   it('label second pass', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ main: call test_label $ test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\\main: call test_label\\test_label: nop\\jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 
   it('local label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ main: $ call main.test_label $ .test_label: nop $ jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\\main:\\call main.test_label\\.test_label: nop\\jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 
   it('local label 2', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ main: $ call main.test_label $ .test_label: nop $ jp .test_label')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
+    should(z80.asm('org 8000h\\main:\\call main.test_label\\.test_label: nop\\jp .test_label')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
   });
 
   it('local label 3', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ main: $ call main.1 $ .1: nop $ jp .1')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
+    should(z80.asm('org 8000h\\main:\\call main.1\\.1: nop\\jp .1')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
   });
 
   it('empty code', function() {
@@ -168,17 +168,17 @@ describe('asm inst', function() {
 
   it('djnz label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ test: nop $ djnz test')).be.eql([0, 0x10, 0xfd]);
+    should(z80.asm('org 8000h\\test: nop\\djnz test')).be.eql([0, 0x10, 0xfd]);
   });
 
   it('jr label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h $ jr test $ nop $ test: nop')).be.eql([0x18, 1, 0, 0]);
+    should(z80.asm('org 8000h\\jr test\\nop\\test: nop')).be.eql([0x18, 1, 0, 0]);
   });
 
-  it('pepe equ 123 $ ld a,pepe', function() {
+  it('pepe equ 123\\ld a,pepe', function() {
     var z80 = new Z80();
-    should(z80.asm('pepe equ 123 $ ld a,pepe')).be.eql([0x3e, 123]);
+    should(z80.asm('pepe equ 123\\ld a,pepe')).be.eql([0x3e, 123]);
   });
 
   it('ld a,1<<1', function() {
