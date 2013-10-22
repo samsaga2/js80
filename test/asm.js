@@ -180,4 +180,14 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('pepe equ 123 $ ld a,pepe')).be.eql([0x3e, 123]);
   });
+
+  it('ld a,1<<1', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,1<<1')).be.eql([0x3e, 1<<1]);
+  });
+
+  it('ld a,1<<1+2', function() {
+    var z80 = new Z80();
+    should(z80.asm('ld a,1<<1+2')).be.eql([0x3e, (1<<1)+2]);
+  });
 });

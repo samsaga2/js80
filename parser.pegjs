@@ -43,20 +43,25 @@ Expr
 
 ExprAdd
   = left:ExprMul _ right:([+-] ExprMul)+ {
-  var n=[left].concat(_.map(right, function(i) {
-    if(i[0]==='-') {
-     return {neg:i[1]};
-    } else {
-     return i[1];
-    }
-  }));
-  return {unary:"+", args:n};
-}
-  / ExprPrimary
+    var n=[left].concat(_.map(right, function(i) {
+      if(i[0]==='-') {
+       return {neg:i[1]};
+      } else {
+       return i[1];
+      }
+    }));
+    return {unary:"+", args:n};
+  }
+  / ExprMul
 
 ExprMul
-  = left:ExprPrimary _ "*" _ right:ExprMul { return {unary:"*", args:[left, right]}; }
-  / left:ExprPrimary _ "/" _ right:ExprMul { return {unary:"/", args:[left, right]}; }
+  = left:ExprShift _ "*" _ right:ExprMul { return {unary:"*", args:[left, right]}; }
+  / left:ExprShift _ "/" _ right:ExprMul { return {unary:"/", args:[left, right]}; }
+  / ExprShift
+
+ExprShift
+  = left:ExprPrimary _ "<<" _ right:ExprShift { return {unary:"<<", args:[left, right]}; }
+  / left:ExprPrimary _ ">>" _ right:ExprShift { return {unary:">>", args:[left, right]}; }
   / ExprPrimary
 
 ExprPrimary
