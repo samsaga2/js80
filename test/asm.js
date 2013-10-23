@@ -222,4 +222,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('incbin "util/test.asm"').length).not.be.eql(0);
   });
+
+  it('endmodule', function() {
+    var z80 = new Z80();
+    should(z80.asm('module test\\l1: nop\\endmodule\\l2: nop\\module test2\\call test.l1\\call l2').length).not.be.eql([0,0,0xcd,0,0,0xcd,1,0]);
+  });
 });

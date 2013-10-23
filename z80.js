@@ -28,6 +28,9 @@ Z80.prototype.inferenceLabel = function(label) {
   if(label[0] === '.') {
     label = this.lastDefinedLabel + label;
   }
+  if(label in this.labels) {
+    return label;
+  }
   if(this.module && label.split('.').length < 2) {
     label = this.module + '.' + label;
   }
@@ -148,6 +151,9 @@ Z80.prototype.parseInst = function(code) {
     return null;
   } else if('module' in code) {
     this.module = code.module;
+    return null;
+  } else if(code.endmodule) {
+    this.module = '';
     return null;
   } else if('include' in code) {
     var f = fs.readFileSync(code.include);
