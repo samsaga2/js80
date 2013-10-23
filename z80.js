@@ -152,6 +152,9 @@ Z80.prototype.parseInst = function(code) {
   } else if('include' in code) {
     var f = fs.readFileSync(code.include);
     return this.asm(f.toString());
+  } else if('incbin' in code) {
+    var f = fs.readFileSync(code.incbin);
+    return Array.prototype.slice.call(f, 0)
   } else {
     throw new Error('Internal error');
   }

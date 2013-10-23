@@ -217,4 +217,9 @@ describe('asm inst', function() {
     should(bytes.length).be.eql(0x2000);
     should(bytes[1]).be.equal(255);
   });
+
+  it('incbin', function() {
+    var z80 = new Z80();
+    should(z80.asm('incbin "util/test.asm"').length).not.be.eql(0);
+  });
 });

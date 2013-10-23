@@ -25,6 +25,7 @@ Command
   / "db"i _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "module"i _ i:Identifier { return {module:i}; }
   / "include"i _ s:String { return {include:s}; }
+  / "incbin"i _ s:String { return {incbin:s}; }
   / inst:Identifier _ args:InstArgs? { return {inst:inst, args:args}; }
 
 DbExpr
