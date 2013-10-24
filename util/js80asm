@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var Z80 = require('../z80')
-  , fs = require('fs');
+var Z80 = require('../z80');
 
 if(process.argv.length > 4 || process.argv.length === 2) {
   console.log("js80asm <input.asm> [output.rom]");
@@ -15,7 +14,10 @@ if(process.argv.length == 4) {
   output = process.argv[3];
 }
 
-var data = fs.readFileSync(input, 'utf8');
 var z80 = new Z80();
-z80.asm(data);
+try {
+  z80.compileFile(input);
+} catch(e) {
+  console.log('%s:%s: %s', z80.currentFilename, e.line, e.name||e);
+}
 z80.saveImage(output);

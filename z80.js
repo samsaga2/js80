@@ -15,6 +15,9 @@ function compl2(v) {
 }
 
 function Z80() {
+  this.currentFilename = '';
+  this.currentLineIndex = 1;
+
   this.output = [];
   this.org = 0;
   this.offset = 0;
@@ -71,7 +74,7 @@ Z80.prototype.evalExpr = function(expr) {
     }
   }
 
-  throw new Error(util.format('Internal error %j', expr));
+  throw('Internal error');
 }
 
 Z80.prototype.buildTemplateArg = function(arg) {
@@ -127,6 +130,10 @@ Z80.prototype.parseBytes = function(bytes) {
 }
 
 Z80.prototype.parseInst = function(code) {
+  if(code.line) {
+    this.currentLineIndex = code.line;
+  }
+
   if(code.label) {
     this.defineLabel(code.label);
     return null;
@@ -159,15 +166,22 @@ Z80.prototype.parseInst = function(code) {
     this.lastModule = '';
     return null;
   } else if('include' in code) {
-    var f = fs.readFileSync(code.include);
-    return this.asm(f.toString());
+    return this.compileFile(code.include);
   } else if('incbin' in code) {
     var f = fs.readFileSync(code.incbin);
     return Array.prototype.slice.call(f, 0)
   } else {
-    console.log('%j', code);
-    throw new Error('Internal error');
+    throw('Internal error');
   }
+}
+
+Z80.prototype.compileFile = function(fname) {
+    var prevFilename = this.currentFilename;
+    this.currentFilename = fname;
+    var f = fs.readFileSync(fname);
+    var bytes = this.asm(f.toString());
+    this.currentFilename = prevFilename;
+    return bytes;
 }
 
 Z80.prototype.asmSecondPass = function(bytes) {
@@ -176,7 +190,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
     if(value.label) {
       offset = this.labels[this.inferenceLabel(value.label)];
       if(_.isUndefined(offset)) {
-        throw new Error('Unknown label ' + value.label);
+        throw('Unknown label ' + value.label);
       }
     }
     switch(value.type) {
@@ -189,31 +203,40 @@ Z80.prototype.asmSecondPass = function(bytes) {
       case 'relative':
         var rel = offset - value.next;
         if(rel < - 128 || rel > 127) {
-          throw new Error('Offset too large');
+          throw('Offset too large');
         }
         bytes[key] = rel;
         break;
       default:
-        throw new Error('Internal error');
+        throw('Internal error');
     }
   }, this);
   return bytes;
 }
 
 Z80.prototype.asm = function(code) {
-  this.secondPass = {};
-  var offset = this.offset;
-  var ast = parser.parse(code);
-  var bytes = _.chain(ast)
-              .map(this.parseInst, this)
-              .filter(function(i) { return i !== null; })
-              .flatten()
-              .value();
-  bytes = _.map(this.asmSecondPass(bytes), compl2);
-  for(var i = 0; i < bytes.length; i++) {
-    this.output[offset + i] = bytes[i];
+  try {
+    this.secondPass = {};
+
+    var offset = this.offset;
+    var ast = parser.parse(code);
+    var bytes = _.chain(ast)
+                .map(this.parseInst, this)
+                .filter(function(i) { return i !== null; })
+                .flatten()
+                .value();
+    bytes = _.map(this.asmSecondPass(bytes), compl2);
+    for(var i = 0; i < bytes.length; i++) {
+      this.output[offset + i] = bytes[i];
+    }
+    return bytes;
+  } catch(e) {
+    if(!e.line) {
+      e.line = this.currentLineIndex;
+    }
+    e.filename = this.currentFilename;
+    throw e;
   }
-  return bytes;
 }
 
 Z80.prototype.saveImage = function(fname) {
