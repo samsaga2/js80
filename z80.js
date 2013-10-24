@@ -21,7 +21,7 @@ function Z80() {
   this.labels = {};
   this.secondPass = {};
   this.lastDefinedLabel = "";
-  this.module = "";
+  this.lastModule = "";
 }
 
 Z80.prototype.inferenceLabel = function(label) {
@@ -31,8 +31,8 @@ Z80.prototype.inferenceLabel = function(label) {
   if(label in this.labels) {
     return label;
   }
-  if(this.module && label.split('.').length < 2) {
-    label = this.module + '.' + label;
+  if(this.lastModule && label.split('.').length < 2) {
+    label = this.lastModule + '.' + label;
   }
   return label;
 }
@@ -150,10 +150,10 @@ Z80.prototype.parseInst = function(code) {
     this.defineLabel(code.equ.label, this.evalExpr(code.equ.value.expr));
     return null;
   } else if('module' in code) {
-    this.module = code.module;
+    this.lastModule = code.module;
     return null;
   } else if(code.endmodule) {
-    this.module = '';
+    this.lastModule = '';
     return null;
   } else if('include' in code) {
     var f = fs.readFileSync(code.include);
@@ -239,8 +239,8 @@ Z80.prototype.defineLabel = function(name, value) {
   } else {
     this.lastDefinedLabel = name;
   }
-  if(this.module.length > 0) {
-    name = this.module + '.' + name;
+  if(this.lastModule.length > 0) {
+    name = this.lastModule + '.' + name;
   }
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
