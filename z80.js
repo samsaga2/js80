@@ -102,7 +102,7 @@ Z80.prototype.buildTemplateArg = function(arg) {
 }
 
 Z80.prototype.parseAsmInst = function(ast) {
-  var template = ast.inst;
+  var template = ast.asm;
   var sep = ' ';
   _.each(ast.args, function(arg) {
     template += sep + this.buildTemplateArg(arg);
@@ -127,18 +127,18 @@ Z80.prototype.parseBytes = function(bytes) {
 }
 
 Z80.prototype.parseInst = function(code) {
-  if("inst" in code) {
+  if('asm' in code) {
     return this.parseAsmInst(code);
-  } else if("org" in code) {
+  } else if('org' in code) {
     this.org = this.evalExpr(code.org.expr);
     return null;
-  } else if("ds" in code) {
+  } else if('ds' in code) {
     var len = this.evalExpr(code.ds.len.expr);
     var value = this.evalExpr(code.ds.value.expr);
     return _.map(_.range(len), function() {return value;});
-  } else if("dw" in code) {
+  } else if('dw' in code) {
     return _.map(code.dw, function(i) { var ix = this.evalExpr(i.expr); return [ix&255, ix>>8]; }, this);
-  } else if("db" in code) {
+  } else if('db' in code) {
     return _.map(code.db, function(i) {
              if(i.str) {
                return _.map(i.str, function(i) { return i.charCodeAt(0); });

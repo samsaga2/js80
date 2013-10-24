@@ -10,14 +10,14 @@ Lines
 
 Line
   = l:Identifier _ "equ"i _ e:Expr { return {line:{equ:{label:l, value:e}}}; }
-  / l:Label _ c:Command { return {label:l, line:c, lineIndex:line}; }
+  / l:Label _ i:Inst { return {label:l, line:i, lineIndex:line}; }
   / l:Label { return {label:l}; }
-  / c:Command { return {line:c}; }
+  / i:Inst { return {line:i}; }
 
 Label
   = l:Identifier ":" { return l; }
 
-Command
+Inst
   = "org"i _ n:Expr { return {org:n}; }
   / "ds"i _ n:Expr _ "," _ v:Expr { return {ds:{len:n,value:v}}; }
   / "ds"i _ n:Expr { return {ds:{len:n,value:{expr:{num:0}}}}; }
@@ -27,7 +27,7 @@ Command
   / "endmodule"i { return {endmodule:true}; }
   / "include"i _ s:String { return {include:s}; }
   / "incbin"i _ s:String { return {incbin:s}; }
-  / inst:Identifier _ args:InstArgs? { return {inst:inst, args:args}; }
+  / asm:Identifier _ args:InstArgs? { return {asm:asm, args:args}; }
 
 DbExpr
   = Expr
