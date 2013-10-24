@@ -6,13 +6,13 @@ Start
   = l:Lines __ LineTerminator* { return l; }
 
 Lines
-  = __ head:Line tail:(__ (LineTerminator/"\\")+ __ Line)* __ { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = __ head:Line tail:(__ (LineTerminator/"\\")+ __ Line)* __ { return _.flatten([head, _.map(tail, function(i) { return i[3]; })]); }
 
 Line
-  = l:Identifier _ "equ"i _ e:Expr { return {line:{equ:{label:l, value:e}}}; }
-  / l:Label _ i:Inst { return {label:l, line:i, lineIndex:line}; }
+  = l:Identifier _ "equ"i _ e:Expr { return {equ:{label:l, value:e}}; }
+  / l:Label _ i:Inst { return [{label:l}, i] }
   / l:Label { return {label:l}; }
-  / i:Inst { return {line:i}; }
+  / i:Inst { return i; }
 
 Label
   = l:Identifier ":" { return l; }

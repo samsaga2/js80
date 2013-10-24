@@ -127,7 +127,10 @@ Z80.prototype.parseBytes = function(bytes) {
 }
 
 Z80.prototype.parseInst = function(code) {
-  if('asm' in code) {
+  if(code.label) {
+    this.defineLabel(code.label);
+    return null;
+  } else if('asm' in code) {
     return this.parseAsmInst(code);
   } else if('org' in code) {
     this.org = this.evalExpr(code.org.expr);
@@ -162,18 +165,9 @@ Z80.prototype.parseInst = function(code) {
     var f = fs.readFileSync(code.incbin);
     return Array.prototype.slice.call(f, 0)
   } else {
+    console.log('%j', code);
     throw new Error('Internal error');
   }
-}
-
-Z80.prototype.parseLine = function(line) {
-  if("label" in line) {
-    this.defineLabel(line.label);
-  }
-  if("line" in line) {
-    return this.parseInst(line.line);
-  }
-  return [];
 }
 
 Z80.prototype.asmSecondPass = function(bytes) {
@@ -211,7 +205,7 @@ Z80.prototype.asm = function(code) {
   var offset = this.offset;
   var ast = parser.parse(code);
   var bytes = _.chain(ast)
-              .map(this.parseLine, this)
+              .map(this.parseInst, this)
               .filter(function(i) { return i !== null; })
               .flatten()
               .value();
