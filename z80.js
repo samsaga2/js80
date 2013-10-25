@@ -210,6 +210,15 @@ Z80.prototype.parseInst = function(code) {
   } else if('macro' in code) {
     this.macros[code.macro.id] = code.macro;
     return null;
+  } else if('repeat' in code) {
+    var n = this.evalExpr(code.repeat.count);
+    return _.chain(_.range(n))
+           .map(function() {
+             return _.map(code.repeat.body, this.parseInst, this);
+           }, this)
+           .flatten()
+           .filter(function(i) { return i !== null; })
+           .value();
   } else {
     throw new Error('Internal error');
   }

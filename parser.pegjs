@@ -1,6 +1,7 @@
 {
   var _ = require('underscore');
   var macro = null;
+  var repeat = null;
 }
 
 Start
@@ -14,10 +15,8 @@ Lines
 
 ProgLine
   = l:Line {
-    if(macro) {
-      macro.body.push(l);
-      return [];
-    }
+    if(repeat) { repeat.body.push(l); return []; }
+    if(macro)  { macro.body.push(l); return []; }
     return l;
   }
 
@@ -46,6 +45,12 @@ Inst
     return {};
   }
   / "endmacro"i                                { var m = macro; macro = null; return {macro:m}; }
+  / "repeat"i _ n:Expr                         {
+    if(repeat) { throw new Error('Forbidden repeat declaration'); }
+    repeat = {count:n, body:[]};
+    return {};
+  }
+  / "endrepeat"i                               { var r = repeat; repeat = null; return {repeat:r}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr

@@ -254,4 +254,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm("ld a,'a'").length).not.be.eql([0x3e, 65]);
   });
+
+  it('repeat', function() {
+    var z80 = new Z80();
+    should(z80.asm('repeat 2\\nop\\nop\\endrepeat')).be.eql([0,0,0,0]);
+  });
 });
