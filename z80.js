@@ -82,29 +82,25 @@ Z80.prototype.evalExpr = function(expr) {
 }
 
 Z80.prototype.buildTemplateArg = function(arg) {
-  if('expr' in arg) {
-    if(arg.expr.paren) {
-      var p = arg.expr.paren;
-      if('id' in p) {
-        return util.format('(%s)', p.id);
-      } else if('num' in p) {
-        return util.format('(%d)', p.num);
-      } else if(p.unary === '+' && ['ix','iy'].indexOf(p.args[0].id.toString().toLowerCase()) > -1) {
-        var reg = p.args[0].id.toString().toLowerCase();
-        var offset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
-        if(offset < 0) {
-          return util.format('(%s%d)', reg, offset);
-        } else {
-          return util.format('(%s+%d)', reg, offset);
-        }
+  if(arg.paren) {
+    var p = arg.paren;
+    if('id' in p) {
+      return util.format('(%s)', p.id);
+    } else if('num' in p) {
+      return util.format('(%d)', p.num);
+    } else if(p.unary === '+' && ['ix','iy'].indexOf(p.args[0].id.toString().toLowerCase()) > -1) {
+      var reg = p.args[0].id.toString().toLowerCase();
+      var offset = this.evalExpr({unary:p.unary, args:_.rest(p.args)});
+      if(offset < 0) {
+        return util.format('(%s%d)', reg, offset);
       } else {
-        return this.buildTemplateArg(arg.paren);
+        return util.format('(%s+%d)', reg, offset);
       }
     } else {
-      return this.evalExpr(arg.expr).toString();
+      return this.buildTemplateArg(arg.paren);
     }
   } else {
-    return arg;
+    return this.evalExpr(arg).toString();
   }
 }
 
@@ -140,7 +136,7 @@ Z80.prototype.evalMacro = function(id, args) {
   var evalArgs = _.object(_.map(macro.args, function(arg, i) {
                             return [
                                   arg.id,
-                                  this.evalExpr(args[i] ? args[i].expr : arg.default.expr || 0)
+                                  this.evalExpr(args[i] ? args[i] : arg.default || 0)
                             ];
                           }, this));
 
@@ -168,24 +164,24 @@ Z80.prototype.parseInst = function(code) {
       return this.parseAsmInst(code);
     }
   } else if('org' in code) {
-    this.org = this.evalExpr(code.org.expr);
+    this.org = this.evalExpr(code.org);
     return null;
   } else if('ds' in code) {
-    var len = this.evalExpr(code.ds.len.expr);
-    var value = this.evalExpr(code.ds.value.expr);
+    var len = this.evalExpr(code.ds.len);
+    var value = this.evalExpr(code.ds.value);
     return _.map(_.range(len), function() {return value;});
   } else if('dw' in code) {
-    return _.map(code.dw, function(i) { var ix = this.evalExpr(i.expr); return [ix&255, ix>>8]; }, this);
+    return _.map(code.dw, function(i) { var ix = this.evalExpr(i); return [ix&255, ix>>8]; }, this);
   } else if('db' in code) {
     return _.map(code.db, function(i) {
              if(i.str) {
                return _.map(i.str, function(i) { return i.charCodeAt(0); });
              } else {
-               return this.evalExpr(i.expr);
+               return this.evalExpr(i);
              }
            }, this);
   } else if('equ' in code) {
-    this.defineLabel(code.equ.label, this.evalExpr(code.equ.value.expr));
+    this.defineLabel(code.equ.label, this.evalExpr(code.equ.value));
     return null;
   } else if('module' in code) {
     this.currentModule = code.module;

@@ -23,7 +23,7 @@ Label
 Inst
   = "org"i _ n:Expr                            { return {org:n}; }
   / "ds"i _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
-  / "ds"i _ n:Expr                             { return {ds:{len:n,value:{expr:{num:0}}}}; }
+  / "ds"i _ n:Expr                             { return {ds:{len:n,value:{num:0}}}; }
   / "dw"i _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "db"i _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "module"i _ i:Identifier                   { return {module:i}; }
@@ -52,7 +52,7 @@ MacroArg
 // Expr
 //
 Expr
-  = e:ExprAdd { return {expr:e}; }
+  = e:ExprAdd { return e; }
   / e:String { return {str:e}; }
 
 ExprAdd
