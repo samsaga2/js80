@@ -49,7 +49,7 @@ describe('asm inst', function() {
     should(z80.asm('set 2,(iy-10-1-2)')).be.eql([0xfd, 0xcb, 256+(-10-1-2), 0xc6+8*2]);
   });
 
-  it('out (0x98),a \\ or 5', function() {
+  it('out (0x98),a \n or 5', function() {
     var z80 = new Z80();
     should(z80.asm('out (0x98),a\nor 5')).be.eql([0xd3, 0x98, 0xf6, 5]);
   });
@@ -94,7 +94,7 @@ describe('asm inst', function() {
     should(z80.asm('ld a,(1+2)-(3+4)')).be.eql([0x3e, 256+((1+2)-(3+4))]);
   });
 
-  it('org 8000h \\ nop', function() {
+  it('org 8000h \n nop', function() {
     var z80 = new Z80();
     should(z80.asm('org 8000h\nnop')).be.eql([0]);
     should(z80.org + z80.offset).be.eql(0x8001);
@@ -133,32 +133,32 @@ describe('asm inst', function() {
 
   it('call label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\test_label: nop\\call test_label')).be.eql([0, 0xcd, 0, 0x80]);
+    should(z80.asm('org 8000h\ntest_label: nop\ncall test_label')).be.eql([0, 0xcd, 0, 0x80]);
   });
 
   it('jp label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\test_label: nop\\jp test_label')).be.eql([0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\ntest_label: nop\njp test_label')).be.eql([0, 0xc3, 0, 0x80]);
   });
 
   it('label second pass', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\main: call test_label\\test_label: nop\\jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\nmain: call test_label\ntest_label: nop\njp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 
   it('local label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\main:\\call main.test_label\\.test_label: nop\\jp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
+    should(z80.asm('org 8000h\nmain:\ncall main.test_label\n.test_label: nop\njp main')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 0, 0x80]);
   });
 
   it('local label 2', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\main:\\call main.test_label\\.test_label: nop\\jp .test_label')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
+    should(z80.asm('org 8000h\nmain:\ncall main.test_label\n.test_label: nop\njp .test_label')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
   });
 
   it('local label 3', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\main:\\call main.1\\.1: nop\\jp .1')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
+    should(z80.asm('org 8000h\nmain:\ncall main.1\n.1: nop\njp .1')).be.eql([0xcd, 3, 0x80, 0, 0xc3, 3, 0x80]);
   });
 
   it('empty code', function() {
@@ -168,17 +168,17 @@ describe('asm inst', function() {
 
   it('djnz label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\test: nop\\djnz test')).be.eql([0, 0x10, 0xfd]);
+    should(z80.asm('org 8000h\ntest: nop\ndjnz test')).be.eql([0, 0x10, 0xfd]);
   });
 
   it('jr label', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\jr test\\nop\\test: nop')).be.eql([0x18, 1, 0, 0]);
+    should(z80.asm('org 8000h\njr test\nnop\ntest: nop')).be.eql([0x18, 1, 0, 0]);
   });
 
-  it('pepe equ 123\\ld a,pepe', function() {
+  it('pepe equ 123\nld a,pepe', function() {
     var z80 = new Z80();
-    should(z80.asm('pepe equ 123\\ld a,pepe')).be.eql([0x3e, 123]);
+    should(z80.asm('pepe equ 123\nld a,pepe')).be.eql([0x3e, 123]);
   });
 
   it('ld a,1<<1', function() {
@@ -191,19 +191,19 @@ describe('asm inst', function() {
     should(z80.asm('ld a,1<<1+2')).be.eql([0x3e, (1<<1)+2]);
   });
 
-  it('org 8000h \\ ld hl,$', function() {
+  it('org 8000h \n ld hl,$', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\ld hl,$')).be.eql([0x21, 0, 0x80]);
+    should(z80.asm('org 8000h\nld hl,$')).be.eql([0x21, 0, 0x80]);
   });
 
-  it('org 8000h \\ ld hl,$+2', function() {
+  it('org 8000h \n ld hl,$+2', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\ld hl,$+2')).be.eql([0x21, 2, 0x80]);
+    should(z80.asm('org 8000h\nld hl,$+2')).be.eql([0x21, 2, 0x80]);
   });
 
   it('modules', function() {
     var z80 = new Z80();
-    should(z80.asm('org 8000h\\module m1\\l1: nop\\module m2\\l2: nop\\module m3\\ld hl,m1.l1+m2.l2')).be.eql([0,0,0x21,1,(0x80+0x80)&255]);
+    should(z80.asm('org 8000h\nmodule m1\nl1: nop\nmodule m2\nl2: nop\nmodule m3\nld hl,m1.l1+m2.l2')).be.eql([0,0,0x21,1,(0x80+0x80)&255]);
   });
 
   it('include', function() {
@@ -213,7 +213,7 @@ describe('asm inst', function() {
 
   it('ds fill', function() {
     var z80 = new Z80();
-    var bytes = z80.asm('org 8000h\\nop\\ds 0x8000+0x2000-$,0xff');
+    var bytes = z80.asm('org 8000h\nnop\nds 0x8000+0x2000-$,0xff');
     should(bytes.length).be.eql(0x2000);
     should(bytes[1]).be.equal(255);
   });
@@ -225,22 +225,22 @@ describe('asm inst', function() {
 
   it('endmodule', function() {
     var z80 = new Z80();
-    should(z80.asm('module test\\l1: nop\\endmodule\\l2: nop\\module test2\\call test.l1\\call l2').length).not.be.eql([0,0,0xcd,0,0,0xcd,1,0]);
+    should(z80.asm('module test\nl1: nop\nendmodule\nl2: nop\nmodule test2\ncall test.l1\ncall l2').length).not.be.eql([0,0,0xcd,0,0,0xcd,1,0]);
   });
 
   it('macro noargs', function() {
     var z80 = new Z80();
-    should(z80.asm('macro test\\nop\\nop\\endmacro\\test\\test').length).not.be.eql([0,0,0,0]);
+    should(z80.asm('macro test\nnop\nnop\nendmacro\ntest\ntest').length).not.be.eql([0,0,0,0]);
   });
 
   it('macro with fixed args', function() {
     var z80 = new Z80();
-    should(z80.asm('macro test arg1,arg2\\ld a,arg1+arg2\\endmacro\\test 1,2').length).not.be.eql([0x3e, 1+2]);
+    should(z80.asm('macro test arg1,arg2\nld a,arg1+arg2\nendmacro\ntest 1,2').length).not.be.eql([0x3e, 1+2]);
   });
 
   it('macro with default args', function() {
     var z80 = new Z80();
-    should(z80.asm('macro test arg1,arg2:10\\ld a,arg1+arg2\\endmacro\\test 1').length).not.be.eql([0x3e, 1+10]);
+    should(z80.asm('macro test arg1,arg2:10\nld a,arg1+arg2\nendmacro\ntest 1').length).not.be.eql([0x3e, 1+10]);
   });
 
   it('ld string', function() {
@@ -257,11 +257,16 @@ describe('asm inst', function() {
 
   it('repeat', function() {
     var z80 = new Z80();
-    should(z80.asm('repeat 2\\nop\\nop\\endrepeat')).be.eql([0,0,0,0]);
+    should(z80.asm('repeat 2\nnop\nnop\nendrepeat')).be.eql([0,0,0,0]);
   });
 
   it('repeat^2', function() {
     var z80 = new Z80();
-    should(z80.asm('repeat 2\\repeat 2\\nop\\endrepeat\\endrepeat')).be.eql([0,0,0,0]);
+    should(z80.asm('repeat 2\nrepeat 2\nnop\nendrepeat\nendrepeat')).be.eql([0,0,0,0]);
+  });
+
+  it('macro with variable args', function() {
+    var z80 = new Z80();
+    should(z80.asm('macro test base,1..*\nrepeat @0\ndb base+@1\nrotate 1\nendrepeat\nendmacro\ntest 10,1,2,3')).be.eql([11,12,13]);
   });
 });

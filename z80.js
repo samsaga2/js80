@@ -14,6 +14,19 @@ function compl2(v) {
   return (v<0) ? (256+v) : v;
 }
 
+// http://stackoverflow.com/questions/1985260/javascript-array-rotate
+Array.prototype.rotate = (function() {
+                            var unshift = Array.prototype.unshift;
+                            var splice = Array.prototype.splice;
+
+                            return function(count) {
+                              var len = this.length >>> 0;
+                              count = count >> 0;
+                              unshift.apply(this, splice.call(this, count % len, len));
+                              return this;
+                            };
+})();
+
 function Z80() {
   this.org = 0;
   this.offset = 0;
@@ -82,6 +95,14 @@ Z80.prototype.evalExpr = function(expr) {
   if(expr.chr) {
     return expr.chr[0].charCodeAt(0);
   }
+  if('arg' in expr) {
+    var args = this.environment.__arguments__;
+    var n = this.evalExpr(expr.arg);
+    if(n === 0) {
+      return args.length;
+    }
+    return args[n-1];
+  }
 
   throw new Error('Internal error');
 }
@@ -141,20 +162,33 @@ Z80.prototype.evalMacro = function(id, args) {
   var macro = this.macros[id];
 
   // eval args
-  var evalArgs = _.object(_.map(macro.args, function(arg, i) {
-                            return [
-                                  arg.id,
-                                  this.evalExpr(args[i] ? args[i] : arg.default || 0)
-                            ];
-                          }, this));
+  var evalArgs = {};
+  _.each(macro.args, function(macroArg) {
+    if(macroArg.rest) {
+      this.environment.__arguments__ = [];
+      while(args.length) {
+        this.environment.__arguments__.push(this.evalExpr(args.shift()));
+      }
+    } else {
+      evalArgs[macroArg.id] = this.evalExpr(args.shift() || macroArg.default || {num:0});
+    }
+  }, this);
 
   // run macro
   var labels = this.environment;
   this.environment = _.extend(_.clone(this.environment), evalArgs);
-  var bytes = _.map(macro.body, this.parseInst, this);
+  var bytes = this.parseInsts(macro.body);
   this.environment = labels;
 
   return bytes;
+}
+
+Z80.prototype.parseInsts = function(insts) {
+  return _.chain(insts)
+         .map(this.parseInst, this)
+         .flatten()
+         .filter(function(i) { return i !== null && i !== undefined; })
+         .value();
 }
 
 Z80.prototype.parseInst = function(code) {
@@ -212,13 +246,12 @@ Z80.prototype.parseInst = function(code) {
     return null;
   } else if('repeat' in code) {
     var n = this.evalExpr(code.repeat.count);
-    return _.chain(_.range(n))
-           .map(function() {
-             return _.map(code.repeat.body, this.parseInst, this);
-           }, this)
-           .flatten()
-           .filter(function(i) { return i !== null; })
-           .value();
+    return _.flatten(_.map(_.range(n), function() {
+                       return this.parseInsts(code.repeat.body);
+                     }, this));
+  } else if('rotate' in code) {
+    var n = this.evalExpr(code.rotate);
+    this.environment.__arguments__ = this.environment.__arguments__.rotate(n);
   } else {
     throw new Error('Internal error');
   }
@@ -267,11 +300,7 @@ Z80.prototype.compileAst = function(ast) {
   this.secondPass = {};
   try {
     var offset = this.offset;
-    var bytes = _.chain(ast)
-                .map(this.parseInst, this)
-                .filter(function(i) { return i !== null; })
-                .flatten()
-                .value();
+    var bytes = this.parseInsts(ast);
     bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
     for(var i = 0; i < bytes.length; i++) {
       this.output[offset + i] = bytes[i];

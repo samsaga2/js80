@@ -44,6 +44,7 @@ Inst
   / "endmacro"i                                { var m = macro; macro = null; return {macro:m}; }
   / "repeat"i _ n:Expr                         { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
   / "endrepeat"i                               { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
+  / "rotate"i _ n:Expr                         { return {rotate:n}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr
@@ -59,6 +60,7 @@ MacroArgs
 MacroArg
   = i:Identifier _ ":" _ e:Expr { return {id:i, default:e}; }
   / i:Identifier                { return {id:i}; }
+  / "1" _ ".." _ "*" __         { return {rest:true}; }
 
 //
 // Expr
@@ -94,6 +96,7 @@ ExprShift
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
   / "$"               { return {id:'__here__'}; }
+  / "@" e:Expr        { return {arg:e}; }
   / num:Number        { return {num:num}; }
   / id:Identifier     { return {id:id}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }
