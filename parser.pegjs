@@ -30,6 +30,8 @@ Inst
   / "endmodule"i                               { return {endmodule:true}; }
   / "include"i _ s:String                      { return {include:s}; }
   / "incbin"i _ s:String                       { return {incbin:s}; }
+  / "macro"i _ i:Identifier                    { return {macro:i}; }
+  / "endmacro"i                                { return {endmacro:true}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr

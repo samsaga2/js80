@@ -15,27 +15,31 @@ function compl2(v) {
 }
 
 function Z80() {
-  this.currentFilename = '';
-  this.currentLineIndex = 1;
-
-  this.output = [];
   this.org = 0;
   this.offset = 0;
-  this.labels = {};
   this.secondPass = {};
-  this.lastDefinedLabel = "";
-  this.lastModule = "";
+
+  this.output = [];
+
+  this.labels = {};
+  this.macros = {};
+
+  this.currentFilename = '';
+  this.currentLineIndex = 1;
+  this.currentLabel = '';
+  this.currentModule = '';
+  this.currentMacro = null;
 }
 
 Z80.prototype.inferenceLabel = function(label) {
   if(label[0] === '.') {
-    label = this.lastDefinedLabel + label;
+    label = this.currentLabel + label;
   }
   if(label in this.labels) {
     return label;
   }
-  if(this.lastModule && label.split('.').length < 2) {
-    label = this.lastModule + '.' + label;
+  if(this.currentModule && label.split('.').length < 2) {
+    label = this.currentModule + '.' + label;
   }
   return label;
 }
@@ -74,7 +78,7 @@ Z80.prototype.evalExpr = function(expr) {
     }
   }
 
-  throw('Internal error');
+  throw new Error('Internal error');
 }
 
 Z80.prototype.buildTemplateArg = function(arg) {
@@ -129,6 +133,11 @@ Z80.prototype.parseBytes = function(bytes) {
   return bytes;
 }
 
+Z80.prototype.evalMacro = function(id) {
+  var bytes = _.map(this.macros[id], this.parseInst, this);
+  return bytes;
+}
+
 Z80.prototype.parseInst = function(code) {
   if(code.line) {
     this.currentLineIndex = code.line;
@@ -138,7 +147,11 @@ Z80.prototype.parseInst = function(code) {
     this.defineLabel(code.label);
     return null;
   } else if('asm' in code) {
-    return this.parseAsmInst(code);
+    if(code.asm in this.macros) {
+      return this.evalMacro(code.id);
+    } else {
+      return this.parseAsmInst(code);
+    }
   } else if('org' in code) {
     this.org = this.evalExpr(code.org.expr);
     return null;
@@ -160,18 +173,23 @@ Z80.prototype.parseInst = function(code) {
     this.defineLabel(code.equ.label, this.evalExpr(code.equ.value.expr));
     return null;
   } else if('module' in code) {
-    this.lastModule = code.module;
+    this.currentModule = code.module;
     return null;
   } else if(code.endmodule) {
-    this.lastModule = '';
+    this.currentModule = '';
     return null;
   } else if('include' in code) {
     return this.compileFile(code.include);
   } else if('incbin' in code) {
     var f = fs.readFileSync(code.incbin);
     return Array.prototype.slice.call(f, 0)
+  } else if('macro' in code) {
+    if(this.currentMacro !== null) {
+      throw new Error('Forbidden macro declaration');
+    }
+    this.currentMacro = {id:code.macro, body:[]};
   } else {
-    throw('Internal error');
+    throw new Error('Internal error');
   }
 }
 
@@ -190,7 +208,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
     if(value.label) {
       offset = this.labels[this.inferenceLabel(value.label)];
       if(_.isUndefined(offset)) {
-        throw('Unknown label ' + value.label);
+        throw new Error('Unknown label ' + value.label);
       }
     }
     switch(value.type) {
@@ -203,29 +221,36 @@ Z80.prototype.asmSecondPass = function(bytes) {
       case 'relative':
         var rel = offset - value.next;
         if(rel < - 128 || rel > 127) {
-          throw('Offset too large');
+          throw new Error('Offset too large');
         }
         bytes[key] = rel;
         break;
       default:
-        throw('Internal error');
+        throw new Error('Internal error');
     }
   }, this);
   return bytes;
 }
 
-Z80.prototype.asm = function(code) {
+Z80.prototype.compileAst = function(ast) {
+  this.secondPass = {};
   try {
-    this.secondPass = {};
-
     var offset = this.offset;
-    var ast = parser.parse(code);
-    var bytes = _.chain(ast)
-                .map(this.parseInst, this)
-                .filter(function(i) { return i !== null; })
-                .flatten()
-                .value();
-    bytes = _.map(this.asmSecondPass(bytes), compl2);
+    var bytes = [];
+    _.each(ast, function (ast) {
+      if('endmacro' in ast) {
+        this.macros[this.currentMacro.id] = this.currentMacro.body;
+        this.currentMacro = null;
+      } else if(this.currentMacro) {
+        this.currentMacro.body = this.currentMacro.body.concat(ast);
+      } else {
+        var b = this.parseInst(ast);
+        if(b !== null) {
+          bytes = bytes.concat(b);
+        }
+      }
+    }, this);
+    bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
     for(var i = 0; i < bytes.length; i++) {
       this.output[offset + i] = bytes[i];
     }
@@ -237,6 +262,11 @@ Z80.prototype.asm = function(code) {
     e.filename = this.currentFilename;
     throw e;
   }
+}
+
+Z80.prototype.asm = function(code) {
+  var ast = parser.parse(code);
+  return this.compileAst(ast);
 }
 
 Z80.prototype.saveImage = function(fname) {
@@ -252,12 +282,12 @@ Z80.prototype.defineLabel = function(name, value) {
     if(name.indexOf('.') > 0) {
       throw new Error('Invalid label name');
     }
-    name = this.lastDefinedLabel + name;
+    name = this.currentLabel + name;
   } else {
-    this.lastDefinedLabel = name;
+    this.currentLabel = name;
   }
-  if(this.lastModule.length > 0) {
-    name = this.lastModule + '.' + name;
+  if(this.currentModule.length > 0) {
+    name = this.currentModule + '.' + name;
   }
   if(this.labels[name]) {
     throw new Error('Label '+name+' already exists');
