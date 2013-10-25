@@ -21,7 +21,7 @@ function Z80() {
 
   this.output = [];
 
-  this.labels = {};
+  this.environment = {};
   this.macros = {};
 
   this.currentFilename = '';
@@ -35,7 +35,7 @@ Z80.prototype.inferenceLabel = function(label) {
   if(label[0] === '.') {
     label = this.currentLabel + label;
   }
-  if(label in this.labels) {
+  if(label in this.environment) {
     return label;
   }
   if(this.currentModule && label.split('.').length < 2) {
@@ -50,8 +50,8 @@ Z80.prototype.evalExpr = function(expr) {
   }
   if (expr.id) {
     var l = this.inferenceLabel(expr.id);
-    if (l in this.labels) {
-      return this.labels[l];
+    if (l in this.environment) {
+      return this.environment[l];
     }
   }
   if(expr.id) {
@@ -150,10 +150,10 @@ Z80.prototype.evalMacro = function(id, args) {
                           }, this));
 
   // run macro
-  var labels = this.labels;
-  this.labels = _.extend(_.clone(this.labels), evalArgs);
+  var labels = this.environment;
+  this.environment = _.extend(_.clone(this.environment), evalArgs);
   var bytes = _.map(macro.body, this.parseInst, this);
-  this.labels = labels;
+  this.environment = labels;
 
   return bytes;
 }
@@ -227,7 +227,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
   _.each(this.secondPass, function(value, key) {
     var offset = value.value;
     if(value.label) {
-      offset = this.labels[this.inferenceLabel(value.label)];
+      offset = this.environment[this.inferenceLabel(value.label)];
       if(_.isUndefined(offset)) {
         throw new Error('Unknown label ' + value.label);
       }
@@ -310,17 +310,17 @@ Z80.prototype.defineLabel = function(name, value) {
   if(this.currentModule.length > 0) {
     name = this.currentModule + '.' + name;
   }
-  if(this.labels[name]) {
+  if(this.environment[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.labels[name] = value || (this.org + this.offset);
+  this.environment[name] = value || (this.org + this.offset);
 }
 
 Z80.prototype.getLabel = function(name) {
-  if(!this.labels[name]) {
+  if(!this.environment[name]) {
     throw new Error('Unknow label ' + name);
   }
-  return this.labels[name];
+  return this.environment[name];
 }
 
 module.exports = Z80;
