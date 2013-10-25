@@ -29,6 +29,7 @@ Array.prototype.rotate = (function() {
 
 function Z80() {
   this.org = 0;
+  this.map = 0;
   this.offset = 0;
   this.secondPass = {};
 
@@ -102,6 +103,12 @@ Z80.prototype.evalExpr = function(expr) {
       return args.length;
     }
     return args[n-1];
+  }
+  if('getMap' in expr) {
+    var n = this.evalExpr(expr.getMap);
+    var i = this.map;
+    this.map += n;
+    return i;
   }
 
   throw new Error('Internal error');
@@ -211,6 +218,9 @@ Z80.prototype.parseInst = function(code) {
     }
   } else if('org' in code) {
     this.org = this.evalExpr(code.org);
+    return null;
+  } else if('map' in code) {
+    this.map = this.evalExpr(code.map);
     return null;
   } else if('ds' in code) {
     var len = this.evalExpr(code.ds.len);

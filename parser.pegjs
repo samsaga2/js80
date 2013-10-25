@@ -32,6 +32,7 @@ Label
 
 Inst
   = "org"i _ n:Expr                            { return {org:n}; }
+  / "map"i _ n:Expr                            { return {map:n}; }
   / "ds"i _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
   / "ds"i _ n:Expr                             { return {ds:{len:n,value:{num:0}}}; }
   / "dw"i _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
@@ -96,7 +97,8 @@ ExprShift
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
   / "$"               { return {id:'__here__'}; }
-  / "@" e:Expr        { return {arg:e}; }
+  / "@" _ e:Expr      { return {arg:e}; }
+  / "#" _ e:Expr      { return {getMap:e}; }
   / num:Number        { return {num:num}; }
   / id:Identifier     { return {id:id}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }

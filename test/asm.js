@@ -269,4 +269,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('macro test base,1..*\nrepeat @0\ndb base+@1\nrotate 1\nendrepeat\nendmacro\ntest 10,1,2,3')).be.eql([11,12,13]);
   });
+
+  it('map', function() {
+    var z80 = new Z80();
+    should(z80.asm('map 0xc000\ntest equ # 1\ntest2 equ # 2\nld hl,test\nld hl,test2')).be.eql([0x21,0,0xc0,0x21,1,0xc0]);
+  });
 });
