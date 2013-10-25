@@ -13,24 +13,24 @@ Lines
 
 Line
   = l:Identifier _ "equ"i _ e:Expr { return {equ:{label:l, value:e}, line:line}; }
-  / l:Label _ i:Inst { return [{label:l, line:line}, i] }
-  / l:Label { return {label:l, line:line}; }
-  / i:Inst { return i; }
+  / l:Label _ i:Inst               { return [{label:l, line:line}, i] }
+  / l:Label                        { return {label:l, line:line}; }
+  / i:Inst                         { return i; }
 
 Label
   = l:Identifier ":" { return l; }
 
 Inst
-  = "org"i _ n:Expr { return {org:n}; }
-  / "ds"i _ n:Expr _ "," _ v:Expr { return {ds:{len:n,value:v}}; }
-  / "ds"i _ n:Expr { return {ds:{len:n,value:{expr:{num:0}}}}; }
-  / "dw"i _ head:Expr tail:(_ "," _ Expr)* { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
+  = "org"i _ n:Expr                            { return {org:n}; }
+  / "ds"i _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
+  / "ds"i _ n:Expr                             { return {ds:{len:n,value:{expr:{num:0}}}}; }
+  / "dw"i _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "db"i _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / "module"i _ i:Identifier { return {module:i}; }
-  / "endmodule"i { return {endmodule:true}; }
-  / "include"i _ s:String { return {include:s}; }
-  / "incbin"i _ s:String { return {incbin:s}; }
-  / asm:Identifier _ args:InstArgs? { return {asm:asm, args:args}; }
+  / "module"i _ i:Identifier                   { return {module:i}; }
+  / "endmodule"i                               { return {endmodule:true}; }
+  / "include"i _ s:String                      { return {include:s}; }
+  / "incbin"i _ s:String                       { return {incbin:s}; }
+  / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr
   = Expr
@@ -74,17 +74,17 @@ ExprShift
 
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
-  / "$" { return {id:'__here__'}; }
-  / num:Number { return {num:num}; }
-  / id:Identifier { return {id:id}; }
+  / "$"               { return {id:'__here__'}; }
+  / num:Number        { return {num:num}; }
+  / id:Identifier     { return {id:id}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }
 
 Number
-  = text:[0-9]+ "h"  { return parseInt(text.join(""), 16); }
-  / text:[0-1]+ "b"  { return parseInt(text.join(""), 2); }
+  = text:[0-9]+ "h"        { return parseInt(text.join(""), 16); }
+  / text:[0-1]+ "b"        { return parseInt(text.join(""), 2); }
   / "0x" text:[0-9a-fA-F]+ { return parseInt(text.join(""), 16); }
-  / "0b" text:[0-1]+ { return parseInt(text.join(""), 2); }
-  / text:[0-9]+ { return parseInt(text.join("")); }
+  / "0b" text:[0-1]+       { return parseInt(text.join(""), 2); }
+  / text:[0-9]+            { return parseInt(text.join("")); }
 
 String
   = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }
