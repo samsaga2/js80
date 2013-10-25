@@ -28,12 +28,11 @@ Array.prototype.rotate = (function() {
 })();
 
 function Z80() {
-  this.origin = 0;
-  this.map = 0;
-  this.offset = 0;
-  this.secondPass = {};
+  this.pages = {0:{origin:0, offset:0, output:[]}};
+  this.currentPage = this.pages[0];
 
-  this.output = [];
+  this.map = 0;
+  this.secondPass = {};
 
   this.environment = {};
   this.macros = {};
@@ -59,7 +58,7 @@ Z80.prototype.inferenceLabel = function(label) {
 
 Z80.prototype.evalExpr = function(expr) {
   if (expr.id === '__here__') {
-    return this.offset + this.origin;
+    return this.currentPage.offset + this.currentPage.origin;
   }
   if (expr.id) {
     var l = this.inferenceLabel(expr.id);
@@ -154,14 +153,14 @@ Z80.prototype.parseAsmInst = function(ast) {
 Z80.prototype.parseBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
            if(_.isObject(b)) {
-             this.secondPass[this.offset + index] = b;
-             b.next = this.origin + this.offset + bytes.length;
+             this.secondPass[this.currentPage.offset + index] = b;
+             b.next = this.currentPage.origin + this.currentPage.offset + bytes.length;
              return 0;
            } else {
              return b;
            }
           }, this);
-  this.offset += bytes.length;
+  this.currentPage.offset += bytes.length;
   return bytes;
 }
 
@@ -217,7 +216,7 @@ Z80.prototype.parseInst = function(code) {
       return this.parseAsmInst(code);
     }
   } else if('org' in code) {
-    this.origin = this.evalExpr(code.org);
+    this.currentPage.origin = this.evalExpr(code.org);
     return null;
   } else if('map' in code) {
     this.map = this.evalExpr(code.map);
@@ -309,11 +308,11 @@ Z80.prototype.asmSecondPass = function(bytes) {
 Z80.prototype.compileAst = function(ast) {
   this.secondPass = {};
   try {
-    var offset = this.offset;
+    var offset = this.currentPage.offset;
     var bytes = this.parseInsts(ast);
     bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
     for(var i = 0; i < bytes.length; i++) {
-      this.output[offset + i] = bytes[i];
+      this.currentPage.output[offset + i] = bytes[i];
     }
   } catch(e) {
     if(!e.line) {
@@ -329,10 +328,19 @@ Z80.prototype.asm = function(code) {
   this.compileAst(ast);
 }
 
+Z80.prototype.buildImage = function() {
+  var buffer = [];
+  _.each(this.pages, function(page) {
+    buffer = buffer.concat(page.output);
+  });
+  return buffer;
+}
+
 Z80.prototype.saveImage = function(fname) {
-  var buffer = new Buffer(this.output.length);
-  for(var i = 0; i < this.output.length; i++) {
-    buffer[i] = this.output[i];
+  var image = this.buildImage();
+  var buffer = new Buffer(image.length);
+  for(var i = 0; i < image.length; i++) {
+    buffer[i] = image[i];
   }
   fs.writeFileSync(fname, buffer, 'binary');
 }
@@ -352,7 +360,7 @@ Z80.prototype.defineLabel = function(name, value) {
   if(this.environment[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.environment[name] = value || (this.origin + this.offset);
+  this.environment[name] = value || (this.currentPage.origin + this.currentPage.offset);
 }
 
 Z80.prototype.getLabel = function(name) {
