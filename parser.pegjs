@@ -1,14 +1,24 @@
 {
   var _ = require('underscore');
+  var macro = null;
 }
 
 Start
   = l:Lines __ LineTerminator* { return l; }
 
 Lines
-  = __ head:Line tail:(__ (LineTerminator/"\\")+ __ Line)* __ {
+  = __ head:ProgLine tail:(__ (LineTerminator/"\\")+ __ ProgLine)* __ {
     tail = _.map(tail, function(i) { return i[3]; });
     return _.flatten([head, tail]);
+  }
+
+ProgLine
+  = l:Line {
+    if(macro) {
+      macro.body.push(l);
+      return [];
+    }
+    return l;
   }
 
 Line
@@ -30,8 +40,12 @@ Inst
   / "endmodule"i                               { return {endmodule:true}; }
   / "include"i _ s:String                      { return {include:s}; }
   / "incbin"i _ s:String                       { return {incbin:s}; }
-  / "macro"i _ i:Identifier _ a:MacroArgs?     { return {macro:{id:i, args:a}}; }
-  / "endmacro"i                                { return {endmacro:true}; }
+  / "macro"i _ i:Identifier _ a:MacroArgs?     {
+    if(macro) { throw new Error('Forbidden macro declaration'); }
+    macro = {id:i, args:a, body:[]};
+    return {};
+  }
+  / "endmacro"i                                { var m = macro; macro = null; return {macro:m}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr

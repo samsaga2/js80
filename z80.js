@@ -28,7 +28,6 @@ function Z80() {
   this.currentLineIndex = 1;
   this.currentLabel = '';
   this.currentModule = '';
-  this.currentMacro = null;
 }
 
 Z80.prototype.inferenceLabel = function(label) {
@@ -159,6 +158,10 @@ Z80.prototype.evalMacro = function(id, args) {
 }
 
 Z80.prototype.parseInst = function(code) {
+  if(_.isEmpty(code)) {
+    return null;
+  }
+
   if(code.line) {
     this.currentLineIndex = code.line;
   }
@@ -205,10 +208,8 @@ Z80.prototype.parseInst = function(code) {
     var f = fs.readFileSync(code.incbin);
     return Array.prototype.slice.call(f, 0)
   } else if('macro' in code) {
-    if(this.currentMacro !== null) {
-      throw new Error('Forbidden macro declaration');
-    }
-    this.currentMacro = {id:code.macro.id, args:code.macro.args, body:[]};
+    this.macros[code.macro.id] = code.macro;
+    return null;
   } else {
     throw new Error('Internal error');
   }
@@ -257,20 +258,11 @@ Z80.prototype.compileAst = function(ast) {
   this.secondPass = {};
   try {
     var offset = this.offset;
-    var bytes = [];
-    _.each(ast, function (ast) {
-      if('endmacro' in ast) {
-        this.macros[this.currentMacro.id] = this.currentMacro;
-        this.currentMacro = null;
-      } else if(this.currentMacro) {
-        this.currentMacro.body = this.currentMacro.body.concat(ast);
-      } else {
-        var b = this.parseInst(ast);
-        if(b !== null) {
-          bytes = bytes.concat(b);
-        }
-      }
-    }, this);
+    var bytes = _.chain(ast)
+                .map(this.parseInst, this)
+                .filter(function(i) { return i !== null; })
+                .flatten()
+                .value();
     bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
     for(var i = 0; i < bytes.length; i++) {
       this.output[offset + i] = bytes[i];
