@@ -30,7 +30,7 @@ Inst
   / "endmodule"i                               { return {endmodule:true}; }
   / "include"i _ s:String                      { return {include:s}; }
   / "incbin"i _ s:String                       { return {incbin:s}; }
-  / "macro"i _ i:Identifier                    { return {macro:i}; }
+  / "macro"i _ i:Identifier _ a:MacroArgs?     { return {macro:{id:i, args:a}}; }
   / "endmacro"i                                { return {endmacro:true}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
@@ -39,10 +39,14 @@ DbExpr
   / s:String { return {str:s}; }
 
 InstArgs
-  = head:Arg tail:(_ "," _ Arg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = head:Expr tail:(_ "," _ Expr)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
-Arg
-  = Expr
+MacroArgs
+  = head:MacroArg tail:(_ "," _ MacroArg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+
+MacroArg
+  = i:Identifier _ ":" _ e:Expr { return {id:i, default:e}; }
+  / i:Identifier                { return {id:i}; }
 
 //
 // Expr

@@ -133,8 +133,23 @@ Z80.prototype.parseBytes = function(bytes) {
   return bytes;
 }
 
-Z80.prototype.evalMacro = function(id) {
-  var bytes = _.map(this.macros[id], this.parseInst, this);
+Z80.prototype.evalMacro = function(id, args) {
+  var macro = this.macros[id];
+
+  // eval args
+  var evalArgs = _.object(_.map(macro.args, function(arg, i) {
+                            return [
+                                  arg.id,
+                                  this.evalExpr(args[i] ? args[i].expr : arg.default.expr || 0)
+                            ];
+                          }, this));
+
+  // run macro
+  var labels = this.labels;
+  this.labels = _.extend(_.clone(this.labels), evalArgs);
+  var bytes = _.map(macro.body, this.parseInst, this);
+  this.labels = labels;
+
   return bytes;
 }
 
@@ -148,7 +163,7 @@ Z80.prototype.parseInst = function(code) {
     return null;
   } else if('asm' in code) {
     if(code.asm in this.macros) {
-      return this.evalMacro(code.id);
+      return this.evalMacro(code.asm, code.args || []);
     } else {
       return this.parseAsmInst(code);
     }
@@ -187,7 +202,7 @@ Z80.prototype.parseInst = function(code) {
     if(this.currentMacro !== null) {
       throw new Error('Forbidden macro declaration');
     }
-    this.currentMacro = {id:code.macro, body:[]};
+    this.currentMacro = {id:code.macro.id, args:code.macro.args, body:[]};
   } else {
     throw new Error('Internal error');
   }
@@ -239,7 +254,7 @@ Z80.prototype.compileAst = function(ast) {
     var bytes = [];
     _.each(ast, function (ast) {
       if('endmacro' in ast) {
-        this.macros[this.currentMacro.id] = this.currentMacro.body;
+        this.macros[this.currentMacro.id] = this.currentMacro;
         this.currentMacro = null;
       } else if(this.currentMacro) {
         this.currentMacro.body = this.currentMacro.body.concat(ast);

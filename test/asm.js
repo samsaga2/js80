@@ -232,4 +232,14 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('macro test\\nop\\nop\\endmacro\\test\\test').length).not.be.eql([0,0,0,0]);
   });
+
+  it('macro with fixed args', function() {
+    var z80 = new Z80();
+    should(z80.asm('macro test arg1,arg2\\ld a,arg1+arg2\\endmacro\\test 1,2').length).not.be.eql([0x3e, 1+2]);
+  });
+
+  it('macro with default args', function() {
+    var z80 = new Z80();
+    should(z80.asm('macro test arg1,arg2:10\\ld a,arg1+arg2\\endmacro\\test 1').length).not.be.eql([0x3e, 1+10]);
+  });
 });
