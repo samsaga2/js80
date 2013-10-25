@@ -28,7 +28,7 @@ Array.prototype.rotate = (function() {
 })();
 
 function Z80() {
-  this.org = 0;
+  this.origin = 0;
   this.map = 0;
   this.offset = 0;
   this.secondPass = {};
@@ -59,7 +59,7 @@ Z80.prototype.inferenceLabel = function(label) {
 
 Z80.prototype.evalExpr = function(expr) {
   if (expr.id === '__here__') {
-    return this.offset + this.org;
+    return this.offset + this.origin;
   }
   if (expr.id) {
     var l = this.inferenceLabel(expr.id);
@@ -155,7 +155,7 @@ Z80.prototype.parseBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
            if(_.isObject(b)) {
              this.secondPass[this.offset + index] = b;
-             b.next = this.org + this.offset + bytes.length;
+             b.next = this.origin + this.offset + bytes.length;
              return 0;
            } else {
              return b;
@@ -217,7 +217,7 @@ Z80.prototype.parseInst = function(code) {
       return this.parseAsmInst(code);
     }
   } else if('org' in code) {
-    this.org = this.evalExpr(code.org);
+    this.origin = this.evalExpr(code.org);
     return null;
   } else if('map' in code) {
     this.map = this.evalExpr(code.map);
@@ -352,7 +352,7 @@ Z80.prototype.defineLabel = function(name, value) {
   if(this.environment[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.environment[name] = value || (this.org + this.offset);
+  this.environment[name] = value || (this.origin + this.offset);
 }
 
 Z80.prototype.getLabel = function(name) {
