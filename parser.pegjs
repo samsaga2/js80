@@ -2,6 +2,7 @@
   var _ = require('underscore');
   var macro = null;
   var repeat = null;
+  var prevRepeats = [];
 }
 
 Start
@@ -39,18 +40,10 @@ Inst
   / "endmodule"i                               { return {endmodule:true}; }
   / "include"i _ s:String                      { return {include:s}; }
   / "incbin"i _ s:String                       { return {incbin:s}; }
-  / "macro"i _ i:Identifier _ a:MacroArgs?     {
-    if(macro) { throw new Error('Forbidden macro declaration'); }
-    macro = {id:i, args:a, body:[]};
-    return {};
-  }
+  / "macro"i _ i:Identifier _ a:MacroArgs?     { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
   / "endmacro"i                                { var m = macro; macro = null; return {macro:m}; }
-  / "repeat"i _ n:Expr                         {
-    if(repeat) { throw new Error('Forbidden repeat declaration'); }
-    repeat = {count:n, body:[]};
-    return {};
-  }
-  / "endrepeat"i                               { var r = repeat; repeat = null; return {repeat:r}; }
+  / "repeat"i _ n:Expr                         { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
+  / "endrepeat"i                               { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
 
 DbExpr

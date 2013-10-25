@@ -259,4 +259,9 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('repeat 2\\nop\\nop\\endrepeat')).be.eql([0,0,0,0]);
   });
+
+  it('repeat^2', function() {
+    var z80 = new Z80();
+    should(z80.asm('repeat 2\\repeat 2\\nop\\endrepeat\\endrepeat')).be.eql([0,0,0,0]);
+  });
 });
