@@ -315,7 +315,6 @@ Z80.prototype.compileAst = function(ast) {
     for(var i = 0; i < bytes.length; i++) {
       this.output[offset + i] = bytes[i];
     }
-    return bytes;
   } catch(e) {
     if(!e.line) {
       e.line = this.currentLineIndex;
@@ -327,7 +326,7 @@ Z80.prototype.compileAst = function(ast) {
 
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  return this.compileAst(ast);
+  this.compileAst(ast);
 }
 
 Z80.prototype.saveImage = function(fname) {
