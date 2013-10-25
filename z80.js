@@ -174,10 +174,11 @@ Z80.prototype.parseInst = function(code) {
     return _.map(code.dw, function(i) { var ix = this.evalExpr(i); return [ix&255, ix>>8]; }, this);
   } else if('db' in code) {
     return _.map(code.db, function(i) {
-             if(i.str) {
-               return _.map(i.str, function(i) { return i.charCodeAt(0); });
+             var r = this.evalExpr(i);
+             if(_.isString(r)) {
+               return _.map(r, function(i) { return i.charCodeAt(0); });
              } else {
-               return this.evalExpr(i);
+               return r;
              }
            }, this);
   } else if('equ' in code) {
