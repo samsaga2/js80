@@ -52,8 +52,9 @@ MacroArg
 // Expr
 //
 Expr
-  = e:ExprAdd { return e; }
-  / e:String { return {str:e}; }
+  = e:ExprAdd    { return e; }
+  / e:ExprChar   { return {chr:e}; }
+  / e:String     { return {str:e}; }
 
 ExprAdd
   = left:ExprMul _ right:([+-] ExprMul)+ {
@@ -94,6 +95,9 @@ Number
 
 String
   = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }
+
+ExprChar
+  = "'" t:(!"'" .) "'" { return t[1]; }
 
 Identifier
   = head:[a-zA-Z_.] tail:[a-zA-Z0-9_.]* { return head + tail.join(""); }

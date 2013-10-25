@@ -242,4 +242,16 @@ describe('asm inst', function() {
     var z80 = new Z80();
     should(z80.asm('macro test arg1,arg2:10\\ld a,arg1+arg2\\endmacro\\test 1').length).not.be.eql([0x3e, 1+10]);
   });
+
+  it('ld string', function() {
+    var z80 = new Z80();
+    (function () {
+      z80.asm('ld a,"jarl"');
+    }).should.throw('Invalid argument');
+  });
+
+  it('ld char', function() {
+    var z80 = new Z80();
+    should(z80.asm("ld a,'a'").length).not.be.eql([0x3e, 65]);
+  });
 });

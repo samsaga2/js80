@@ -80,6 +80,9 @@ Z80.prototype.evalExpr = function(expr) {
   if(expr.str) {
     return expr.str;
   }
+  if(expr.chr) {
+    return expr.chr[0].charCodeAt(0);
+  }
 
   throw new Error('Internal error');
 }
@@ -103,6 +106,9 @@ Z80.prototype.buildTemplateArg = function(arg) {
       return this.buildTemplateArg(arg.paren);
     }
   } else {
+    if(arg.str) {
+      throw new Error('Invalid argument');
+    }
     return this.evalExpr(arg).toString();
   }
 }
