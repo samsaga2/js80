@@ -34,7 +34,7 @@ function Z80() {
   this.page = 0;
 
   this.map = 0;
-  this.secondPass = {};
+  this.secondPass = [];
 
   this.environment = {};
   this.macros = {};
@@ -155,8 +155,9 @@ Z80.prototype.parseAsmInst = function(ast) {
 Z80.prototype.parseBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
            if(_.isObject(b)) {
-             this.secondPass[this.currentPage.offset + index] = b;
+             b.offset = this.currentPage.offset + index;
              b.next = this.currentPage.origin + this.currentPage.offset + bytes.length;
+             this.secondPass.push(b);
              return 0;
            } else {
              return b;
@@ -278,27 +279,27 @@ Z80.prototype.compileFile = function(fname) {
 }
 
 Z80.prototype.asmSecondPass = function(bytes) {
-  _.each(this.secondPass, function(value, key) {
-    var offset = value.value;
-    if(value.label) {
-      offset = this.environment[this.inferenceLabel(value.label)];
-      if(_.isUndefined(offset)) {
-        throw new Error('Unknown label ' + value.label);
+  _.each(this.secondPass, function(pass) {
+    var addr = pass.value;
+    if(pass.label) {
+      addr = this.environment[this.inferenceLabel(pass.label)];
+      if(_.isUndefined(addr)) {
+        throw new Error('Unknown label ' + pass.label);
       }
     }
-    switch(value.type) {
+    switch(pass.type) {
       case 'low':
-        bytes[key] = offset&255;
+        bytes[pass.offset] = addr&255;
         break;
       case 'high':
-        bytes[key] = (offset>>8)&255;
+        bytes[pass.offset] = (addr>>8)&255;
         break;
       case 'relative':
-        var rel = offset - value.next;
+        var rel = addr - pass.next;
         if(rel < - 128 || rel > 127) {
-          throw new Error('Offset too large');
+            throw new Error('Offset too large');
         }
-        bytes[key] = rel;
+        bytes[pass.offset] = rel;
         break;
       default:
         throw new Error('Internal error');
@@ -308,7 +309,7 @@ Z80.prototype.asmSecondPass = function(bytes) {
 }
 
 Z80.prototype.compileAst = function(ast) {
-  this.secondPass = {};
+  this.secondPass = [];
   try {
     var offset = this.currentPage.offset;
     var bytes = this.parseInsts(ast);
