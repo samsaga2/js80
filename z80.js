@@ -4,7 +4,8 @@ var parser = require('./parser')
   , z80parser = require('./z80parser')
   , util = require('util')
   , _ = require('underscore')
-  , fs = require('fs');
+  , fs = require('fs')
+  , Image = require('./image');
 
 function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
@@ -28,8 +29,8 @@ Array.prototype.rotate = (function() {
 })();
 
 function Z80() {
-  this.pages = {0:{origin:0, offset:0, output:[]}};
-  this.currentPage = this.pages[0];
+  this.image = new Image();
+  this.currentPage = this.image.pages[0];
 
   this.map = 0;
   this.secondPass = {};
@@ -329,11 +330,7 @@ Z80.prototype.asm = function(code) {
 }
 
 Z80.prototype.buildImage = function() {
-  var buffer = [];
-  _.each(this.pages, function(page) {
-    buffer = buffer.concat(page.output);
-  });
-  return buffer;
+  return this.image.build();
 }
 
 Z80.prototype.saveImage = function(fname) {
