@@ -3,7 +3,14 @@
 var _ = require('underscore');
 
 function Image() {
-  this.pages = {0:{origin:0, offset:0, output:[]}};
+  this.pages = [];
+  _.each(_.range(256), function() {
+    this.pages.push({
+        origin:0,
+        offset:0,
+        output:[]
+    });
+  }, this);
 }
 
 Image.prototype.build = function() {
