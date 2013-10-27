@@ -13,6 +13,11 @@ function Image() {
   }, this);
 }
 
+Image.prototype.write = function(bytes, pageIndex) {
+    var page = this.pages[pageIndex];
+    page.output = page.output.concat(bytes);
+}
+
 Image.prototype.build = function() {
   var buffer = [];
   _.each(this.pages, function(page) {

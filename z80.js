@@ -31,6 +31,7 @@ Array.prototype.rotate = (function() {
 function Z80() {
   this.image = new Image();
   this.currentPage = this.image.pages[0];
+  this.page = 0;
 
   this.map = 0;
   this.secondPass = {};
@@ -312,9 +313,7 @@ Z80.prototype.compileAst = function(ast) {
     var offset = this.currentPage.offset;
     var bytes = this.parseInsts(ast);
     bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
-    for(var i = 0; i < bytes.length; i++) {
-      this.currentPage.output[offset + i] = bytes[i];
-    }
+    this.image.write(bytes, this.page);
   } catch(e) {
     if(!e.line) {
       e.line = this.currentLineIndex;
