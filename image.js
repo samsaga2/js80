@@ -13,7 +13,12 @@ function Image() {
   }, this);
 }
 
+Image.prototype.compl2 = function(v) {
+  return (v<0) ? (256+v) : v;
+}
+
 Image.prototype.write = function(bytes, pageIndex) {
+    bytes = _.map(bytes, this.compl2, this);
     var page = this.pages[pageIndex];
     page.output = page.output.concat(bytes);
 }

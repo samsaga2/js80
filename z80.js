@@ -11,10 +11,6 @@ function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
 }
 
-function compl2(v) {
-  return (v<0) ? (256+v) : v;
-}
-
 // http://stackoverflow.com/questions/1985260/javascript-array-rotate
 Array.prototype.rotate = (function() {
                             var unshift = Array.prototype.unshift;
@@ -278,7 +274,7 @@ Z80.prototype.compileFile = function(fname) {
     return bytes;
 }
 
-Z80.prototype.asmSecondPass = function(bytes) {
+Z80.prototype.asmSecondPass = function() {
   _.each(this.secondPass, function(pass) {
     var addr = pass.value;
     if(pass.label) {
@@ -289,32 +285,30 @@ Z80.prototype.asmSecondPass = function(bytes) {
     }
     switch(pass.type) {
       case 'low':
-        bytes[pass.offset] = addr&255;
+        this.currentPage.output[pass.offset] = this.image.compl2(addr&255);
         break;
       case 'high':
-        bytes[pass.offset] = (addr>>8)&255;
+        this.currentPage.output[pass.offset] = this.image.compl2((addr>>8)&255);
         break;
       case 'relative':
         var rel = addr - pass.next;
         if(rel < - 128 || rel > 127) {
             throw new Error('Offset too large');
         }
-        bytes[pass.offset] = rel;
+        this.currentPage.output[pass.offset] = this.image.compl2(rel);
         break;
       default:
         throw new Error('Internal error');
     }
   }, this);
-  return bytes;
 }
 
 Z80.prototype.compileAst = function(ast) {
   this.secondPass = [];
   try {
-    var offset = this.currentPage.offset;
-    var bytes = this.parseInsts(ast);
-    bytes = _.map(this.asmSecondPass(_.flatten(bytes)), compl2);
+    var bytes = _.flatten(this.parseInsts(ast));
     this.image.write(bytes, this.page);
+    this.asmSecondPass();
   } catch(e) {
     if(!e.line) {
       e.line = this.currentLineIndex;
