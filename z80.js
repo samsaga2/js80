@@ -336,12 +336,8 @@ Z80.prototype.asm = function(code) {
   this.compileAst(ast);
 }
 
-Z80.prototype.buildImage = function() {
-  return this.image.build();
-}
-
 Z80.prototype.saveImage = function(fname) {
-  var image = this.buildImage();
+  var image = this.image.build();
   var buffer = new Buffer(image.length);
   for(var i = 0; i < image.length; i++) {
     buffer[i] = image[i];
