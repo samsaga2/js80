@@ -35,21 +35,23 @@ function Z80() {
   this.environment = {};
   this.macros = {};
 
-  this.currentFilename = '';
-  this.currentLineIndex = 1;
-  this.currentLabel = '';
-  this.currentModule = '';
+  this.info = {
+    filename  : '',
+    lineIndex : 1,
+    label     : '',
+    module    : ''
+  };
 }
 
 Z80.prototype.inferenceLabel = function(label) {
   if(label[0] === '.') {
-    label = this.currentLabel + label;
+    label = this.info.label + label;
   }
   if(label in this.environment) {
     return label;
   }
-  if(this.currentModule && label.split('.').length < 2) {
-    label = this.currentModule + '.' + label;
+  if(this.info.module && label.split('.').length < 2) {
+    label = this.info.module + '.' + label;
   }
   return label;
 }
@@ -201,7 +203,7 @@ Z80.prototype.parseInst = function(code) {
   var self = this;
   var commands = {
     line: function(line) {
-      self.currentLineIndex = line;
+      self.info.lineIndex = line;
     },
     label: function (label) {
       self.defineLabel(label);
@@ -241,10 +243,10 @@ Z80.prototype.parseInst = function(code) {
       self.defineLabel(equ.label, self.evalExpr(equ.value));
     },
     module: function(module) {
-      self.currentModule = module;
+      self.info.module = module;
     },
     endmodule: function() {
-      self.currentModule = '';
+      self.info.module = '';
     },
     include: function(include) {
       return self.compileFile(include);
@@ -284,11 +286,11 @@ Z80.prototype.parseInst = function(code) {
 }
 
 Z80.prototype.compileFile = function(fname) {
-  var prevFilename = this.currentFilename;
-  this.currentFilename = fname;
+  var prevFilename = this.info.filename;
+  this.info.filename = fname;
   var f = fs.readFileSync(fname);
   this.asm(f.toString());
-  this.currentFilename = prevFilename;
+  this.info.filename = prevFilename;
 }
 
 Z80.prototype.asmSecondPass = function() {
@@ -327,9 +329,9 @@ Z80.prototype.compileAst = function(ast) {
     this.asmSecondPass();
   } catch(e) {
     if(!e.line) {
-      e.line = this.currentLineIndex;
+      e.line = this.info.lineIndex;
     }
-    e.filename = this.currentFilename;
+    e.filename = this.info.filename;
     throw e;
   }
 }
@@ -353,12 +355,12 @@ Z80.prototype.defineLabel = function(name, value) {
     if(name.indexOf('.') > 0) {
       throw new Error('Invalid label name');
     }
-    name = this.currentLabel + name;
+    name = this.info.label + name;
   } else {
-    this.currentLabel = name;
+    this.info.label = name;
   }
-  if(this.currentModule.length > 0) {
-    name = this.currentModule + '.' + name;
+  if(this.info.module.length > 0) {
+    name = this.info.module + '.' + name;
   }
   if(this.environment[name]) {
     throw new Error('Label '+name+' already exists');
