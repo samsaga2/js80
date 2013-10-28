@@ -262,8 +262,9 @@ describe('asm inst', function() {
   it('ds fill', function() {
     var z80 = new Z80();
     z80.asm('org 8000h\nnop\nds 0x8000+0x2000-$,0xff');
-    should(z80.image.build().length).be.eql(0x2000);
-    should(z80.image.build()[1]).be.equal(255);
+    var image = z80.image.build();
+    should(image.length).be.eql(0x2000);
+    should(image[1]).be.equal(255);
   });
 
   it('incbin', function() {
