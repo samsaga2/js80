@@ -195,12 +195,11 @@ Z80.prototype.parseInst = function(code) {
     return;
   }
 
-  if(code.line) {
-    this.currentLineIndex = code.line;
-  }
-
   var self = this;
   var commands = {
+    line: function(line) {
+      self.currentLineIndex = line;
+    },
     label: function (label) {
       self.defineLabel(label);
     },
