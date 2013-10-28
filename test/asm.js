@@ -273,6 +273,12 @@ describe('asm inst', function() {
     should(z80.image.build().length).not.be.eql(0);
   });
 
+  it('incbin len', function() {
+    var z80 = new Z80();
+    z80.asm('incbin "util/test.asm",10,10');
+    should(z80.image.build().length).be.eql(10);
+  });
+
   it('endmodule', function() {
     var z80 = new Z80();
     z80.asm('module test\nl1: nop\nendmodule\nl2: nop\nmodule test2\ncall test.l1\ncall l2');

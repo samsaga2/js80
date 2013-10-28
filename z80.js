@@ -253,8 +253,10 @@ Z80.prototype.parseInst = function(code) {
       return self.compileFile(include);
     },
     incbin: function(incbin) {
-      var f = fs.readFileSync(incbin);
-      return Array.prototype.slice.call(f, 0)
+      var data = fs.readFileSync(incbin.file);
+      var skip = incbin.skip ? self.evalExpr(incbin.skip) : 0;
+      var len  = incbin.len  ? self.evalExpr(incbin.len)  : data.length;
+      return Array.prototype.slice.call(data, skip, skip+len);
     },
     macro: function(macro) {
       self.macros[macro.id] = macro;

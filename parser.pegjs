@@ -43,7 +43,10 @@ Inst
   / "."? "module"i _ i:Identifier              { return {module:i}; }
   / "."? "endmodule"i                          { return {endmodule:true}; }
   / "."? "include"i _ s:String                 { return {include:s}; }
-  / "."? "incbin"i _ s:String                  { return {incbin:s}; }
+  / "."? "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr
+                                               { return {incbin:{file:s, skip:k, len:l}}; }
+  / "."? "incbin"i _ s:String _ "," _ k:Expr   { return {incbin:{file:s, skip:k}}; }
+  / "."? "incbin"i _ s:String                  { return {incbin:{file:s}}; }
   / "."? "macro"i _ i:Identifier _ a:MacroArgs?
                                                { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
   / "."? "endmacro"i                           { var m = macro; macro = null; return {macro:m}; }
