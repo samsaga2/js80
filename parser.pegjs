@@ -155,10 +155,14 @@ __
 //
 Comment
   = SingleLineComment
+  / SingleLineComment2
   / MultiLineComment
 
 SingleLineComment
   = "//" (!LineTerminator .)*
+
+SingleLineComment2
+  = ";" (!LineTerminator .)*
 
 MultiLineComment
   = "/*" (!"*/" .)* "*/"

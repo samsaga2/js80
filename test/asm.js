@@ -70,6 +70,12 @@ describe('asm inst', function() {
     should(z80.image.build()).be.eql([0]);
   });
 
+  it('nop ; comment', function() {
+    var z80 = new Z80();
+    z80.asm('nop ; comment');
+    should(z80.image.build()).be.eql([0]);
+  });
+
   it('nop /* ... */', function() {
     var z80 = new Z80();
     z80.asm('nop /* comment\ncomment 2\ncomment3\n*/\nnop');
