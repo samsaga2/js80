@@ -85,6 +85,9 @@ Z80.prototype.evalExpr = function(expr) {
       case '/':  return reduce(values, function(l, r) { return l/r; });
       case '<<': return reduce(values, function(l, r) { return l<<r; });
       case '>>': return reduce(values, function(l, r) { return l>>r; });
+      case '^':  return reduce(values, function(l, r) { return l^r; });
+      case '|':  return reduce(values, function(l, r) { return l|r; });
+      case '&':  return reduce(values, function(l, r) { return l&r; });
     }
   }
   if(expr.str) {

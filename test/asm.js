@@ -325,4 +325,22 @@ describe('asm inst', function() {
     z80.asm('map 0xc000\ntest equ # 1\ntest2 equ # 2\nld hl,test\nld hl,test2');
     should(z80.image.build()).be.eql([0x21,0,0xc0,0x21,1,0xc0]);
   });
+
+  it('or op', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,1|2');
+    should(z80.image.build()).be.eql([0x3e, 1|2]);
+  });
+
+  it('and op', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,3&2');
+    should(z80.image.build()).be.eql([0x3e, 3&2]);
+  });
+
+  it('xor op', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,3^2');
+    should(z80.image.build()).be.eql([0x3e, 3^2]);
+  });
 });

@@ -76,7 +76,7 @@ Expr
   / e:String     { return {str:e}; }
 
 ExprAdd
-  = left:ExprMul _ right:([+-] ExprMul)+ {
+  = left:ExprLogic _ right:([+-] ExprLogic)+ {
     var n=[left].concat(_.map(right, function(i) {
       if(i[0]==='-') {
        return {neg:i[1]};
@@ -86,6 +86,12 @@ ExprAdd
     }));
     return {unary:"+", args:n};
   }
+  / ExprLogic
+
+ExprLogic
+  = left:ExprMul _ "^" _ right:ExprLogic { return {unary:"^", args:[left, right]}; }
+  / left:ExprMul _ "|" _ right:ExprLogic { return {unary:"|", args:[left, right]}; }
+  / left:ExprMul _ "&" _ right:ExprLogic { return {unary:"&", args:[left, right]}; }
   / ExprMul
 
 ExprMul
