@@ -255,7 +255,8 @@ describe('asm inst', function() {
 
   it('include', function() {
     var z80 = new Z80();
-    z80.asm('include "util/test.asm"');
+    z80.searchPath.push('util');
+    z80.asm('include "test.asm"');
     should(z80.image.build().length).not.be.eql(0);
   });
 
@@ -388,10 +389,5 @@ describe('asm inst', function() {
     var image = z80.image.build();
     should(image.length).be.eql(0x2000);
     should(_.first(image, 3)).be.eql([0x21, 0, 0x40]);
-  });
-
-  it('echo', function() {
-    var z80 = new Z80();
-    z80.asm('echo "hola", 10+20');
   });
 });

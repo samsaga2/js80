@@ -6,7 +6,8 @@ var parser = require('./parser')
   , _ = require('underscore')
   , fs = require('fs')
   , Image = require('./image')
-  , miscutil = require('./miscutil');
+  , miscutil = require('./miscutil')
+  , path = require('path');
 
 function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
@@ -35,6 +36,7 @@ function Z80() {
 
   this.environment = {};
   this.macros = {};
+  this.searchPath = ['.'];
 
   this.info = {
     filename  : '',
@@ -250,7 +252,18 @@ Z80.prototype.parseInst = function(code) {
       self.info.module = '';
     },
     include: function(include) {
-      return self.compileFile(include);
+      var done = false;
+      _.each(self.searchPath, function(i) {
+        var fullname = path.join(i, include);
+        if(fs.existsSync(fullname)) {
+          self.compileFile(fullname);
+          done = true;
+        }
+        return !done;
+      }, this);
+      if(!done) {
+        throw new Error('File not found');
+      }
     },
     incbin: function(incbin) {
       var data = fs.readFileSync(incbin.file);
