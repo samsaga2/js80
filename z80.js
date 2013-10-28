@@ -199,61 +199,85 @@ Z80.prototype.parseInst = function(code) {
     this.currentLineIndex = code.line;
   }
 
-  var bytes = null;
-  if(code.label) {
-    this.defineLabel(code.label);
-  } else if('asm' in code) {
-    if(code.asm in this.macros) {
-      this.executeMacro(code.asm, code.args || []);
-    } else {
-      this.parseAsmInst(code);
+  var self = this;
+  var commands = {
+    label: function (code) {
+      self.defineLabel(code.label);
+    },
+    asm: function(code) {
+      if(code.asm in self.macros) {
+        self.executeMacro(code.asm, code.args || []);
+      } else {
+        self.parseAsmInst(code);
+      }
+    },
+    org: function(code) {
+      self.currentPage.origin = self.evalExpr(code.org);
+    },
+    map: function(code) {
+      self.map = self.evalExpr(code.map);
+    },
+    ds: function(code) {
+      var len = self.evalExpr(code.ds.len);
+      var value = self.evalExpr(code.ds.value);
+      return _.map(_.range(len), function() {return value;});
+    },
+    dw: function(code) {
+      return _.flatten(_.map(code.dw, function(i) { var ix = self.evalExpr(i); return [ix&255, ix>>8]; }, self));
+    },
+    db: function(code) {
+      return _.flatten(_.map(code.db, function(i) {
+                         var r = self.evalExpr(i);
+                         if(_.isString(r)) {
+                           return _.map(r, function(i) { return i.charCodeAt(0); });
+                         } else {
+                           return r;
+                         }
+                       }, self));
+    },
+    equ: function(code) {
+      self.defineLabel(code.equ.label, self.evalExpr(code.equ.value));
+    },
+    module: function(code) {
+      self.currentModule = code.module;
+    },
+    endmodule: function() {
+      self.currentModule = '';
+    },
+    include: function(code) {
+      return self.compileFile(code.include);
+    },
+    incbin: function(code) {
+      var f = fs.readFileSync(code.incbin);
+      return Array.prototype.slice.call(f, 0)
+    },
+    macro: function(code) {
+      self.macros[code.macro.id] = code.macro;
+    },
+    repeat: function(code) {
+      var n = self.evalExpr(code.repeat.count);
+      _.each(_.range(n), function() {
+        return self.parseInsts(code.repeat.body);
+      }, self);
+    },
+    rotate: function(code) {
+      var n = self.evalExpr(code.rotate);
+      self.environment.__arguments__ = self.environment.__arguments__.rotate(n);
     }
-  } else if('org' in code) {
-    this.currentPage.origin = this.evalExpr(code.org);
-  } else if('map' in code) {
-    this.map = this.evalExpr(code.map);
-  } else if('ds' in code) {
-    var len = this.evalExpr(code.ds.len);
-    var value = this.evalExpr(code.ds.value);
-    bytes = _.map(_.range(len), function() {return value;});
-  } else if('dw' in code) {
-    bytes = _.flatten(_.map(code.dw, function(i) { var ix = this.evalExpr(i); return [ix&255, ix>>8]; }, this));
-  } else if('db' in code) {
-    bytes = _.flatten(_.map(code.db, function(i) {
-                        var r = this.evalExpr(i);
-                        if(_.isString(r)) {
-                          return _.map(r, function(i) { return i.charCodeAt(0); });
-                        } else {
-                          return r;
-                        }
-                      }, this));
-  } else if('equ' in code) {
-    this.defineLabel(code.equ.label, this.evalExpr(code.equ.value));
-  } else if('module' in code) {
-    this.currentModule = code.module;
-  } else if(code.endmodule) {
-    this.currentModule = '';
-  } else if('include' in code) {
-    bytes = this.compileFile(code.include);
-  } else if('incbin' in code) {
-    var f = fs.readFileSync(code.incbin);
-    bytes =Array.prototype.slice.call(f, 0)
-  } else if('macro' in code) {
-    this.macros[code.macro.id] = code.macro;
-  } else if('repeat' in code) {
-    var n = this.evalExpr(code.repeat.count);
-    _.each(_.range(n), function() {
-      return this.parseInsts(code.repeat.body);
-    }, this);
-  } else if('rotate' in code) {
-    var n = this.evalExpr(code.rotate);
-    this.environment.__arguments__ = this.environment.__arguments__.rotate(n);
-  } else {
-    throw new Error('Internal error');
-  }
+  };
 
-  if(bytes) {
-    this.image.write(bytes, this.page);
+  var done = false;
+  _.each(commands, function(fn, key) {
+    if(key in code) {
+      done = true;
+      var bytes = fn(code);
+      if(bytes) {
+        this.image.write(bytes, this.page);
+      }
+    }
+  }, this);
+  if(!done) {
+    throw new Error('Internal error');
   }
 }
 
