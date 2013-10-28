@@ -95,17 +95,17 @@ Z80.prototype.evalExpr = function(expr) {
   }
   if('arg' in expr) {
     var args = this.environment.__arguments__;
-    var n = this.evalExpr(expr.arg);
-    if(n === 0) {
+    var argIndex = this.evalExpr(expr.arg);
+    if(argIndex === 0) {
       return args.length;
     }
-    return args[n-1];
+    return args[argIndex-1];
   }
   if('getMap' in expr) {
-    var n = this.evalExpr(expr.getMap);
-    var i = this.map;
-    this.map += n;
-    return i;
+    var mapLength = this.evalExpr(expr.getMap);
+    var addr = this.map;
+    this.map += mapLength;
+    return addr;
   }
 
   throw new Error('Internal error');
@@ -145,7 +145,7 @@ Z80.prototype.parseAsmInst = function(ast) {
     sep = ',';
   }, this);
   var bytes = z80parser.parse(template);
-  return this.parseBytes(bytes);
+  this.image.write(this.parseBytes(bytes), this.page);
 }
 
 Z80.prototype.parseBytes = function(bytes) {
@@ -163,7 +163,7 @@ Z80.prototype.parseBytes = function(bytes) {
   return bytes;
 }
 
-Z80.prototype.evalMacro = function(id, args) {
+Z80.prototype.executeMacro = function(id, args) {
   var macro = this.macros[id];
 
   // eval args
@@ -182,96 +182,87 @@ Z80.prototype.evalMacro = function(id, args) {
   // run macro
   var labels = this.environment;
   this.environment = _.extend(_.clone(this.environment), evalArgs);
-  var bytes = this.parseInsts(macro.body);
+  this.parseInsts(macro.body);
   this.environment = labels;
-
-  return bytes;
 }
 
 Z80.prototype.parseInsts = function(insts) {
-  return _.chain(insts)
-         .map(this.parseInst, this)
-         .flatten()
-         .filter(function(i) { return i !== null && i !== undefined; })
-         .value();
+  _.each(insts, this.parseInst, this);
 }
 
 Z80.prototype.parseInst = function(code) {
   if(_.isEmpty(code)) {
-    return null;
+    return;
   }
 
   if(code.line) {
     this.currentLineIndex = code.line;
   }
 
+  var bytes = null;
   if(code.label) {
     this.defineLabel(code.label);
-    return null;
   } else if('asm' in code) {
     if(code.asm in this.macros) {
-      return this.evalMacro(code.asm, code.args || []);
+      this.executeMacro(code.asm, code.args || []);
     } else {
-      return this.parseAsmInst(code);
+      this.parseAsmInst(code);
     }
   } else if('org' in code) {
     this.currentPage.origin = this.evalExpr(code.org);
-    return null;
   } else if('map' in code) {
     this.map = this.evalExpr(code.map);
-    return null;
   } else if('ds' in code) {
     var len = this.evalExpr(code.ds.len);
     var value = this.evalExpr(code.ds.value);
-    return _.map(_.range(len), function() {return value;});
+    bytes = _.map(_.range(len), function() {return value;});
   } else if('dw' in code) {
-    return _.map(code.dw, function(i) { var ix = this.evalExpr(i); return [ix&255, ix>>8]; }, this);
+    bytes = _.flatten(_.map(code.dw, function(i) { var ix = this.evalExpr(i); return [ix&255, ix>>8]; }, this));
   } else if('db' in code) {
-    return _.map(code.db, function(i) {
-             var r = this.evalExpr(i);
-             if(_.isString(r)) {
-               return _.map(r, function(i) { return i.charCodeAt(0); });
-             } else {
-               return r;
-             }
-           }, this);
+    bytes = _.flatten(_.map(code.db, function(i) {
+                        var r = this.evalExpr(i);
+                        if(_.isString(r)) {
+                          return _.map(r, function(i) { return i.charCodeAt(0); });
+                        } else {
+                          return r;
+                        }
+                      }, this));
   } else if('equ' in code) {
     this.defineLabel(code.equ.label, this.evalExpr(code.equ.value));
-    return null;
   } else if('module' in code) {
     this.currentModule = code.module;
-    return null;
   } else if(code.endmodule) {
     this.currentModule = '';
-    return null;
   } else if('include' in code) {
-    return this.compileFile(code.include);
+    bytes = this.compileFile(code.include);
   } else if('incbin' in code) {
     var f = fs.readFileSync(code.incbin);
-    return Array.prototype.slice.call(f, 0)
+    bytes =Array.prototype.slice.call(f, 0)
   } else if('macro' in code) {
     this.macros[code.macro.id] = code.macro;
-    return null;
   } else if('repeat' in code) {
     var n = this.evalExpr(code.repeat.count);
-    return _.flatten(_.map(_.range(n), function() {
-                       return this.parseInsts(code.repeat.body);
-                     }, this));
+    _.each(_.range(n), function() {
+      return this.parseInsts(code.repeat.body);
+    }, this);
   } else if('rotate' in code) {
     var n = this.evalExpr(code.rotate);
     this.environment.__arguments__ = this.environment.__arguments__.rotate(n);
   } else {
     throw new Error('Internal error');
   }
+
+  if(bytes) {
+    this.image.write(bytes, this.page);
+  }
 }
 
 Z80.prototype.compileFile = function(fname) {
-    var prevFilename = this.currentFilename;
-    this.currentFilename = fname;
-    var f = fs.readFileSync(fname);
-    var bytes = this.asm(f.toString());
-    this.currentFilename = prevFilename;
-    return bytes;
+  var prevFilename = this.currentFilename;
+  this.currentFilename = fname;
+  var f = fs.readFileSync(fname);
+  this.asm(f.toString());
+  this.currentFilename = prevFilename;
 }
 
 Z80.prototype.asmSecondPass = function() {
@@ -306,8 +297,7 @@ Z80.prototype.asmSecondPass = function() {
 Z80.prototype.compileAst = function(ast) {
   this.secondPass = [];
   try {
-    var bytes = _.flatten(this.parseInsts(ast));
-    this.image.write(bytes, this.page);
+    _.flatten(this.parseInsts(ast));
     this.asmSecondPass();
   } catch(e) {
     if(!e.line) {
