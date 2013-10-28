@@ -46,7 +46,7 @@ Inst
   / "repeat"i _ n:Expr                         { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
   / "endrepeat"i                               { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
   / "rotate"i _ n:Expr                         { return {rotate:n}; }
-  / asm:Identifier _ args:InstArgs?            { return {asm:asm, args:args}; }
+  / asm:Identifier _ args:InstArgs?            { return {asm:{inst:asm, args:args}}; }
 
 DbExpr
   = Expr

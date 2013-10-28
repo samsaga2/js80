@@ -138,7 +138,7 @@ Z80.prototype.buildTemplateArg = function(arg) {
 }
 
 Z80.prototype.parseAsmInst = function(ast) {
-  var template = ast.asm;
+  var template = ast.inst;
   var sep = ' ';
   _.each(ast.args, function(arg) {
     template += sep + this.buildTemplateArg(arg);
@@ -201,32 +201,32 @@ Z80.prototype.parseInst = function(code) {
 
   var self = this;
   var commands = {
-    label: function (code) {
-      self.defineLabel(code.label);
+    label: function (label) {
+      self.defineLabel(label);
     },
-    asm: function(code) {
-      if(code.asm in self.macros) {
-        self.executeMacro(code.asm, code.args || []);
+    asm: function(asm) {
+      if(asm.inst in self.macros) {
+        self.executeMacro(asm.inst, asm.args || []);
       } else {
-        self.parseAsmInst(code);
+        self.parseAsmInst(asm);
       }
     },
-    org: function(code) {
-      self.currentPage.origin = self.evalExpr(code.org);
+    org: function(org) {
+      self.currentPage.origin = self.evalExpr(org);
     },
-    map: function(code) {
-      self.map = self.evalExpr(code.map);
+    map: function(map) {
+      self.map = self.evalExpr(map);
     },
-    ds: function(code) {
-      var len = self.evalExpr(code.ds.len);
-      var value = self.evalExpr(code.ds.value);
+    ds: function(ds) {
+      var len = self.evalExpr(ds.len);
+      var value = self.evalExpr(ds.value);
       return _.map(_.range(len), function() {return value;});
     },
-    dw: function(code) {
-      return _.flatten(_.map(code.dw, function(i) { var ix = self.evalExpr(i); return [ix&255, ix>>8]; }, self));
+    dw: function(dw) {
+      return _.flatten(_.map(dw, function(i) { var ix = self.evalExpr(i); return [ix&255, ix>>8]; }, self));
     },
-    db: function(code) {
-      return _.flatten(_.map(code.db, function(i) {
+    db: function(db) {
+      return _.flatten(_.map(db, function(i) {
                          var r = self.evalExpr(i);
                          if(_.isString(r)) {
                            return _.map(r, function(i) { return i.charCodeAt(0); });
@@ -235,33 +235,33 @@ Z80.prototype.parseInst = function(code) {
                          }
                        }, self));
     },
-    equ: function(code) {
-      self.defineLabel(code.equ.label, self.evalExpr(code.equ.value));
+    equ: function(equ) {
+      self.defineLabel(equ.label, self.evalExpr(equ.value));
     },
-    module: function(code) {
-      self.currentModule = code.module;
+    module: function(module) {
+      self.currentModule = module;
     },
     endmodule: function() {
       self.currentModule = '';
     },
-    include: function(code) {
-      return self.compileFile(code.include);
+    include: function(include) {
+      return self.compileFile(include);
     },
-    incbin: function(code) {
-      var f = fs.readFileSync(code.incbin);
+    incbin: function(incbin) {
+      var f = fs.readFileSync(incbin);
       return Array.prototype.slice.call(f, 0)
     },
-    macro: function(code) {
-      self.macros[code.macro.id] = code.macro;
+    macro: function(macro) {
+      self.macros[macro.id] = macro;
     },
-    repeat: function(code) {
-      var n = self.evalExpr(code.repeat.count);
+    repeat: function(repeat) {
+      var n = self.evalExpr(repeat.count);
       _.each(_.range(n), function() {
-        return self.parseInsts(code.repeat.body);
+        return self.parseInsts(repeat.body);
       }, self);
     },
-    rotate: function(code) {
-      var n = self.evalExpr(code.rotate);
+    rotate: function(rotate) {
+      var n = self.evalExpr(rotate);
       self.environment.__arguments__ = self.environment.__arguments__.rotate(n);
     }
   };
@@ -270,7 +270,7 @@ Z80.prototype.parseInst = function(code) {
   _.each(commands, function(fn, key) {
     if(key in code) {
       done = true;
-      var bytes = fn(code);
+      var bytes = fn(code[key]);
       if(bytes) {
         this.image.write(bytes, this.page);
       }
