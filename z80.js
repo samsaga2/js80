@@ -5,7 +5,8 @@ var parser = require('./parser')
   , util = require('util')
   , _ = require('underscore')
   , fs = require('fs')
-  , Image = require('./image');
+  , Image = require('./image')
+  , miscutil = require('./miscutil');
 
 function reduce(l, func) {
   return _.reduce(_.rest(l), function(memo, num) { return func(memo, num); }, _.first(l));
@@ -224,7 +225,7 @@ Z80.prototype.parseInst = function(code) {
     ds: function(ds) {
       var len = self.evalExpr(ds.len);
       var value = self.evalExpr(ds.value);
-      return _.map(_.range(len), function() {return value;});
+      return miscutil.fill(len, value);
     },
     dw: function(dw) {
       return _.flatten(_.map(dw, function(i) { var ix = self.evalExpr(i); return [ix&255, ix>>8]; }, self));
@@ -267,6 +268,15 @@ Z80.prototype.parseInst = function(code) {
     rotate: function(rotate) {
       var n = self.evalExpr(rotate);
       self.environment.__arguments__ = self.environment.__arguments__.rotate(n);
+    },
+    defpage: function(defpage) {
+      var index = self.evalExpr(defpage.index);
+      self.image.pages[index].origin = self.evalExpr(defpage.origin);
+      self.image.pages[index].size = self.evalExpr(defpage.size);
+    },
+    page: function(page) {
+      var n = self.evalExpr(page);
+      self.currentPage = self.image.pages[n];
     }
   };
 
@@ -304,17 +314,17 @@ Z80.prototype.asmSecondPass = function() {
     }
     switch(pass.type) {
       case 'low':
-        this.currentPage.output[pass.offset] = this.image.compl2(addr&255);
+        this.currentPage.output[pass.offset] = miscutil.compl2(addr&255);
         break;
       case 'high':
-        this.currentPage.output[pass.offset] = this.image.compl2((addr>>8)&255);
+        this.currentPage.output[pass.offset] = miscutil.compl2((addr>>8)&255);
         break;
       case 'relative':
         var rel = addr - pass.next;
         if(rel < - 128 || rel > 127) {
             throw new Error('Offset too large');
         }
-        this.currentPage.output[pass.offset] = this.image.compl2(rel);
+        this.currentPage.output[pass.offset] = miscutil.compl2(rel);
         break;
       default:
         throw new Error('Internal error');

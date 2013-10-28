@@ -50,6 +50,9 @@ Inst
   / "."? ("repeat"i/"rept"i) _ n:Expr          { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
   / "."? ("endrepeat"i/"endr"i)                { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
   / "."? "rotate"i _ n:Expr                    { return {rotate:n}; }
+  / "."? "defpage"i _ p:Expr _ "," _ o:Expr _ "," _ s:Expr
+                                               { return {defpage:{index:p, origin:o, size:s}}; }
+  / "."? "page" _ p:Expr                       { return {page:p}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:{inst:asm, args:args}}; }
 
 DbExpr

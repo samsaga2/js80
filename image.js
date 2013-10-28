@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore')
+  , miscutil = require('./miscutil');
 
 function Image() {
   this.pages = [];
@@ -13,12 +14,8 @@ function Image() {
   }, this);
 }
 
-Image.prototype.compl2 = function(v) {
-  return (v<0) ? (256+v) : v;
-}
-
 Image.prototype.write = function(bytes, pageIndex) {
-    bytes = _.map(bytes, this.compl2, this);
+    bytes = _.map(bytes, miscutil.compl2, this);
     var page = this.pages[pageIndex];
     page.output = page.output.concat(bytes);
 }
@@ -27,6 +24,10 @@ Image.prototype.build = function() {
   var buffer = [];
   _.each(this.pages, function(page) {
     buffer = buffer.concat(page.output);
+    var left = Math.max(0, page.size - page.output.length);
+    if(left>0) {
+      buffer = buffer.concat(miscutil.fill(left, 0));
+    }
   });
   return buffer;
 }

@@ -1,7 +1,8 @@
 'use strict';
 
 var should = require('should')
-  , Z80 = require ('../z80');
+  , Z80 = require ('../z80')
+  , _ = require('underscore');
 
 describe('asm inst', function() {
   it('nop', function() {
@@ -372,5 +373,13 @@ describe('asm inst', function() {
     var z80 = new Z80();
     z80.asm('ld a,0b100');
     should(z80.image.build()).be.eql([0x3e, 4]);
+  });
+
+  it('defpage 0', function() {
+    var z80 = new Z80();
+    z80.asm('defpage 0,0x4000,0x2000\\page 0\\ld hl,$');
+    var image = z80.image.build();
+    should(image.length).be.eql(0x2000);
+    should(_.first(image, 3)).be.eql([0x21, 0, 0x40]);
   });
 });
