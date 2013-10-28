@@ -31,21 +31,25 @@ Label
   = l:Identifier ":" { return l; }
 
 Inst
-  = "org"i _ n:Expr                            { return {org:n}; }
-  / "map"i _ n:Expr                            { return {map:n}; }
-  / "ds"i _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
-  / "ds"i _ n:Expr                             { return {ds:{len:n,value:{num:0}}}; }
-  / "dw"i _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / "db"i _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / "module"i _ i:Identifier                   { return {module:i}; }
-  / "endmodule"i                               { return {endmodule:true}; }
-  / "include"i _ s:String                      { return {include:s}; }
-  / "incbin"i _ s:String                       { return {incbin:s}; }
-  / "macro"i _ i:Identifier _ a:MacroArgs?     { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
-  / "endmacro"i                                { var m = macro; macro = null; return {macro:m}; }
-  / "repeat"i _ n:Expr                         { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
-  / "endrepeat"i                               { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
-  / "rotate"i _ n:Expr                         { return {rotate:n}; }
+  = "."? "org"i _ n:Expr                       { return {org:n}; }
+  / "."? "map"i _ n:Expr                       { return {map:n}; }
+  / "."? ("ds"i/"defs"i) _ n:Expr _ "," _ v:Expr
+                                               { return {ds:{len:n,value:v}}; }
+  / "."? ("ds"i/"defs"i) _ n:Expr              { return {ds:{len:n,value:{num:0}}}; }
+  / "."? ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*
+                                               { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
+  / "."? ("db"i/"defb"i) _ head:DbExpr tail:(_ "," _ DbExpr)*
+                                               { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
+  / "."? "module"i _ i:Identifier              { return {module:i}; }
+  / "."? "endmodule"i                          { return {endmodule:true}; }
+  / "."? "include"i _ s:String                 { return {include:s}; }
+  / "."? "incbin"i _ s:String                  { return {incbin:s}; }
+  / "."? "macro"i _ i:Identifier _ a:MacroArgs?
+                                               { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
+  / "."? "endmacro"i                           { var m = macro; macro = null; return {macro:m}; }
+  / "."? ("repeat"i/"rept"i) _ n:Expr          { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
+  / "."? ("endrepeat"i/"endr"i)                { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
+  / "."? "rotate"i _ n:Expr                    { return {rotate:n}; }
   / asm:Identifier _ args:InstArgs?            { return {asm:{inst:asm, args:args}}; }
 
 DbExpr
