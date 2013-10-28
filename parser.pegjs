@@ -106,19 +106,19 @@ ExprShift
 
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
-  / "$"               { return {id:'__here__'}; }
   / "@" _ e:Expr      { return {arg:e}; }
   / "#" _ e:Expr      { return {getMap:e}; }
   / num:Number        { return {num:num}; }
   / id:Identifier     { return {id:id}; }
+  / "$"               { return {id:'__here__'}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }
 
 Number
-  = text:[0-9]+ "h"        { return parseInt(text.join(""), 16); }
-  / text:[0-1]+ "b"        { return parseInt(text.join(""), 2); }
-  / "0x" text:[0-9a-fA-F]+ { return parseInt(text.join(""), 16); }
-  / "0b" text:[0-1]+       { return parseInt(text.join(""), 2); }
-  / text:[0-9]+            { return parseInt(text.join("")); }
+  = text:[0-9]+ "h"              { return parseInt(text.join(""), 16); }
+  / ("0x"/"$") text:[0-9a-fA-F]+ { return parseInt(text.join(""), 16); }
+  / "0b" text:[0-1]+             { return parseInt(text.join(""), 2); }
+  / text:[0-1]+ "b"              { return parseInt(text.join(""), 2); }
+  / text:[0-9]+                  { return parseInt(text.join("")); }
 
 String
   = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }

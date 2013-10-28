@@ -343,4 +343,28 @@ describe('asm inst', function() {
     z80.asm('ld a,3^2');
     should(z80.image.build()).be.eql([0x3e, 3^2]);
   });
+
+  it('hex $20', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,$20');
+    should(z80.image.build()).be.eql([0x3e, 0x20]);
+  });
+
+  it('hex 0x20', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,0x20');
+    should(z80.image.build()).be.eql([0x3e, 0x20]);
+  });
+
+  it('hex 20h', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,20h');
+    should(z80.image.build()).be.eql([0x3e, 0x20]);
+  });
+
+  it('bin 0b100', function() {
+    var z80 = new Z80();
+    z80.asm('ld a,0b100');
+    should(z80.image.build()).be.eql([0x3e, 4]);
+  });
 });
