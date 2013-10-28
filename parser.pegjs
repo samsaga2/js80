@@ -54,6 +54,7 @@ SpecialInst
   / "rotate"i _ n:Expr                                   { return {rotate:n}; }
   / "defpage"i _ p:Expr _ "," _ o:Expr _ "," _ s:Expr    { return {defpage:{index:p, origin:o, size:s}}; }
   / "page" _ p:Expr                                      { return {page:p}; }
+  / "echo" _ head:Expr tail:(_ "," _ Expr)*              { return {echo:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
 
 DbExpr
   = Expr
