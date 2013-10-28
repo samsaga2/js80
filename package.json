@@ -2,7 +2,8 @@
   "name": "js80",
   "dependencies": {
     "underscore": "~1.5.2",
-    "pegjs": "~0.7.0"
+    "pegjs": "~0.7.0",
+    "commander": "~2.0.0"
   },
   "devDependencies": {
     "mocha": "~1.13.0",

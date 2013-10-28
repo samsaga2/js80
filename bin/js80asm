@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+var Z80 = require('../z80')
+  , program = require('commander');
+
+program
+  .version('0.0.1')
+  .usage('[options] <file>')
+  .option('-o, --output <file>', 'Output binary compiled file')
+  .parse(process.argv);
+
+if(!program.args[0]) {
+    console.error('Mising input file');
+    process.exit(1);
+}
+
+var z80 = new Z80();
+try {
+  z80.compileFile(program.args[0]);
+} catch(e) {
+  console.log('%s:%s: %s', z80.currentFilename, e.line, e.name||e);
+}
+
+z80.saveImage(program.output || 'a.out');
