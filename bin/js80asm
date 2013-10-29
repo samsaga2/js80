@@ -14,6 +14,7 @@ program
   .usage('[options] <file ...>')
   .option('-o, --output <file>', 'Output binary compiled file')
   .option('-I, --include <dir1:dir2:...>', 'Add directories into the search list', list)
+  .option('-s, --sym <file>', 'Output sym file')
   .parse(process.argv);
 
 if(!program.args[0]) {
@@ -31,6 +32,9 @@ try {
   });
   z80.secondPass();
   z80.saveImage(program.output || 'a.out');
+  if(program.sym) {
+    z80.saveSymbols(program.sym);
+  }
 } catch(e) {
   console.log('%s:%s: %s', e.filename, e.line, e.toString());
 }

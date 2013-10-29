@@ -401,6 +401,13 @@ Z80.prototype.saveImage = function(fname) {
   fs.writeFileSync(fname, buffer, 'binary');
 }
 
+Z80.prototype.saveSymbols = function(fname) {
+  fs.truncateSync(fname, 0);
+  _.each(this.environment, function(equ, label) {
+    fs.appendFileSync(fname, util.format("%s: equ 0%sh\n", label, equ.toString(16)));
+  });
+}
+
 Z80.prototype.defineLabel = function(name, value) {
   if(name[0] === '.') {
     if(name.indexOf('.') > 0) {
