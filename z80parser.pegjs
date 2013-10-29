@@ -8,7 +8,7 @@ _
   = [\t\v\f \u00A0\uFEFF]*
 
 Identifier
-  = head:[a-zA-Z_\.] tail:[a-zA-Z0-9_\.]* { return head + tail.join(""); }
+  = p:"."? s:[a-zA-Z_0-9\.]+ { return (p||'') + s.join(''); }
 
 //
 // basic types
@@ -100,7 +100,6 @@ Z80
   / "BIT"i _ b:Int3 _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                          		{ return [0xDD,0xCB,oo,0x46+0x8*b]; } // BIT b,(IX+o)
   / "BIT"i _ b:Int3 _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                          		{ return [0xFD,0xCB,oo,0x46+0x8*b]; } // BIT b,(IY+o)
   / "BIT"i _ b:Int3 _ "," _ r:TableR                                                		{ return [0xCB,0x40+0x8*b+r]; } // BIT b,r
-  / "CALL"i _ nn:Int16                                                              		{ return [0xCD,nn[0],nn[1]]; } // CALL nn
   / "CALL"i _ "C"i _ "," _ nn:Int16                                                 		{ return [0xDC,nn[0],nn[1]]; } // CALL C,nn
   / "CALL"i _ "M"i _ "," _ nn:Int16                                                 		{ return [0xFC,nn[0],nn[1]]; } // CALL M,nn
   / "CALL"i _ "NC"i _ "," _ nn:Int16                                                		{ return [0xD4,nn[0],nn[1]]; } // CALL NC,nn
@@ -109,6 +108,7 @@ Z80
   / "CALL"i _ "PE"i _ "," _ nn:Int16                                                		{ return [0xEC,nn[0],nn[1]]; } // CALL PE,nn
   / "CALL"i _ "PO"i _ "," _ nn:Int16                                                		{ return [0xE4,nn[0],nn[1]]; } // CALL PO,nn
   / "CALL"i _ "Z"i _ "," _ nn:Int16                                                 		{ return [0xCC,nn[0],nn[1]]; } // CALL Z,nn
+  / "CALL"i _ nn:Int16                                                              		{ return [0xCD,nn[0],nn[1]]; } // CALL nn
   / "CCF"i                                                                          		{ return [0x3F]; } // CCF
   / "CP"i _ "(HL)"i                                                                 		{ return [0xBE]; } // CP (HL)
   / "CP"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xBE,oo]; } // CP (IX+o)
@@ -126,17 +126,17 @@ Z80
   / "DEC"i _ "(HL)"i                                                                		{ return [0x35]; } // DEC (HL)
   / "DEC"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0x35,oo]; } // DEC (IX+o)
   / "DEC"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0x35,oo]; } // DEC (IY+o)
-  / "DEC"i _ "A"i                                                                   		{ return [0x3D]; } // DEC A
-  / "DEC"i _ "B"i                                                                   		{ return [0x05]; } // DEC B
   / "DEC"i _ "BC"i                                                                  		{ return [0x0B]; } // DEC BC
-  / "DEC"i _ "C"i                                                                   		{ return [0x0D]; } // DEC C
-  / "DEC"i _ "D"i                                                                   		{ return [0x15]; } // DEC D
   / "DEC"i _ "DE"i                                                                  		{ return [0x1B]; } // DEC DE
-  / "DEC"i _ "E"i                                                                   		{ return [0x1D]; } // DEC E
-  / "DEC"i _ "H"i                                                                   		{ return [0x25]; } // DEC H
   / "DEC"i _ "HL"i                                                                  		{ return [0x2B]; } // DEC HL
   / "DEC"i _ "IX"i                                                                  		{ return [0xDD,0x2B]; } // DEC IX
   / "DEC"i _ "IY"i                                                                  		{ return [0xFD,0x2B]; } // DEC IY
+  / "DEC"i _ "A"i                                                                   		{ return [0x3D]; } // DEC A
+  / "DEC"i _ "B"i                                                                   		{ return [0x05]; } // DEC B
+  / "DEC"i _ "C"i                                                                   		{ return [0x0D]; } // DEC C
+  / "DEC"i _ "D"i                                                                   		{ return [0x15]; } // DEC D
+  / "DEC"i _ "E"i                                                                   		{ return [0x1D]; } // DEC E
+  / "DEC"i _ "H"i                                                                   		{ return [0x25]; } // DEC H
   / "DEC"i _ p:TableIXp                                                             		{ return [0xDD,0x05+0x8*p]; } // DEC IXp
   / "DEC"i _ q:TableIYq                                                             		{ return [0xFD,0x05+0x8*q]; } // DEC IYq
   / "DEC"i _ "L"i                                                                   		{ return [0x2D]; } // DEC L
@@ -166,26 +166,25 @@ Z80
   / "INC"i _ "(HL)"i                                                                		{ return [0x34]; } // INC (HL)
   / "INC"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0x34,oo]; } // INC (IX+o)
   / "INC"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0x34,oo]; } // INC (IY+o)
-  / "INC"i _ "A"i                                                                   		{ return [0x3C]; } // INC A
-  / "INC"i _ "B"i                                                                   		{ return [0x04]; } // INC B
   / "INC"i _ "BC"i                                                                  		{ return [0x03]; } // INC BC
-  / "INC"i _ "C"i                                                                   		{ return [0x0C]; } // INC C
-  / "INC"i _ "D"i                                                                   		{ return [0x14]; } // INC D
   / "INC"i _ "DE"i                                                                  		{ return [0x13]; } // INC DE
-  / "INC"i _ "E"i                                                                   		{ return [0x1C]; } // INC E
-  / "INC"i _ "H"i                                                                   		{ return [0x24]; } // INC H
   / "INC"i _ "HL"i                                                                  		{ return [0x23]; } // INC HL
   / "INC"i _ "IX"i                                                                  		{ return [0xDD,0x23]; } // INC IX
   / "INC"i _ "IY"i                                                                  		{ return [0xFD,0x23]; } // INC IY
+  / "INC"i _ "A"i                                                                   		{ return [0x3C]; } // INC A
+  / "INC"i _ "B"i                                                                   		{ return [0x04]; } // INC B
+  / "INC"i _ "C"i                                                                   		{ return [0x0C]; } // INC C
+  / "INC"i _ "D"i                                                                   		{ return [0x14]; } // INC D
+  / "INC"i _ "E"i                                                                   		{ return [0x1C]; } // INC E
+  / "INC"i _ "H"i                                                                   		{ return [0x24]; } // INC H
+  / "INC"i _ "L"i                                                                   		{ return [0x2C]; } // INC L
   / "INC"i _ p:TableIXp                                                             		{ return [0xDD,0x04+0x8*p]; } // INC IXp
   / "INC"i _ q:TableIYq                                                             		{ return [0xFD,0x04+0x8*q]; } // INC IYq
-  / "INC"i _ "L"i                                                                   		{ return [0x2C]; } // INC L
   / "INC"i _ "SP"i                                                                  		{ return [0x33]; } // INC SP
   / "IND"i                                                                          		{ return [0xED,0xAA]; } // IND
   / "INDR"i                                                                         		{ return [0xED,0xBA]; } // INDR
   / "INI"i                                                                          		{ return [0xED,0xA2]; } // INI
   / "INIR"i                                                                         		{ return [0xED,0xB2]; } // INIR
-  / "JP"i _ nn:Int16                                                                		{ return [0xC3,nn[0],nn[1]]; } // JP nn
   / "JP"i _ "(HL)"i                                                                 		{ return [0xE9]; } // JP (HL)
   / "JP"i _ "(IX)"i                                                                 		{ return [0xDD,0xE9]; } // JP (IX)
   / "JP"i _ "(IY)"i                                                                 		{ return [0xFD,0xE9]; } // JP (IY)
@@ -195,13 +194,14 @@ Z80
   / "JP"i _ "NZ"i _ "," _ nn:Int16                                                  		{ return [0xC2,nn[0],nn[1]]; } // JP NZ,nn
   / "JP"i _ "P"i _ "," _ nn:Int16                                                   		{ return [0xF2,nn[0],nn[1]]; } // JP P,nn
   / "JP"i _ "PE"i _ "," _ nn:Int16                                                  		{ return [0xEA,nn[0],nn[1]]; } // JP PE,nn
+  / "JP"i _ nn:Int16                                                                		{ return [0xC3,nn[0],nn[1]]; } // JP nn
   / "JP"i _ "PO"i _ "," _ nn:Int16                                                  		{ return [0xE2,nn[0],nn[1]]; } // JP PO,nn
   / "JP"i _ "Z"i _ "," _ nn:Int16                                                   		{ return [0xCA,nn[0],nn[1]]; } // JP Z,nn
-  / "JR"i _ oo:Offset8                                                              		{ return [0x18,oo]; } // JR o
   / "JR"i _ "C"i _ "," _ oo:Offset8                                                 		{ return [0x38,oo]; } // JR C,o
   / "JR"i _ "NC"i _ "," _ oo:Offset8                                                		{ return [0x30,oo]; } // JR NC,o
   / "JR"i _ "NZ"i _ "," _ oo:Offset8                                                		{ return [0x20,oo]; } // JR NZ,o
   / "JR"i _ "Z"i _ "," _ oo:Offset8                                                 		{ return [0x28,oo]; } // JR Z,o
+  / "JR"i _ oo:Offset8                                                              		{ return [0x18,oo]; } // JR o
   / "LD"i _ "(BC)"i _ "," _ "A"i                                                    		{ return [0x02]; } // LD (BC),A
   / "LD"i _ "(DE)"i _ "," _ "A"i                                                    		{ return [0x12]; } // LD (DE),A
   / "LD"i _ "(HL)"i _ "," _ nn:Int8                                                 		{ return [0x36,nn]; } // LD (HL),n
@@ -336,7 +336,6 @@ Z80
   / "RES"i _ b:Int3 _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                          		{ return [0xDD,0xCB,oo,0x86+0x8*b]; } // RES b,(IX+o)
   / "RES"i _ b:Int3 _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                          		{ return [0xFD,0xCB,oo,0x86+0x8*b]; } // RES b,(IY+o)
   / "RES"i _ b:Int3 _ "," _ r:TableR                                                		{ return [0xCB,0x80+0x8*b+r]; } // RES b,r
-  / "RET"i                                                                          		{ return [0xC9]; } // RET
   / "RET"i _ "C"i                                                                   		{ return [0xD8]; } // RET C
   / "RET"i _ "M"i                                                                   		{ return [0xF8]; } // RET M
   / "RET"i _ "NC"i                                                                  		{ return [0xD0]; } // RET NC
@@ -345,6 +344,7 @@ Z80
   / "RET"i _ "PE"i                                                                  		{ return [0xE8]; } // RET PE
   / "RET"i _ "PO"i                                                                  		{ return [0xE0]; } // RET PO
   / "RET"i _ "Z"i                                                                   		{ return [0xC8]; } // RET Z
+  / "RET"i                                                                          		{ return [0xC9]; } // RET
   / "RETI"i                                                                         		{ return [0xED,0x4D]; } // RETI
   / "RETN"i                                                                         		{ return [0xED,0x45]; } // RETN
   / "RL"i _ "(HL)"i                                                                 		{ return [0xCB,0x16]; } // RL (HL)

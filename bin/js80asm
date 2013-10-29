@@ -22,13 +22,15 @@ if(!program.args[0]) {
 }
 
 var z80 = new Z80();
-z80.searchPath = z80.searchPath.concat(program.include);
+if(program.include) {
+  z80.searchPath = z80.searchPath.concat(program.include);
+}
 try {
   _.each(program.args, function(arg) {
     z80.compileFile(arg);
   });
+  z80.secondPass();
+  z80.saveImage(program.output || 'a.out');
 } catch(e) {
-  console.log('%s:%s: %s', z80.currentFilename, e.line, e.name||e);
+  console.log('%s:%s: %s', e.filename, e.line, e.toString());
 }
-
-z80.saveImage(program.output || 'a.out');

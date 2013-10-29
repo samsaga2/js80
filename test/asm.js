@@ -65,6 +65,12 @@ describe('asm inst', function() {
     should(z80.image.build()).be.eql([0xd3, 0x98, 0xf6, 5]);
   });
 
+  it(';; comment', function() {
+    var z80 = new Z80();
+    z80.asm(';; comment');
+    should(z80.image.build().length).be.eql(0);
+  });
+
   it('nop // comment', function() {
     var z80 = new Z80();
     z80.asm('nop // comment');
@@ -255,8 +261,8 @@ describe('asm inst', function() {
 
   it('include', function() {
     var z80 = new Z80();
-    z80.searchPath.push('util');
-    z80.asm('include "test.asm"');
+    z80.searchPath.push('examples');
+    z80.asm('include "hello.asm"');
     should(z80.image.build().length).not.be.eql(0);
   });
 
@@ -270,13 +276,13 @@ describe('asm inst', function() {
 
   it('incbin', function() {
     var z80 = new Z80();
-    z80.asm('incbin "util/test.asm"');
+    z80.asm('incbin "examples/hello.asm"');
     should(z80.image.build().length).not.be.eql(0);
   });
 
   it('incbin len', function() {
     var z80 = new Z80();
-    z80.asm('incbin "util/test.asm",10,10');
+    z80.asm('incbin "examples/hello.asm",10,10');
     should(z80.image.build().length).be.eql(10);
   });
 
@@ -389,5 +395,11 @@ describe('asm inst', function() {
     var image = z80.image.build();
     should(image.length).be.eql(0x2000);
     should(_.first(image, 3)).be.eql([0x21, 0, 0x40]);
+  });
+
+  it('dw label, 10', function() {
+    var z80 = new Z80();
+    z80.asm('dw start, 10\nstart:');
+    should(z80.image.build()).be.eql([4, 0, 10, 0]);
   });
 });

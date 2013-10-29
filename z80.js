@@ -32,11 +32,11 @@ function Z80() {
   this.page = 0;
 
   this.map = 0;
-  this.secondPass = [];
+  this.secondPassTasks = [];
 
   this.environment = {};
   this.macros = {};
-  this.searchPath = ['.'];
+  this.searchPath = ['.', 'msx'];
 
   this.info = {
     filename  : '',
@@ -46,15 +46,28 @@ function Z80() {
   };
 }
 
-Z80.prototype.inferenceLabel = function(label) {
+Z80.prototype.catchError = function(fn) {
+  try {
+    fn.call(this);
+  } catch(e) {
+    if(!e.line) {
+      e.line = this.info.lineIndex;
+    }
+    e.filename = this.info.filename;
+    throw e;
+  }
+}
+
+Z80.prototype.inferenceLabel = function(label, info) {
+  info = info || this.info;
   if(label[0] === '.') {
-    label = this.info.label + label;
+    label = info.label + label;
   }
   if(label in this.environment) {
     return label;
   }
-  if(this.info.module && label.split('.').length < 2) {
-    label = this.info.module + '.' + label;
+  if(info.module && label.split('.').length < 2) {
+    label = info.module + '.' + label;
   }
   return label;
 }
@@ -152,20 +165,27 @@ Z80.prototype.parseAsmInst = function(ast) {
     template += sep + this.buildTemplateArg(arg);
     sep = ',';
   }, this);
-  var bytes = z80parser.parse(template);
-  this.image.write(this.parseBytes(bytes), this.page);
+  try {
+    var bytes = z80parser.parse(template);
+    this.image.write(this.parseBytes(bytes), this.page);
+  } catch(e) {
+    throw new Error('Syntax error ' + template);
+  }
 }
 
 Z80.prototype.parseBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
-           if(_.isObject(b)) {
-             b.offset = this.currentPage.offset + index;
-             b.next = this.currentPage.origin + this.currentPage.offset + bytes.length;
-             this.secondPass.push(b);
-             return 0;
-           } else {
-             return b;
-           }
+            if(_.isObject(b)) {
+              b = _.clone(b);
+              b.page = this.currentPage;
+              b.offset = this.currentPage.offset + index;
+              b.next = this.currentPage.origin + this.currentPage.offset + bytes.length;
+              b.info = _.clone(this.info);
+              this.secondPassTasks.push(b);
+              return 0;
+            } else {
+              return b;
+            }
           }, this);
   this.currentPage.offset += bytes.length;
   return bytes;
@@ -195,7 +215,9 @@ Z80.prototype.executeMacro = function(id, args) {
 }
 
 Z80.prototype.parseInsts = function(insts) {
-  _.each(insts, this.parseInst, this);
+  this.catchError(function() {
+    _.each(insts, this.parseInst, this);
+  });
 }
 
 Z80.prototype.parseInst = function(code) {
@@ -230,7 +252,14 @@ Z80.prototype.parseInst = function(code) {
       return miscutil.fill(len, value);
     },
     dw: function(dw) {
-      return _.flatten(_.map(dw, function(i) { var ix = self.evalExpr(i); return [ix&255, ix>>8]; }, self));
+      return _.flatten(_.map(dw, function(i) {
+                         if('id' in i) {
+                           return [{type:'low', label:i.id}, {type:'high', label:i.id}];
+                         } else {
+                           var j = self.evalExpr(i);
+                           return [j&255, j>>8];
+                         }
+                       }, self));
     },
     db: function(db) {
       return _.flatten(_.map(db, function(i) {
@@ -306,7 +335,7 @@ Z80.prototype.parseInst = function(code) {
       done = true;
       var bytes = fn(code[key]);
       if(bytes) {
-        this.image.write(bytes, this.page);
+        this.image.write(this.parseBytes(bytes), this.page);
       }
     }
   }, this);
@@ -319,56 +348,48 @@ Z80.prototype.compileFile = function(fname) {
   var prevFilename = this.info.filename;
   this.info.filename = fname;
   var f = fs.readFileSync(fname);
-  this.asm(f.toString());
+  var ast = parser.parse(f.toString());
+  this.parseInsts(ast);
   this.info.filename = prevFilename;
 }
 
-Z80.prototype.asmSecondPass = function() {
-  _.each(this.secondPass, function(pass) {
-    var addr = pass.value;
-    if(pass.label) {
-      addr = this.environment[this.inferenceLabel(pass.label)];
-      if(_.isUndefined(addr)) {
-        throw new Error('Unknown label ' + pass.label);
+Z80.prototype.secondPass = function() {
+  this.catchError(function() {
+    _.each(this.secondPassTasks, function(pass) {
+      var addr = pass.value;
+      if(pass.label) {
+        addr = this.environment[this.inferenceLabel(pass.label, pass.info)];
+        if(_.isUndefined(addr)) {
+          this.info = _.clone(pass.info);
+          throw new Error('Unknown label ' + pass.label);
+        }
       }
-    }
-    switch(pass.type) {
-      case 'low':
-        this.currentPage.output[pass.offset] = miscutil.compl2(addr&255);
+      switch(pass.type) {
+        case 'low':
+        pass.page.output[pass.offset] = miscutil.compl2(addr&255);
         break;
-      case 'high':
-        this.currentPage.output[pass.offset] = miscutil.compl2((addr>>8)&255);
+        case 'high':
+        pass.page.output[pass.offset] = miscutil.compl2((addr>>8)&255);
         break;
-      case 'relative':
+        case 'relative':
         var rel = addr - pass.next;
         if(rel < - 128 || rel > 127) {
-            throw new Error('Offset too large');
+          throw new Error('Offset too large');
         }
-        this.currentPage.output[pass.offset] = miscutil.compl2(rel);
+        pass.page.output[pass.offset] = miscutil.compl2(rel);
         break;
-      default:
+        default:
         throw new Error('Internal error');
-    }
-  }, this);
-}
-
-Z80.prototype.compileAst = function(ast) {
-  this.secondPass = [];
-  try {
-    _.flatten(this.parseInsts(ast));
-    this.asmSecondPass();
-  } catch(e) {
-    if(!e.line) {
-      e.line = this.info.lineIndex;
-    }
-    e.filename = this.info.filename;
-    throw e;
-  }
+      }
+    }, this);
+    this.secondPassTasks = [];
+  });
 }
 
 Z80.prototype.asm = function(code) {
   var ast = parser.parse(code);
-  this.compileAst(ast);
+  this.parseInsts(ast);
+  this.secondPass();
 }
 
 Z80.prototype.saveImage = function(fname) {

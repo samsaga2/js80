@@ -9,7 +9,7 @@ Start
   = l:Lines __ LineTerminator* { return l; }
 
 Lines
-  = __ head:ProgLine tail:(__ (LineTerminator/"\\")+ __ ProgLine)* __ {
+  = __ head:ProgLine? tail:(__ (LineTerminator/"\\")+ __ ProgLine?)* __ {
     tail = _.map(tail, function(i) { return i[3]; });
     return _.flatten([head, tail]);
   }
@@ -25,7 +25,7 @@ Line
   = l:Identifier _ "equ"i _ e:Expr { return {equ:{label:l, value:e}, line:line}; }
   / l:Label _ i:Inst               { return [{label:l, line:line}, i] }
   / l:Label                        { return {label:l, line:line}; }
-  / i:Inst                         { return i; }
+  / i:Inst                         { return _.extend(i, {line:line}); }
 
 Label
   = l:Identifier ":" { return l; }
@@ -67,9 +67,9 @@ MacroArgs
   = head:MacroArg tail:(_ "," _ MacroArg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
 
 MacroArg
-  = i:Identifier _ ":" _ e:Expr { return {id:i, default:e}; }
+  = "1" _ ".." _ "*" __         { return {rest:true}; }
+  / i:Identifier _ ":" _ e:Expr { return {id:i, default:e}; }
   / i:Identifier                { return {id:i}; }
-  / "1" _ ".." _ "*" __         { return {rest:true}; }
 
 //
 // Expr
@@ -131,7 +131,7 @@ ExprChar
   = "'" t:(!"'" .) "'" { return t[1]; }
 
 Identifier
-  = head:[a-zA-Z_.] tail:[a-zA-Z0-9_.]* { return head + tail.join(""); }
+  = p:"."? s:[a-zA-Z_0-9\.]+ { return (p||'') + s.join(''); }
 
 //
 // chars
