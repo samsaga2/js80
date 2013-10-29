@@ -366,20 +366,20 @@ Z80.prototype.secondPass = function() {
       }
       switch(pass.type) {
         case 'low':
-        pass.page.output[pass.offset] = miscutil.compl2(addr&255);
-        break;
+          pass.page.output[pass.offset] = miscutil.compl2(addr&255);
+          break;
         case 'high':
-        pass.page.output[pass.offset] = miscutil.compl2((addr>>8)&255);
-        break;
+          pass.page.output[pass.offset] = miscutil.compl2((addr>>8)&255);
+          break;
         case 'relative':
-        var rel = addr - pass.next;
-        if(rel < - 128 || rel > 127) {
-          throw new Error('Offset too large');
-        }
-        pass.page.output[pass.offset] = miscutil.compl2(rel);
-        break;
+          var rel = addr - pass.next;
+          if(rel < - 128 || rel > 127) {
+            throw new Error('Offset too large');
+          }
+          pass.page.output[pass.offset] = miscutil.compl2(rel);
+          break;
         default:
-        throw new Error('Internal error');
+          throw new Error('Internal error');
       }
     }, this);
     this.secondPassTasks = [];
