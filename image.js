@@ -9,6 +9,7 @@ function Image() {
     this.pages.push({
       origin:0,
       offset:0,
+      size:0,
       output:[]
     });
   }, this);
@@ -17,11 +18,17 @@ function Image() {
 }
 
 Image.prototype.write = function(bytes) {
-  bytes = _.map(bytes, miscutil.compl2, this);
   var page = this.pages[this.page];
+
+  // write
+  bytes = _.map(bytes, miscutil.compl2, this);
   page.output = page.output.concat(bytes);
 
+  // advance
   page.offset += bytes.length;
+  if(page.size > 0 && page.offset > page.size) {
+    throw new Error('Page overflow');
+  }
 }
 
 Image.prototype.build = function() {
