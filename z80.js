@@ -28,8 +28,6 @@ Array.prototype.rotate = (function() {
 
 function Z80() {
   this.image = new Image();
-  this.currentPage = this.image.pages[0];
-
   this.map = 0;
   this.secondPassTasks = [];
 
@@ -73,7 +71,7 @@ Z80.prototype.inferenceLabel = function(label, info) {
 
 Z80.prototype.evalExpr = function(expr) {
   if (expr.id === '__here__') {
-    return this.currentPage.offset + this.currentPage.origin;
+    return this.image.page.offset + this.image.page.origin;
   }
   if (expr.id) {
     var l = this.inferenceLabel(expr.id);
@@ -176,9 +174,9 @@ Z80.prototype.writeBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
             if(_.isObject(b)) {
               b = _.clone(b);
-              b.page = this.currentPage;
-              b.offset = this.currentPage.offset + index;
-              b.next = this.currentPage.origin + this.currentPage.offset + bytes.length;
+              b.page = this.image.page;
+              b.offset = this.image.page.offset + index;
+              b.next = this.image.page.origin + this.image.page.offset + bytes.length;
               b.info = _.clone(this.info);
               this.secondPassTasks.push(b);
               return 0;
@@ -239,7 +237,7 @@ Z80.prototype.parseInst = function(code) {
       }
     },
     org: function(org) {
-      self.currentPage.origin = self.evalExpr(org);
+      self.image.page.origin = self.evalExpr(org);
     },
     map: function(map) {
       self.map = self.evalExpr(map);
@@ -317,9 +315,7 @@ Z80.prototype.parseInst = function(code) {
       self.image.pages[index].size = self.evalExpr(defpage.size);
     },
     page: function(page) {
-      var n = self.evalExpr(page);
-      self.currentPage = self.image.pages[n];
-      self.image.pageIndex = n;
+      self.image.selectPage(self.evalExpr(page));
     },
     echo: function(echo) {
       console.log(_.map(echo, function(arg) {
@@ -415,7 +411,7 @@ Z80.prototype.defineLabel = function(name, value) {
   if(this.environment[name]) {
     throw new Error('Label '+name+' already exists');
   }
-  this.environment[name] = value || (this.currentPage.origin + this.currentPage.offset);
+  this.environment[name] = value || (this.image.page.origin + this.image.page.offset);
 }
 
 Z80.prototype.getLabel = function(name) {

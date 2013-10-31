@@ -13,20 +13,22 @@ function Image() {
       output:[]
     });
   }, this);
+  this.selectPage(0);
+}
 
-  this.pageIndex = 0;
+Image.prototype.selectPage = function(n) {
+  this.pageIndex = n;
+  this.page = this.pages[n];
 }
 
 Image.prototype.write = function(bytes) {
-  var page = this.pages[this.pageIndex];
-
   // write
   bytes = _.map(bytes, miscutil.compl2, this);
-  page.output = page.output.concat(bytes);
+  this.page.output = this.page.output.concat(bytes);
 
   // advance
-  page.offset += bytes.length;
-  if(page.size > 0 && page.offset > page.size) {
+  this.page.offset += bytes.length;
+  if(this.page.size > 0 && this.page.offset > this.page.size) {
     throw new Error('Page overflow');
   }
 }

@@ -129,7 +129,7 @@ describe('asm inst', function() {
     var z80 = new Z80();
     z80.asm('org 8000h\nnop');
     should(z80.image.build()).be.eql([0]);
-    should(z80.currentPage.origin + z80.currentPage.offset).be.eql(0x8001);
+    should(z80.image.page.origin + z80.image.page.offset).be.eql(0x8001);
   });
 
   it('db 1,2,3', function() {
