@@ -12,11 +12,13 @@ function Image() {
       output:[]
     });
   }, this);
+
+  this.page = 0;
 }
 
-Image.prototype.write = function(bytes, pageIndex) {
+Image.prototype.write = function(bytes) {
   bytes = _.map(bytes, miscutil.compl2, this);
-  var page = this.pages[pageIndex];
+  var page = this.pages[this.page];
   page.output = page.output.concat(bytes);
 
   page.offset += bytes.length;

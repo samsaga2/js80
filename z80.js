@@ -29,7 +29,6 @@ Array.prototype.rotate = (function() {
 function Z80() {
   this.image = new Image();
   this.currentPage = this.image.pages[0];
-  this.page = 0;
 
   this.map = 0;
   this.secondPassTasks = [];
@@ -187,7 +186,7 @@ Z80.prototype.writeBytes = function(bytes) {
               return b;
             }
           }, this);
-  this.image.write(bytes, this.page);
+  this.image.write(bytes);
 }
 
 Z80.prototype.executeMacro = function(id, args) {
@@ -320,6 +319,7 @@ Z80.prototype.parseInst = function(code) {
     page: function(page) {
       var n = self.evalExpr(page);
       self.currentPage = self.image.pages[n];
+      self.image.page = n;
     },
     echo: function(echo) {
       console.log(_.map(echo, function(arg) {
