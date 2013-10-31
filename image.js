@@ -18,6 +18,8 @@ Image.prototype.write = function(bytes, pageIndex) {
   bytes = _.map(bytes, miscutil.compl2, this);
   var page = this.pages[pageIndex];
   page.output = page.output.concat(bytes);
+
+  page.offset += bytes.length;
 }
 
 Image.prototype.build = function() {

@@ -167,13 +167,13 @@ Z80.prototype.parseAsmInst = function(ast) {
   }, this);
   try {
     var bytes = z80parser.parse(template);
-    this.image.write(this.parseBytes(bytes), this.page);
+    this.writeBytes(bytes);
   } catch(e) {
     throw new Error('Syntax error ' + template);
   }
 }
 
-Z80.prototype.parseBytes = function(bytes) {
+Z80.prototype.writeBytes = function(bytes) {
   bytes = _.map(bytes, function(b, index) {
             if(_.isObject(b)) {
               b = _.clone(b);
@@ -187,8 +187,7 @@ Z80.prototype.parseBytes = function(bytes) {
               return b;
             }
           }, this);
-  this.currentPage.offset += bytes.length;
-  return bytes;
+  this.image.write(bytes, this.page);
 }
 
 Z80.prototype.executeMacro = function(id, args) {
@@ -335,7 +334,7 @@ Z80.prototype.parseInst = function(code) {
       done = true;
       var bytes = fn(code[key]);
       if(bytes) {
-        this.image.write(this.parseBytes(bytes), this.page);
+        this.writeBytes(bytes);
       }
     }
   }, this);
