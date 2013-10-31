@@ -319,7 +319,7 @@ Z80.prototype.parseInst = function(code) {
     page: function(page) {
       var n = self.evalExpr(page);
       self.currentPage = self.image.pages[n];
-      self.image.page = n;
+      self.image.pageIndex = n;
     },
     echo: function(echo) {
       console.log(_.map(echo, function(arg) {

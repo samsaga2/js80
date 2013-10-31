@@ -14,11 +14,11 @@ function Image() {
     });
   }, this);
 
-  this.page = 0;
+  this.pageIndex = 0;
 }
 
 Image.prototype.write = function(bytes) {
-  var page = this.pages[this.page];
+  var page = this.pages[this.pageIndex];
 
   // write
   bytes = _.map(bytes, miscutil.compl2, this);
