@@ -71,7 +71,7 @@ Z80.prototype.inferenceLabel = function(label, info) {
 
 Z80.prototype.evalExpr = function(expr) {
   if (expr.id === '__here__') {
-    return this.image.page.offset + this.image.page.origin;
+    return this.image.here();
   }
   if (expr.id) {
     var l = this.inferenceLabel(expr.id);

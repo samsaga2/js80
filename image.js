@@ -21,6 +21,10 @@ Image.prototype.selectPage = function(n) {
   this.page = this.pages[n];
 }
 
+Image.prototype.here = function() {
+  return this.page.offset + this.page.origin;
+}
+
 Image.prototype.write = function(bytes) {
   // write
   bytes = _.map(bytes, miscutil.compl2, this);
