@@ -160,7 +160,7 @@ describe('asm inst', function() {
     var z80 = new Z80();
     z80.asm('org 8000h\ntest_label: nop');
     should(z80.image.build()).be.eql([0]);
-    should(z80.getLabel('test_label')).be.eql(0x8000);
+    should(z80.environment.test_label).be.eql(0x8000);
   });
 
   it('multiple inst per line', function() {
@@ -401,5 +401,11 @@ describe('asm inst', function() {
     var z80 = new Z80();
     z80.asm('dw start, 10\nstart:');
     should(z80.image.build()).be.eql([4, 0, 10, 0]);
+  });
+
+  it('no macro', function() {
+    var z80 = new Z80();
+    z80.asm('macro nop\n@@nop\n@@nop\nendmacro\nnop');
+    should(z80.image.build()).be.eql([0, 0]);
   });
 });

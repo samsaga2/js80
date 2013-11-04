@@ -234,7 +234,7 @@ Z80.prototype.parseInst = function(code) {
       self.defineLabel(label);
     },
     asm: function(asm) {
-      if(asm.inst in self.macros) {
+      if(asm.execmacro && asm.inst in self.macros) {
         self.executeMacro(asm.inst, asm.args || []);
       } else {
         self.parseAsmInst(asm);
@@ -424,13 +424,6 @@ Z80.prototype.defineLabel = function(name, value) {
     throw new Error('Label '+name+' already exists');
   }
   this.environment[name] = value || (this.currentPage.origin + this.currentPage.offset);
-}
-
-Z80.prototype.getLabel = function(name) {
-  if(!this.environment[name]) {
-    throw new Error('Unknow label ' + name);
-  }
-  return this.environment[name];
 }
 
 module.exports = Z80;

@@ -20,7 +20,7 @@ Int8
   = n:Number { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
 
 Int16
-  = n:Number { return [{type:'low', value:n}, {type:'high', value:n}]; }
+  = n:Number { return [n&255, (n>>8)&255]; }
   / i:Identifier { return [{type:'low', label:i}, {type:'high', label:i}]; }
 
 Offset8

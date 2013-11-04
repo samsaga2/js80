@@ -32,7 +32,7 @@ Label
 
 Inst
   = "."? s:SpecialInst                    { return s; }
-  / asm:Identifier _ args:InstArgs?       { return {asm:{inst:asm, args:args}}; }
+  / m:"@@"? asm:Identifier _ args:InstArgs?       { return {asm:{inst:asm, args:args, execmacro:_.isEmpty(m)}}; }
 
 SpecialInst
   = "org"i _ n:Expr                                      { return {org:n}; }

@@ -12,14 +12,14 @@ function list(val) {
 program
   .version('0.0.1')
   .usage('[options] <file ...>')
-  .option('-o, --output <file>', 'Output binary compiled file')
-  .option('-I, --include <dir1:dir2:...>', 'Add directories into the search list', list)
-  .option('-s, --sym <file>', 'Output sym file')
+  .option('-o, --output <file>', 'create binary compiled file (default a.out)')
+  .option('-I, --include <dir1:dir2:...>', 'add directories into the search list', list)
+  .option('-s, --sym <file>', 'create sym file')
   .parse(process.argv);
 
 if(!program.args[0]) {
-    console.error('Mising input file');
-    process.exit(1);
+  console.error('Mising input file');
+  program.help();
 }
 
 var z80 = new Z80();
