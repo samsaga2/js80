@@ -408,4 +408,11 @@ describe('asm inst', function() {
     z80.asm('macro nop\n@@nop\n@@nop\nendmacro\nnop');
     should(z80.image.build()).be.eql([0, 0]);
   });
+
+  it('invalid instr', function() {
+    var z80 = new Z80();
+    (function () {
+      z80.asm('xor a,1"');
+    }).should.throw();
+  });
 });
