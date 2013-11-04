@@ -1,12 +1,23 @@
 {
   "name": "js80",
+  "version": "0.1.0",
   "author": {
     "name": "Víctor Marzo Cejudo",
     "email": "samsaga2@gmail.com"
   },
   "main": "lib/z80",
+  "keywords": [
+    "assembler",
+    "z80",
+    "msx"
+  ],
+  "license": "LGPLv3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samsaga2/js80.git"
+  },
   "bin": {
-    "js80asm": "bin/js80asm"
+    "js80asm": "./bin/js80asm"
   },
   "dependencies": {
     "underscore": "~1.5.2",
