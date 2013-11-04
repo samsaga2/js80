@@ -421,4 +421,10 @@ describe('asm inst', function() {
     z80.asm('defpage 0,0,1\ndefpage 1,1,1\ndefpage 2,2,1\npage 0..2\ndb 1,2,3');
     should(z80.image.build()).be.eql([1,2,3]);
   });
+
+  it('multiple defpages', function() {
+    var z80 = new Z80();
+    z80.asm('defpage 0..2,0,1\npage 0..2\ndb 1,2,3');
+    should(z80.image.build()).be.eql([1,2,3]);
+  });
 });

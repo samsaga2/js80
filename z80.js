@@ -312,9 +312,18 @@ Z80.prototype.parseInst = function(code) {
       self.environment.__arguments__ = self.environment.__arguments__.rotate(n);
     },
     defpage: function(defpage) {
-      var index = self.evalExpr(defpage.index);
-      self.image.pages[index].origin = self.evalExpr(defpage.origin);
-      self.image.pages[index].size = self.evalExpr(defpage.size);
+      var pages;
+      if('start' in defpage.index) {
+        var start = self.evalExpr(defpage.index.start);
+        var end = self.evalExpr(defpage.index.end);
+        pages =_.range(start, end + 1);
+      } else {
+        pages = [self.evalExpr(defpage.index)];
+      }
+      _.each(pages, function(index) {
+        self.image.pages[index].origin = self.evalExpr(defpage.origin);
+        self.image.pages[index].size = self.evalExpr(defpage.size);
+      });
     },
     page: function(page) {
       if('start' in page) {
