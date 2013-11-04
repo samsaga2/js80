@@ -1,8 +1,10 @@
+```
      __         ______ _______
     |__| ______/  __  \\   _  \
     |  |/  ___/>      </  /_\  \
     |  |\___ \/   --   \  \_/   \
 /\__|  /____  >______  /\_____  /
 \______|    \/       \/       \/
+```
 
-js80 is a library and an assembler for z80 cpu.
+**js80** is a library and an assembler for **z80** cpu.
