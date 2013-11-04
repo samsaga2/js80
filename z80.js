@@ -245,26 +245,29 @@ Z80.prototype.parseInst = function(code) {
     ds: function(ds) {
       var len = self.evalExpr(ds.len);
       var value = self.evalExpr(ds.value);
-      return miscutil.fill(len, value);
+      self.writeBytes(miscutil.fill(len, value));
     },
     dw: function(dw) {
-      return _.flatten(_.map(dw, function(i) {
-                         var addr = self.evalExpr(i);
-                         if(_.isString(addr)) {
-                           return [{type:'low', label:addr}, {type:'high', label:addr}];
-                         }
-                         return [addr&255, addr>>8];
-                       }, self));
+      _.flatten(_.map(dw, function(i) {
+                  var addr = self.evalExpr(i);
+                  if(_.isString(addr)) {
+                    self.writeBytes([{type:'low', label:addr}, {type:'high', label:addr}]);
+                  } else {
+                    self.writeBytes([addr&255, addr>>8]);
+                  }
+                }, self));
     },
     db: function(db) {
-      return _.flatten(_.map(db, function(i) {
-                         var r = self.evalExpr(i);
-                         if(_.isString(r)) {
-                           return _.map(r, function(i) { return i.charCodeAt(0); });
-                         } else {
-                           return r;
-                         }
-                       }, self));
+      _.flatten(_.map(db, function(i) {
+                  var r = self.evalExpr(i);
+                  if(_.isString(r)) {
+                    _.each(r, function(i) {
+                      self.writeBytes([i.charCodeAt(0)]);
+                    }, self);
+                  } else {
+                    self.writeBytes([r]);
+                  }
+                }, self));
     },
     equ: function(equ) {
       self.defineLabel(equ.label, self.evalExpr(equ.value));
@@ -293,7 +296,7 @@ Z80.prototype.parseInst = function(code) {
       var data = fs.readFileSync(incbin.file);
       var skip = incbin.skip ? self.evalExpr(incbin.skip) : 0;
       var len  = incbin.len  ? self.evalExpr(incbin.len)  : data.length;
-      return Array.prototype.slice.call(data, skip, skip+len);
+      self.writeBytes(Array.prototype.slice.call(data, skip, skip+len));
     },
     macro: function(macro) {
       self.macros[macro.id] = macro;
@@ -301,7 +304,7 @@ Z80.prototype.parseInst = function(code) {
     repeat: function(repeat) {
       var n = self.evalExpr(repeat.count);
       _.each(_.range(n), function() {
-        return self.parseInsts(repeat.body);
+        self.parseInsts(repeat.body);
       }, self);
     },
     rotate: function(rotate) {
@@ -322,7 +325,6 @@ Z80.prototype.parseInst = function(code) {
         self.image.selectPage([self.evalExpr(page)]);
       }
     },
-
     echo: function(echo) {
       console.log(_.map(echo, function(arg) {
                     return self.evalExpr(arg).toString();
@@ -330,16 +332,14 @@ Z80.prototype.parseInst = function(code) {
     }
   };
 
-  var done = false;
-  _.each(commands, function(fn, key) {
-    if(key in code) {
-      done = true;
-      var bytes = fn(code[key]);
-      if(bytes) {
-        this.writeBytes(bytes);
-      }
-    }
-  }, this);
+  var done = _.reduce(commands, function(memo, fn, key) {
+               var val = code[key];
+               if(val) {
+                 fn(val);
+                 return true;
+               }
+               return memo;
+             }, false);
   if(!done) {
     throw new Error('Internal error');
   }
