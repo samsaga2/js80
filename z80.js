@@ -249,12 +249,11 @@ Z80.prototype.parseInst = function(code) {
     },
     dw: function(dw) {
       return _.flatten(_.map(dw, function(i) {
-                         if('id' in i) {
-                           return [{type:'low', label:i.id}, {type:'high', label:i.id}];
-                         } else {
-                           var j = self.evalExpr(i);
-                           return [j&255, j>>8];
+                         var addr = self.evalExpr(i);
+                         if(_.isString(addr)) {
+                           return [{type:'low', label:addr}, {type:'high', label:addr}];
                          }
+                         return [addr&255, addr>>8];
                        }, self));
     },
     db: function(db) {
@@ -315,8 +314,15 @@ Z80.prototype.parseInst = function(code) {
       self.image.pages[index].size = self.evalExpr(defpage.size);
     },
     page: function(page) {
-      self.image.selectPage(self.evalExpr(page));
+      if('start' in page) {
+        var start = self.evalExpr(page.start);
+        var end = self.evalExpr(page.end);
+        self.image.selectPage(_.range(start, end + 1));
+      } else {
+        self.image.selectPage([self.evalExpr(page)]);
+      }
     },
+
     echo: function(echo) {
       console.log(_.map(echo, function(arg) {
                     return self.evalExpr(arg).toString();

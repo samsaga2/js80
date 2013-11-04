@@ -13,28 +13,37 @@ function Image() {
       output:[]
     });
   }, this);
-  this.selectPage(0);
+  this.selectPage([0]);
 }
 
 Image.prototype.selectPage = function(n) {
-  this.pageIndex = n;
-  this.page = this.pages[n];
+  this.pageRange = _.rest(n);
+  this.pageIndex = _.first(n);
+  this.page = this.pages[this.pageIndex];
 }
 
 Image.prototype.here = function() {
   return this.page.offset + this.page.origin;
 }
 
-Image.prototype.write = function(bytes) {
-  // write
-  bytes = _.map(bytes, miscutil.compl2, this);
-  this.page.output = this.page.output.concat(bytes);
-
-  // advance
-  this.page.offset += bytes.length;
-  if(this.page.size > 0 && this.page.offset > this.page.size) {
+Image.prototype.writeByte = function(value) {
+  if(this.page.size > 0 && this.page.offset >= this.page.size) {
     throw new Error('Page overflow');
   }
+
+  this.page.output.push(miscutil.compl2(value));
+
+  this.page.offset++;
+  if(this.page.size > 0 && this.page.offset >= this.page.size && this.pageRange.length) {
+    // select next page
+    this.pageIndex = _.first(this.pageRange);
+    this.page = this.pages[this.pageIndex];
+    this.pageRange = _.rest(this.pageRange);
+  }
+}
+
+Image.prototype.write = function(bytes) {
+  _.each(bytes, this.writeByte, this);
 }
 
 Image.prototype.build = function() {
