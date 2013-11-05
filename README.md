@@ -144,24 +144,19 @@ endmacro
 
 Modules
 ---------
-* bios.asm
+* bios.asm:
   MSX 2 Bios functions and variables (bios.WRTVRM, bios.H_KEYI, ...)
-* rom16k.asm
+* rom16k.asm:
   MSX 16kb rom setup (start label is the entry point)
-* rom32k.asm
+* rom32k.asm:
   MSX 32kb rom setup (start label is the entry point)
-* extensions.asm
+* extensions.asm:
   Utility macros:
-  * push r1, r2, r3, ...
+  * push r1, r2, r3, ...:
     Push multiple registers at once
-  * pop r1, r2, r3, ...
+  * pop r1, r2, r3, ...:
     Pop multiple registers at once in reverse order
-    ```
-    push bc, hl
-    add hl,bc
-    ld (test),hl
-    pop bc, hl
-    ```
+    `push bc, hl\add hl,bc\ld (test),hl\pop bc, hl`
 
 Other
 ------
