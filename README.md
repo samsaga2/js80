@@ -52,7 +52,8 @@ Assembler
 
 Code
 -----
-```label: xor a
+```
+label: xor a
 
 xor a\ld b,1\label2: ld d,2\ret
 
@@ -96,25 +97,27 @@ main: call mod1.util
 
 Expressions
 --------------
-* 11001100b, 0b11001100b: binary number
-* 0x1a, 01ah, $1a: hexadecimal number
-* $: current address
-* -n: negate a number
-* i-j: substract two numbers
-* i+j: sum two numbers
-* i*j: mult two numbers
-* i/j: div two numbers
-* (i): group expression
-* i<<j: shift left
-* i>>j: shift right
-* i^j: xor
-* i|j: or
-* i&j: and
-* "str": string
-* 'i': char
-* # nbytes: get map and move it nbytes
-* @0: macro arguments length
-* @number: get macro argument (start from 1)
+| Expr |  Desc |
+|------|-------|
+| 11001100b, 0b11001100b | binary number |
+| 0x1a, 01ah, $1a | hexadecimal number |
+| $ | current address |
+| -n |  negate a number |
+| i-j | substract two numbers |
+| i+j | sum two numbers |
+| i*j | mult two numbers |
+| i/j | div two numbers |
+| (i) | group expression |
+| i<<j | shift left |
+| i>>j | shift right |
+| i^j | xor |
+| i|j | or |
+| i&j | and |
+| "str" | string |
+| 'i' | char |
+| # nbytes | get map and move it nbytes |
+| @0 | macro arguments length |
+| @number | get macro argument (start from 1) |
 
 Macros
 --------
@@ -162,17 +165,17 @@ Modules
 
 Other
 ------
-
-TODO
-* include "FILENAME"
-* incbin "FILENAME"
-* rotate ARG
-* map OFFSET
-* org OFFSET
-* repeat/rept NUM ... endrepeat/endr
-* defpage PAGE, ORIGIN, SIZE
-* page PAGE
-* echo EXPR1, EXPR2, ...
+| TODO |
+|------|
+| include "FILENAME" |
+| incbin "FILENAME" |
+| rotate ARG |
+| map OFFSET |
+| org OFFSET |
+| repeat/rept NUM ... endrepeat/endr |
+| defpage PAGE, ORIGIN, SIZE |
+| page PAGE |
+| echo EXPR1, EXPR2, ... |
 
 Opcodes
 ---------
