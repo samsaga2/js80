@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-var Z80 = require('../z80')
+var js80 = require('js80')
   , program = require('commander')
   , _ = require('underscore');
 
@@ -22,7 +22,7 @@ if(!program.args[0]) {
   program.help();
 }
 
-var z80 = new Z80();
+var z80 = new js80();
 if(program.include) {
   z80.searchPath = z80.searchPath.concat(program.include);
 }

@@ -6,15 +6,15 @@ MSXLIB := $(shell find msx -name '*.asm')
 all: test
 
 clean:
-	rm -f parser.js z80parser.js *.rom
+	rm -f *.rom
 
-parser.js: parser.pegjs
-	$(PEG) --track-line-and-column parser.pegjs
+lib/parser.js: parser.pegjs
+	$(PEG) --track-line-and-column parser.pegjs lib/parser.js
 
-z80parser.js: z80parser.pegjs
-	$(PEG) --track-line-and-column z80parser.pegjs
+lib/z80parser.js: z80parser.pegjs
+	$(PEG) --track-line-and-column z80parser.pegjs lib/z80parser.js
 
-test: parser.js z80parser.js
+test: lib/parser.js lib/z80parser.js
 	$(MOCHA)
 
 hello.rom: examples/hello.asm $(MSXLIB)

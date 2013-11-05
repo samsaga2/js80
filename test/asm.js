@@ -1,7 +1,7 @@
 'use strict';
 
 var should = require('should')
-  , Z80 = require ('../z80')
+  , Z80 = require ('../lib/z80')
   , _ = require('underscore');
 
 describe('asm inst', function() {
