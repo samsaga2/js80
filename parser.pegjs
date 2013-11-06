@@ -1,8 +1,7 @@
 {
   var _ = require('underscore');
   var macro = null;
-  var repeat = null;
-  var prevRepeats = [];
+  var repeat = [];
 }
 
 Start
@@ -16,8 +15,8 @@ Lines
 
 ProgLine
   = l:Line {
-    if(repeat) { repeat.body.push(l); return []; }
-    if(macro)  { macro.body.push(l); return []; }
+    if(repeat.length) { _.last(repeat).body.push(l); return []; }
+    if(macro)         { macro.body.push(l); return []; }
     return l;
   }
 
@@ -49,8 +48,8 @@ SpecialInst
   / "incbin"i _ s:String                                 { return {incbin:{file:s}}; }
   / "macro"i _ i:Identifier _ a:MacroArgs?               { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
   / "endmacro"i                                          { var m = macro; macro = null; return {macro:m}; }
-  / ("repeat"i/"rept"i) _ n:Expr                         { prevRepeats.push(repeat); repeat = {count:n, body:[]}; return {}; }
-  / ("endrepeat"i/"endr"i)                               { var r = repeat; repeat = prevRepeats.pop(); return {repeat:r}; }
+  / ("repeat"i/"rept"i) _ n:Expr                         { repeat.push({count:n, body:[]}); return {}; }
+  / ("endrepeat"i/"endr"i)                               { var r = repeat.pop(); return {repeat:r}; }
   / "rotate"i _ n:Expr                                   { return {rotate:n}; }
   / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return {defpage:{index:p, origin:o, size:s}}; }
   / "page"i _ p:PageArg                                  { return {page:p}; }
