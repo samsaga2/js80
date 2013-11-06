@@ -2,6 +2,7 @@
   var _ = require('underscore');
   var macro = null;
   var repeat = [];
+  var astif = [];
 }
 
 Start
@@ -15,6 +16,8 @@ Lines
 
 ProgLine
   = l:Line {
+    if(astif.length && !_.isUndefined(_.last(astif).elseBody)) { _.last(astif).elseBody.push(l); return []; }
+    if(astif.length)  { _.last(astif).thenBody.push(l); return []; }
     if(repeat.length) { _.last(repeat).body.push(l); return []; }
     if(macro)         { macro.body.push(l); return []; }
     return l;
@@ -24,7 +27,7 @@ Line
   = l:Identifier _ "equ"i _ e:Expr { return {equ:{label:l, value:e}, line:line}; }
   / l:Label _ i:Inst               { return [{label:l, line:line}, i] }
   / l:Label                        { return {label:l, line:line}; }
-  / i:Inst                         { return _.extend(i, {line:line}); }
+  / i:Inst                         { return _.isEmpty(i) ? i :_.extend(i, {line:line}); }
 
 Label
   = l:Identifier ":" { return l; }
@@ -50,6 +53,10 @@ SpecialInst
   / "endmacro"i                                          { var m = macro; macro = null; return {macro:m}; }
   / ("repeat"i/"rept"i) _ n:Expr                         { repeat.push({count:n, body:[]}); return {}; }
   / ("endrepeat"i/"endr"i)                               { var r = repeat.pop(); return {repeat:r}; }
+  / "ifdef"i _ i:Identifier                              { astif.push({defined:i, thenBody:[]}); return {}; }
+  / "ifndef"i _ i:Identifier                             { astif.push({undefined:i, thenBody:[]}); return {}; }
+  / "else"i                                              { _.last(astif).elseBody = []; return {}; }
+  / "endif"i                                             { var i = astif.pop(); return {if:i}; }
   / "rotate"i _ n:Expr                                   { return {rotate:n}; }
   / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return {defpage:{index:p, origin:o, size:s}}; }
   / "page"i _ p:PageArg                                  { return {page:p}; }
