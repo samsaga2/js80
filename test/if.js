@@ -3,7 +3,7 @@
 var should = require('should')
   , JS80 = require ('../lib/js80');
 
-describe('asm inst', function() {
+describe('if', function() {
   it('ifdef', function() {
     var js80 = new JS80();
     js80.asm('test equ 1\nifdef test\nnop\nendif');
