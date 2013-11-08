@@ -55,6 +55,7 @@ SpecialInst
   / ("endrepeat"i/"endr"i)                               { var r = repeat.pop(); return {repeat:r}; }
   / "ifdef"i _ i:Identifier                              { astif.push({defined:i, thenBody:[]}); return {}; }
   / "ifndef"i _ i:Identifier                             { astif.push({undefined:i, thenBody:[]}); return {}; }
+  / "if"i _ e:Expr                                       { astif.push({expr:e, thenBody:[]}); return {}; }
   / "else"i                                              { _.last(astif).elseBody = []; return {}; }
   / "endif"i                                             { var i = astif.pop(); return {if:i}; }
   / "rotate"i _ n:Expr                                   { return {rotate:n}; }
