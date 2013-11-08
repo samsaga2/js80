@@ -90,7 +90,8 @@ Expr
   / e:String     { return {str:e}; }
 
 ExprCmp
-  = left:ExprAdd _ "==" _ right:ExprAdd { return {equal:{left:left, right:right}}; }
+  = left:ExprAdd _ "==" _ right:ExprAdd { return {eq:{left:left, right:right}}; }
+  / left:ExprAdd _ "!=" _ right:ExprAdd { return {neq:{left:left, right:right}}; }
   / ExprAdd
 
 ExprAdd
