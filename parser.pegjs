@@ -85,9 +85,15 @@ MacroArg
 // Expr
 //
 Expr
-  = e:ExprCmp    { return e; }
+  = e:ExprLogic  { return e; }
   / e:ExprChar   { return {chr:e}; }
   / e:String     { return {str:e}; }
+
+ExprLogic
+  = left:ExprCmp _ "^" _ right:ExprLogic { return {unary:"^", args:[left, right]}; }
+  / left:ExprCmp _ "|" _ right:ExprLogic { return {unary:"|", args:[left, right]}; }
+  / left:ExprCmp _ "&" _ right:ExprLogic { return {unary:"&", args:[left, right]}; }
+  / ExprCmp
 
 ExprCmp
   = left:ExprAdd _ "==" _ right:ExprAdd { return {eq:{left:left, right:right}}; }
@@ -95,7 +101,7 @@ ExprCmp
   / ExprAdd
 
 ExprAdd
-  = left:ExprLogic _ right:([+-] ExprLogic)+ {
+  = left:ExprMul _ right:([+-] ExprMul)+ {
     var n=[left].concat(_.map(right, function(i) {
       if(i[0]==='-') {
        return {neg:i[1]};
@@ -105,12 +111,6 @@ ExprAdd
     }));
     return {unary:"+", args:n};
   }
-  / ExprLogic
-
-ExprLogic
-  = left:ExprMul _ "^" _ right:ExprLogic { return {unary:"^", args:[left, right]}; }
-  / left:ExprMul _ "|" _ right:ExprLogic { return {unary:"|", args:[left, right]}; }
-  / left:ExprMul _ "&" _ right:ExprLogic { return {unary:"&", args:[left, right]}; }
   / ExprMul
 
 ExprMul
