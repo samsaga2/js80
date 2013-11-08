@@ -85,9 +85,13 @@ MacroArg
 // Expr
 //
 Expr
-  = e:ExprAdd    { return e; }
+  = e:ExprCmp    { return e; }
   / e:ExprChar   { return {chr:e}; }
   / e:String     { return {str:e}; }
+
+ExprCmp
+  = left:ExprAdd _ "==" _ right:ExprAdd { return {equal:{left:left, right:right}}; }
+  / ExprAdd
 
 ExprAdd
   = left:ExprLogic _ right:([+-] ExprLogic)+ {

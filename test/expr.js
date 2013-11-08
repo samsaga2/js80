@@ -130,4 +130,16 @@ describe('expr', function() {
     js80.asm('ld a,0b100');
     should(js80.image.build()).be.eql([0x3e, 4]);
   });
+
+  it('== true', function() {
+    var js80 = new JS80();
+    js80.asm('ld a,0==0');
+    should(js80.image.build()).be.eql([0x3e, 1]);
+  });
+
+  it('== false', function() {
+    var js80 = new JS80();
+    js80.asm('ld a,0==1');
+    should(js80.image.build()).be.eql([0x3e,0]);
+  });
 });
