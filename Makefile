@@ -9,10 +9,10 @@ clean:
 	rm -f *.rom
 
 lib/parser.js: parser.pegjs
-	$(PEG) --track-line-and-column parser.pegjs lib/parser.js
+	$(PEG) --track-line-and-column --cache parser.pegjs lib/parser.js
 
 lib/z80parser.js: z80parser.pegjs
-	$(PEG) --track-line-and-column z80parser.pegjs lib/z80parser.js
+	$(PEG) --track-line-and-column --cache z80parser.pegjs lib/z80parser.js
 
 test: lib/parser.js lib/z80parser.js
 	$(MOCHA)
