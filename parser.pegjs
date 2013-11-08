@@ -96,8 +96,12 @@ ExprLogic
   / ExprCmp
 
 ExprCmp
-  = left:ExprAdd _ "==" _ right:ExprAdd { return {eq:{left:left, right:right}}; }
+  = left:ExprAdd _ "==" _ right:ExprAdd { return {eq: {left:left, right:right}}; }
   / left:ExprAdd _ "!=" _ right:ExprAdd { return {neq:{left:left, right:right}}; }
+  / left:ExprAdd _ "<=" _ right:ExprAdd { return {le: {left:left, right:right}}; }
+  / left:ExprAdd _ ">=" _ right:ExprAdd { return {ge: {left:left, right:right}}; }
+  / left:ExprAdd _ "<"  _ right:ExprAdd { return {lt: {left:left, right:right}}; }
+  / left:ExprAdd _ ">"  _ right:ExprAdd { return {gt: {left:left, right:right}}; }
   / ExprAdd
 
 ExprAdd
