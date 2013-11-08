@@ -62,6 +62,7 @@ SpecialInst
   / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return {defpage:{index:p, origin:o, size:s}}; }
   / "page"i _ p:PageArg                                  { return {page:p}; }
   / "echo"i _ head:Expr tail:(_ "," _ Expr)*             { return {echo:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
+  / "error"i _ msg:Expr                                  { return {error:msg}; }
 
 PageArg
   = s:Expr _ ".." _ e:Expr      { return {start:s, end:e}; }

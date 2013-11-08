@@ -154,4 +154,11 @@ describe('funcs', function() {
     js80.asm('defpage 0..2,0,1\npage 0..2\ndb 1,2,3');
     should(js80.image.build()).be.eql([1,2,3]);
   });
+
+  it('error', function() {
+    var js80 = new JS80();
+    (function() {
+      js80.asm('error "jarl"');
+    }).should.throw('jarl');
+  });
 });

@@ -17,10 +17,10 @@ lib/z80parser.js: z80parser.pegjs
 test: lib/parser.js lib/z80parser.js
 	$(MOCHA)
 
-hello.rom: examples/hello.asm $(MSXLIB)
+hello.rom:
 	$(ASM) -o hello.rom examples/hello.asm
 
-hello32k.rom: examples/hello32k.asm $(MSXLIB)
+hello32k.rom:
 	$(ASM) -o hello32k.rom examples/hello32k.asm
 
 debug:
@@ -28,4 +28,4 @@ debug:
 	$(MOCHA) --debug-brk &
 	chromium-browser http://127.0.0.1:8080/debug?port=5858
 
-.PHONY: all test debug
+.PHONY: all test debug hello.rom hello32k.rom
