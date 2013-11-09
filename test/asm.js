@@ -80,7 +80,7 @@ describe('asm inst', function() {
     var js80 = new JS80();
     js80.asm('org 8000h\ntest_label: nop');
     should(js80.image.build()).be.eql([0]);
-    should(js80.environment.test_label).be.eql(0x8000);
+    should(js80.labels.test_label).be.eql(0x8000);
   });
 
   it('multiple inst per line', function() {
