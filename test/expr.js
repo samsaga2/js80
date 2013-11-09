@@ -64,16 +64,10 @@ describe('expr', function() {
     should(js80.image.build()).be.eql([0x3e, (1<<1)+2]);
   });
 
-  it('org 8000h \n ld hl,$', function() {
+  it('$', function() {
     var js80 = new JS80();
-    js80.asm('org 8000h\nld hl,$');
-    should(js80.image.build()).be.eql([0x21, 0, 0x80]);
-  });
-
-  it('org 8000h \n ld hl,$+2', function() {
-    var js80 = new JS80();
-    js80.asm('org 8000h\nld hl,$+2');
-    should(js80.image.build()).be.eql([0x21, 2, 0x80]);
+    js80.asm('org 8000h\nld hl,$\nld hl,$');
+    should(js80.image.build()).be.eql([0x21, 0, 0x80, 0x21, 3, 0x80]);
   });
 
   it('ld string', function() {

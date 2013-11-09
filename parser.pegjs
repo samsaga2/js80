@@ -135,7 +135,7 @@ ExprPrimary
   / "#" _ e:Expr      { return {getMap:e}; }
   / num:Number        { return {num:num}; }
   / id:Identifier     { return {id:id}; }
-  / "$"               { return {id:'__here__'}; }
+  / "$"               { return {id:'$'}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }
 
 Number
