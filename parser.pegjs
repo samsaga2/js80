@@ -132,7 +132,7 @@ ExprShift
 ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
   / "@" _ e:Expr      { return {arg:e}; }
-  / "#" _ e:Expr      { return {getMap:e}; }
+  / "#" _ e:Expr      { return {map:e}; }
   / num:Number        { return {num:num}; }
   / id:Identifier     { return {id:id}; }
   / "$"               { return {id:'$'}; }
