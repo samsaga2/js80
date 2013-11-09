@@ -21,13 +21,13 @@ Int8
 
 Int16
   = n:Number { return [n&255, (n>>8)&255]; }
-  / i:Identifier { return [{type:'low', label:i}, {type:'high', label:i}]; }
+  / i:Identifier { return [{type:'low', expr:{id:i}}, {type:'high', expr:{id:i}}]; }
 
 Offset8
   = "+" n:Number { return n; }
   / "-" n:Number { return -n; }
-  / n:Number { return {type:'relative', value:n}; }
-  / i:Identifier { return {type:'relative', label:i}; }
+  / n:Number { return {type:'relative', expr:{num:n}}; }
+  / i:Identifier { return {type:'relative', expr:{id:i}}; }
 
 Number
   = s:([+-])? text:[0-9]+ "h"  { return parseInt(s+text.join(""), 16); }
