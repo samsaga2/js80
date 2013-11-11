@@ -44,8 +44,8 @@ describe('funcs', function() {
 
   it('modules', function() {
     var js80 = new JS80();
-    js80.asm('org 8000h\nmodule m1\nl1: nop\nmodule m2\nl2: nop\nmodule m3\nld hl,m1.l1+m2.l2');
-    should(js80.image.build()).be.eql([0,0,0x21,1,(0x80+0x80)&255]);
+    js80.asm('org 8000h\nmodule m1\nl1: nop\nmodule m2\nl2: nop\nmodule m3\nld hl,m1.l1\nld hl,m2.l2');
+    should(js80.image.build()).be.eql([0,0,0x21,0,0x80,0x21,1,0x80]);
   });
 
   it('include', function() {

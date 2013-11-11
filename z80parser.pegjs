@@ -20,13 +20,13 @@ Int8
   = n:Number { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
 
 Int16
-  = n:Number { return [n&255, (n>>8)&255]; }
-  / i:Identifier { return [{type:'low', expr:{id:i}}, {type:'high', expr:{id:i}}]; }
+  = n:Number     { return [{type:'word', expr:{num:n}}, 0]; }
+  / i:Identifier { return [{type:'word', expr:{id:i}}, 0]; }
 
 Offset8
   = "+" n:Number { return n; }
   / "-" n:Number { return -n; }
-  / n:Number { return {type:'relative', expr:{num:n}}; }
+  / n:Number     { return {type:'relative', expr:{num:n}}; }
   / i:Identifier { return {type:'relative', expr:{id:i}}; }
 
 Number
@@ -34,7 +34,7 @@ Number
   / s:([+-])? text:[0-1]+ "b"  { return parseInt(s+text.join(""), 2); }
   / s:([+-])? "0x" text:[0-9]+ { return parseInt(s+text.join(""), 16); }
   / s:([+-])? "0b" text:[0-1]+ { return parseInt(s+text.join(""), 2); }
-  / s:([+-])? text:[0-9]+ { return parseInt(s+text.join("")); }
+  / s:([+-])? text:[0-9]+      { return parseInt(s+text.join("")); }
 
 //
 // tables
