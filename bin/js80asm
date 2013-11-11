@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-var JS80 = require('js80')
+var JS80 = require('../lib/js80')
   , program = require('commander')
   , _ = require('underscore');
 
@@ -9,6 +9,15 @@ function list(val) {
     return val.split(':');
 }
 
+function printError(err) {
+  console.log(
+      '%s:%s: %s',
+      err.environment.__filename__,
+      err.environment.__line__,
+      err.msg);
+}
+
+// parse args
 program
   .version('0.0.1')
   .usage('[options] <file ...>')
@@ -22,19 +31,24 @@ if(!program.args[0]) {
   program.help();
 }
 
+// compile
 var js80 = new JS80();
 if(program.include) {
   js80.searchPath = js80.searchPath.concat(program.include);
 }
-try {
-  _.each(program.args, function(arg) {
-    js80.compileFile(arg);
-  });
-  js80.secondPass();
-  js80.saveImage(program.output || 'a.out');
-  if(program.sym) {
-    js80.saveSymbols(program.sym);
-  }
-} catch(e) {
-  console.log('%s:%s: %s', e.filename, e.line, e.toString());
+_.each(program.args, function(arg) {
+  js80.compileFile(arg);
+});
+js80.secondPass();
+if(!_.isEmpty(js80.errors)) {
+  _.each(js80.errors, printError);
+  process.exit(1);
 }
+
+// output
+js80.saveImage(program.output || 'a.out');
+if(program.sym) {
+  js80.saveSymbols(program.sym);
+}
+
+process.exit(0);

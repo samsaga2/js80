@@ -179,9 +179,10 @@ __
 // comments
 //
 Comment
-  = SingleLineComment
-  / SingleLineComment2
-  / MultiLineComment
+  = SingleLineComment / SingleLineComment2 / MultiLineComment
+
+CommentNoLineTerminator
+  = SingleLineComment / MultiLineCommentNoLineTerminator
 
 SingleLineComment
   = "//" (!LineTerminator .)*
@@ -191,10 +192,6 @@ SingleLineComment2
 
 MultiLineComment
   = "/*" (!"*/" .)* "*/"
-
-CommentNoLineTerminator
-  = SingleLineComment
-  / MultiLineCommentNoLineTerminator
 
 MultiLineCommentNoLineTerminator
   = "/*" (!("*/" / LineTerminator) .)* "*/"
