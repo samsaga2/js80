@@ -202,4 +202,10 @@ describe('expr', function() {
      js80.asm('ld a,1>=0');
      should(js80.image.build()).be.eql([0x3e,1]);
    });
+
+   it('forward label', function() {
+     var js80 = new JS80();
+     js80.asm('org $8000\nld hl,label\nlabel: nop');
+     should(js80.image.build()).be.eql([0x21,3,0x80,0]);
+   });
 });

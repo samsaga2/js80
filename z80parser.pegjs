@@ -17,7 +17,8 @@ Int3
   = n:Number { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
 
 Int8
-  = n:Number { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
+  = n:Number     { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
+  / i:Identifier { return {type:'byte', expr:{id:i}}; }
 
 Int16
   = n:Number     { return [{type:'word', expr:{num:n}}, 0]; }
@@ -62,8 +63,8 @@ Z80
   = "ADC"i _ "A"i _ "," _ "(HL)"i                                                   		{ return [0x8E]; } // ADC A,(HL)
   / "ADC"i _ "A"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                            		{ return [0xDD,0x8E,oo]; } // ADC A,(IX+o)
   / "ADC"i _ "A"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                            		{ return [0xFD,0x8E,oo]; } // ADC A,(IY+o)
-  / "ADC"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xCE,nn]; } // ADC A,n
   / "ADC"i _ "A"i _ "," _ r:TableR                                                  		{ return [0x88+r]; } // ADC A,r
+  / "ADC"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xCE,nn]; } // ADC A,n
   / "ADC"i _ "A"i _ "," _ p:TableIXp                                                		{ return [0xDD,0x88+p]; } // ADC A,IXp
   / "ADC"i _ "A"i _ "," _ q:TableIYq                                                		{ return [0xFD,0x88+q]; } // ADC A,IYq
   / "ADC"i _ "HL"i _ "," _ "BC"i                                                    		{ return [0xED,0x4A]; } // ADC HL,BC
@@ -73,8 +74,8 @@ Z80
   / "ADD"i _ "A"i _ "," _ "(HL)"i                                                   		{ return [0x86]; } // ADD A,(HL)
   / "ADD"i _ "A"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                            		{ return [0xDD,0x86,oo]; } // ADD A,(IX+o)
   / "ADD"i _ "A"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                            		{ return [0xFD,0x86,oo]; } // ADD A,(IY+o)
-  / "ADD"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xC6,nn]; } // ADD A,n
   / "ADD"i _ "A"i _ "," _ r:TableR                                                  		{ return [0x80+r]; } // ADD A,r
+  / "ADD"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xC6,nn]; } // ADD A,n
   / "ADD"i _ "A"i _ "," _ p:TableIXp                                                		{ return [0xDD,0x80+p]; } // ADD A,IXp
   / "ADD"i _ "A"i _ "," _ q:TableIYq                                                		{ return [0xFD,0x80+q]; } // ADD A,IYq
   / "ADD"i _ "HL"i _ "," _ "BC"i                                                    		{ return [0x09]; } // ADD HL,BC
@@ -92,8 +93,8 @@ Z80
   / "AND"i _ "(HL)"i                                                                		{ return [0xA6]; } // AND (HL)
   / "AND"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0xA6,oo]; } // AND (IX+o)
   / "AND"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0xA6,oo]; } // AND (IY+o)
-  / "AND"i _ nn:Int8                                                                		{ return [0xE6,nn]; } // AND n
   / "AND"i _ r:TableR                                                               		{ return [0xA0+r]; } // AND r
+  / "AND"i _ nn:Int8                                                                		{ return [0xE6,nn]; } // AND n
   / "AND"i _ p:TableIXp                                                             		{ return [0xDD,0xA0+p]; } // AND IXp
   / "AND"i _ q:TableIYq                                                             		{ return [0xFD,0xA0+q]; } // AND IYq
   / "BIT"i _ b:Int3 _ "," _ "(HL)"i                                                 		{ return [0xCB,0x46+0x8*b]; } // BIT b,(HL)
@@ -113,8 +114,8 @@ Z80
   / "CP"i _ "(HL)"i                                                                 		{ return [0xBE]; } // CP (HL)
   / "CP"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xBE,oo]; } // CP (IX+o)
   / "CP"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xBE,oo]; } // CP (IY+o)
-  / "CP"i _ nn:Int8                                                                 		{ return [0xFE,nn]; } // CP n
   / "CP"i _ r:TableR                                                                		{ return [0xB8+r]; } // CP r
+  / "CP"i _ nn:Int8                                                                 		{ return [0xFE,nn]; } // CP n
   / "CP"i _ p:TableIXp                                                              		{ return [0xDD,0xB8+p]; } // CP IXp
   / "CP"i _ q:TableIYq                                                              		{ return [0xFD,0xB8+q]; } // CP IYq
   / "CPD"i                                                                          		{ return [0xED,0xA9]; } // CPD
@@ -194,9 +195,9 @@ Z80
   / "JP"i _ "NZ"i _ "," _ nn:Int16                                                  		{ return [0xC2,nn[0],nn[1]]; } // JP NZ,nn
   / "JP"i _ "P"i _ "," _ nn:Int16                                                   		{ return [0xF2,nn[0],nn[1]]; } // JP P,nn
   / "JP"i _ "PE"i _ "," _ nn:Int16                                                  		{ return [0xEA,nn[0],nn[1]]; } // JP PE,nn
-  / "JP"i _ nn:Int16                                                                		{ return [0xC3,nn[0],nn[1]]; } // JP nn
   / "JP"i _ "PO"i _ "," _ nn:Int16                                                  		{ return [0xE2,nn[0],nn[1]]; } // JP PO,nn
   / "JP"i _ "Z"i _ "," _ nn:Int16                                                   		{ return [0xCA,nn[0],nn[1]]; } // JP Z,nn
+  / "JP"i _ nn:Int16                                                                		{ return [0xC3,nn[0],nn[1]]; } // JP nn
   / "JR"i _ "C"i _ "," _ oo:Offset8                                                 		{ return [0x38,oo]; } // JR C,o
   / "JR"i _ "NC"i _ "," _ oo:Offset8                                                		{ return [0x30,oo]; } // JR NC,o
   / "JR"i _ "NZ"i _ "," _ oo:Offset8                                                		{ return [0x20,oo]; } // JR NZ,o
@@ -206,10 +207,10 @@ Z80
   / "LD"i _ "(DE)"i _ "," _ "A"i                                                    		{ return [0x12]; } // LD (DE),A
   / "LD"i _ "(HL)"i _ "," _ nn:Int8                                                 		{ return [0x36,nn]; } // LD (HL),n
   / "LD"i _ "(HL)"i _ "," _ r:TableR                                                		{ return [0x70+r]; } // LD (HL),r
-  / "LD"i _ "(" _ "IX"i _ oo:Offset8 _ ")" _ "," _ nn:Int8                          		{ return [0xDD,0x36,oo,nn]; } // LD (IX+o),n
   / "LD"i _ "(" _ "IX"i _ oo:Offset8 _ ")" _ "," _ r:TableR                         		{ return [0xDD,0x70+r,oo]; } // LD (IX+o),r
-  / "LD"i _ "(" _ "IY"i _ oo:Offset8 _ ")" _ "," _ nn:Int8                          		{ return [0xFD,0x36,oo,nn]; } // LD (IY+o),n
+  / "LD"i _ "(" _ "IX"i _ oo:Offset8 _ ")" _ "," _ nn:Int8                          		{ return [0xDD,0x36,oo,nn]; } // LD (IX+o),n
   / "LD"i _ "(" _ "IY"i _ oo:Offset8 _ ")" _ "," _ r:TableR                         		{ return [0xFD,0x70+r,oo]; } // LD (IY+o),r
+  / "LD"i _ "(" _ "IY"i _ oo:Offset8 _ ")" _ "," _ nn:Int8                          		{ return [0xFD,0x36,oo,nn]; } // LD (IY+o),n
   / "LD"i _ "(" _ nn:Int16 _ ")" _ "," _ "A"i                                       		{ return [0x32,nn[0],nn[1]]; } // LD (nn),A
   / "LD"i _ "(" _ nn:Int16 _ ")" _ "," _ "BC"i                                      		{ return [0xED,0x43,nn[0],nn[1]]; } // LD (nn),BC
   / "LD"i _ "(" _ nn:Int16 _ ")" _ "," _ "DE"i                                      		{ return [0xED,0x53,nn[0],nn[1]]; } // LD (nn),DE
@@ -223,8 +224,8 @@ Z80
   / "LD"i _ "A"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x7E,oo]; } // LD A,(IX+o)
   / "LD"i _ "A"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x7E,oo]; } // LD A,(IY+o)
   / "LD"i _ "A"i _ "," _ "(" _ nn:Int16 _ ")"                                       		{ return [0x3A,nn[0],nn[1]]; } // LD A,(nn)
-  / "LD"i _ "A"i _ "," _ nn:Int8                                                    		{ return [0x3E,nn]; } // LD A,n
   / "LD"i _ "A"i _ "," _ r:TableR                                                   		{ return [0x78+r]; } // LD A,r
+  / "LD"i _ "A"i _ "," _ nn:Int8                                                    		{ return [0x3E,nn]; } // LD A,n
   / "LD"i _ "A"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x78+p]; } // LD A,IXp
   / "LD"i _ "A"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x78+q]; } // LD A,IYq
   / "LD"i _ "A"i _ "," _ "I"i                                                       		{ return [0xED,0x57]; } // LD A,I
@@ -232,8 +233,8 @@ Z80
   / "LD"i _ "B"i _ "," _ "(HL)"i                                                    		{ return [0x46]; } // LD B,(HL)
   / "LD"i _ "B"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x46,oo]; } // LD B,(IX+o)
   / "LD"i _ "B"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x46,oo]; } // LD B,(IY+o)
-  / "LD"i _ "B"i _ "," _ nn:Int8                                                    		{ return [0x06,nn]; } // LD B,n
   / "LD"i _ "B"i _ "," _ r:TableR                                                   		{ return [0x40+r]; } // LD B,r
+  / "LD"i _ "B"i _ "," _ nn:Int8                                                    		{ return [0x06,nn]; } // LD B,n
   / "LD"i _ "B"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x40+p]; } // LD B,IXp
   / "LD"i _ "B"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x40+q]; } // LD B,IYq
   / "LD"i _ "BC"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0xED,0x4B,nn[0],nn[1]]; } // LD BC,(nn)
@@ -241,15 +242,15 @@ Z80
   / "LD"i _ "C"i _ "," _ "(HL)"i                                                    		{ return [0x4E]; } // LD C,(HL)
   / "LD"i _ "C"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x4E,oo]; } // LD C,(IX+o)
   / "LD"i _ "C"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x4E,oo]; } // LD C,(IY+o)
-  / "LD"i _ "C"i _ "," _ nn:Int8                                                    		{ return [0x0E,nn]; } // LD C,n
   / "LD"i _ "C"i _ "," _ r:TableR                                                   		{ return [0x48+r]; } // LD C,r
+  / "LD"i _ "C"i _ "," _ nn:Int8                                                    		{ return [0x0E,nn]; } // LD C,n
   / "LD"i _ "C"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x48+p]; } // LD C,IXp
   / "LD"i _ "C"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x48+q]; } // LD C,IYq
   / "LD"i _ "D"i _ "," _ "(HL)"i                                                    		{ return [0x56]; } // LD D,(HL)
   / "LD"i _ "D"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x56,oo]; } // LD D,(IX+o)
   / "LD"i _ "D"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x56,oo]; } // LD D,(IY+o)
-  / "LD"i _ "D"i _ "," _ nn:Int8                                                    		{ return [0x16,nn]; } // LD D,n
   / "LD"i _ "D"i _ "," _ r:TableR                                                   		{ return [0x50+r]; } // LD D,r
+  / "LD"i _ "D"i _ "," _ nn:Int8                                                    		{ return [0x16,nn]; } // LD D,n
   / "LD"i _ "D"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x50+p]; } // LD D,IXp
   / "LD"i _ "D"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x50+q]; } // LD D,IYq
   / "LD"i _ "DE"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0xED,0x5B,nn[0],nn[1]]; } // LD DE,(nn)
@@ -257,35 +258,35 @@ Z80
   / "LD"i _ "E"i _ "," _ "(HL)"i                                                    		{ return [0x5E]; } // LD E,(HL)
   / "LD"i _ "E"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x5E,oo]; } // LD E,(IX+o)
   / "LD"i _ "E"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x5E,oo]; } // LD E,(IY+o)
-  / "LD"i _ "E"i _ "," _ nn:Int8                                                    		{ return [0x1E,nn]; } // LD E,n
   / "LD"i _ "E"i _ "," _ r:TableR                                                   		{ return [0x58+r]; } // LD E,r
+  / "LD"i _ "E"i _ "," _ nn:Int8                                                    		{ return [0x1E,nn]; } // LD E,n
   / "LD"i _ "E"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x58+p]; } // LD E,IXp
   / "LD"i _ "E"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x58+q]; } // LD E,IYq
   / "LD"i _ "H"i _ "," _ "(HL)"i                                                    		{ return [0x66]; } // LD H,(HL)
   / "LD"i _ "H"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x66,oo]; } // LD H,(IX+o)
   / "LD"i _ "H"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x66,oo]; } // LD H,(IY+o)
-  / "LD"i _ "H"i _ "," _ nn:Int8                                                    		{ return [0x26,nn]; } // LD H,n
   / "LD"i _ "H"i _ "," _ r:TableR                                                   		{ return [0x60+r]; } // LD H,r
+  / "LD"i _ "H"i _ "," _ nn:Int8                                                    		{ return [0x26,nn]; } // LD H,n
   / "LD"i _ "HL"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0x2A,nn[0],nn[1]]; } // LD HL,(nn)
   / "LD"i _ "HL"i _ "," _ nn:Int16                                                  		{ return [0x21,nn[0],nn[1]]; } // LD HL,nn
   / "LD"i _ "I"i _ "," _ "A"i                                                       		{ return [0xED,0x47]; } // LD I,A
   / "LD"i _ "IX"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0xDD,0x2A,nn[0],nn[1]]; } // LD IX,(nn)
   / "LD"i _ "IX"i _ "," _ nn:Int16                                                  		{ return [0xDD,0x21,nn[0],nn[1]]; } // LD IX,nn
-  / "LD"i _ "IXh"i _ "," _ nn:Int8                                                  		{ return [0xDD,0x26,nn]; } // LD IXh,n
   / "LD"i _ "IXh"i _ "," _ "p"i                                                     		{ return [0xDD,0x60+p]; } // LD IXh,p
-  / "LD"i _ "IXl"i _ "," _ nn:Int8                                                  		{ return [0xDD,0x2E,nn]; } // LD IXl,n
+  / "LD"i _ "IXh"i _ "," _ nn:Int8                                                  		{ return [0xDD,0x26,nn]; } // LD IXh,n
   / "LD"i _ "IXl"i _ "," _ "p"i                                                     		{ return [0xDD,0x68+p]; } // LD IXl,p
+  / "LD"i _ "IXl"i _ "," _ nn:Int8                                                  		{ return [0xDD,0x2E,nn]; } // LD IXl,n
   / "LD"i _ "IY"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0xFD,0x2A,nn[0],nn[1]]; } // LD IY,(nn)
   / "LD"i _ "IY"i _ "," _ nn:Int16                                                  		{ return [0xFD,0x21,nn[0],nn[1]]; } // LD IY,nn
-  / "LD"i _ "IYh"i _ "," _ nn:Int8                                                  		{ return [0xFD,0x26,nn]; } // LD IYh,n
   / "LD"i _ "IYh"i _ "," _ "q"i                                                     		{ return [0xFD,0x60+q]; } // LD IYh,q
-  / "LD"i _ "IYl"i _ "," _ nn:Int8                                                  		{ return [0xFD,0x2E,nn]; } // LD IYl,n
+  / "LD"i _ "IYh"i _ "," _ nn:Int8                                                  		{ return [0xFD,0x26,nn]; } // LD IYh,n
   / "LD"i _ "IYl"i _ "," _ "q"i                                                     		{ return [0xFD,0x68+q]; } // LD IYl,q
+  / "LD"i _ "IYl"i _ "," _ nn:Int8                                                  		{ return [0xFD,0x2E,nn]; } // LD IYl,n
   / "LD"i _ "L"i _ "," _ "(HL)"i                                                    		{ return [0x6E]; } // LD L,(HL)
   / "LD"i _ "L"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x6E,oo]; } // LD L,(IX+o)
   / "LD"i _ "L"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x6E,oo]; } // LD L,(IY+o)
-  / "LD"i _ "L"i _ "," _ nn:Int8                                                    		{ return [0x2E,nn]; } // LD L,n
   / "LD"i _ "L"i _ "," _ r:TableR                                                   		{ return [0x68+r]; } // LD L,r
+  / "LD"i _ "L"i _ "," _ nn:Int8                                                    		{ return [0x2E,nn]; } // LD L,n
   / "LD"i _ "R"i _ "," _ "A"i                                                       		{ return [0xED,0x4F]; } // LD R,A
   / "LD"i _ "SP"i _ "," _ "(" _ nn:Int16 _ ")"                                      		{ return [0xED,0x7B,nn[0],nn[1]]; } // LD SP,(nn)
   / "LD"i _ "SP"i _ "," _ "HL"i                                                     		{ return [0xF9]; } // LD SP,HL
@@ -304,8 +305,8 @@ Z80
   / "OR"i _ "(HL)"i                                                                 		{ return [0xB6]; } // OR (HL)
   / "OR"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xB6,oo]; } // OR (IX+o)
   / "OR"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xB6,oo]; } // OR (IY+o)
-  / "OR"i _ nn:Int8                                                                 		{ return [0xF6,nn]; } // OR n
   / "OR"i _ r:TableR                                                                		{ return [0xB0+r]; } // OR r
+  / "OR"i _ nn:Int8                                                                 		{ return [0xF6,nn]; } // OR n
   / "OR"i _ p:TableIXp                                                              		{ return [0xDD,0xB0+p]; } // OR IXp
   / "OR"i _ q:TableIYq                                                              		{ return [0xFD,0xB0+q]; } // OR IYq
   / "OTDR"i                                                                         		{ return [0xED,0xBB]; } // OTDR
@@ -380,8 +381,8 @@ Z80
   / "SBC"i _ "A"i _ "," _ "(HL)"i                                                   		{ return [0x9E]; } // SBC A,(HL)
   / "SBC"i _ "A"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                            		{ return [0xDD,0x9E,oo]; } // SBC A,(IX+o)
   / "SBC"i _ "A"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                            		{ return [0xFD,0x9E,oo]; } // SBC A,(IY+o)
-  / "SBC"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xDE,nn]; } // SBC A,n
   / "SBC"i _ "A"i _ "," _ r:TableR                                                  		{ return [0x98+r]; } // SBC A,r
+  / "SBC"i _ "A"i _ "," _ nn:Int8                                                   		{ return [0xDE,nn]; } // SBC A,n
   / "SBC"i _ "A"i _ "," _ p:TableIXp                                                		{ return [0xDD,0x98+p]; } // SBC A,IXp
   / "SBC"i _ "A"i _ "," _ q:TableIYq                                                		{ return [0xFD,0x98+q]; } // SBC A,IYq
   / "SBC"i _ "HL"i _ "," _ "BC"i                                                    		{ return [0xED,0x42]; } // SBC HL,BC
@@ -408,14 +409,14 @@ Z80
   / "SUB"i _ "(HL)"i                                                                		{ return [0x96]; } // SUB (HL)
   / "SUB"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0x96,oo]; } // SUB (IX+o)
   / "SUB"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0x96,oo]; } // SUB (IY+o)
-  / "SUB"i _ nn:Int8                                                                		{ return [0xD6,nn]; } // SUB n
   / "SUB"i _ r:TableR                                                               		{ return [0x90+r]; } // SUB r
+  / "SUB"i _ nn:Int8                                                                		{ return [0xD6,nn]; } // SUB n
   / "SUB"i _ p:TableIXp                                                             		{ return [0xDD,0x90+p]; } // SUB IXp
   / "SUB"i _ q:TableIYq                                                             		{ return [0xFD,0x90+q]; } // SUB IYq
   / "XOR"i _ "(HL)"i                                                                		{ return [0xAE]; } // XOR (HL)
   / "XOR"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0xAE,oo]; } // XOR (IX+o)
   / "XOR"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0xAE,oo]; } // XOR (IY+o)
-  / "XOR"i _ nn:Int8                                                                		{ return [0xEE,nn]; } // XOR n
   / "XOR"i _ r:TableR                                                               		{ return [0xA8+r]; } // XOR r
+  / "XOR"i _ nn:Int8                                                                		{ return [0xEE,nn]; } // XOR n
   / "XOR"i _ p:TableIXp                                                             		{ return [0xDD,0xA8+p]; } // XOR IXp
   / "XOR"i _ q:TableIYq                                                             		{ return [0xFD,0xA8+q]; } // XOR IYq
