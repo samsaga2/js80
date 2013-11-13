@@ -6,7 +6,7 @@ MSXLIB := $(shell find msx -name '*.asm')
 all: test
 
 clean:
-	rm -f *.rom
+	rm -f *.rom lib/parser.js lib/z80parser.js
 
 lib/parser.js: parser.pegjs
 	$(PEG) --track-line-and-column --cache parser.pegjs lib/parser.js
