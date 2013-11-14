@@ -12,8 +12,8 @@ function list(val) {
 function printError(err) {
   console.log(
       '%s:%s: %s',
-      err.environment.__filename__,
-      err.environment.__line__,
+      err.environment.get('__filename__'),
+      err.environment.get('__lineIndex__'),
       err.msg);
 }
 
@@ -27,7 +27,7 @@ program
   .parse(process.argv);
 
 if(!program.args[0]) {
-  console.error('Mising input file');
+  console.error('Missing input file');
   program.help();
 }
 

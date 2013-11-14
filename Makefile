@@ -15,7 +15,11 @@ lib/z80parser.js: z80parser.pegjs
 	$(PEG) --track-line-and-column --cache z80parser.pegjs lib/z80parser.js
 
 test: lib/parser.js lib/z80parser.js
+ifdef REPORT
+	$(MOCHA) -g $(REPORT)
+else
 	$(MOCHA)
+endif
 
 hello.rom:
 	$(ASM) -o hello.rom examples/hello.asm
@@ -25,7 +29,10 @@ hello32k.rom:
 
 debug:
 	@pkill mocha; true
-	$(MOCHA) --debug-brk &
-	chromium-browser http://127.0.0.1:8080/debug?port=5858
+ifdef REPORT
+	$(MOCHA) -g $(REPORT) --debug-brk
+else
+	$(MOCHA) --debug-brk
+endif
 
 .PHONY: all test debug hello.rom hello32k.rom
