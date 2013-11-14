@@ -21,13 +21,13 @@ Int8
   / i:Identifier { return {type:'byte', expr:{id:i}}; }
 
 Int16
-  = n:Number     { return [{type:'word', expr:{num:n}}, 0]; }
+  = n:Number     { return [{type:'word', expr:n}, 0]; }
   / i:Identifier { return [{type:'word', expr:{id:i}}, 0]; }
 
 Offset8
   = "+" n:Number { return n; }
   / "-" n:Number { return -n; }
-  / n:Number     { return {type:'relative', expr:{num:n}}; }
+  / n:Number     { return {type:'relative', expr:n}; }
   / i:Identifier { return {type:'relative', expr:{id:i}}; }
 
 Number

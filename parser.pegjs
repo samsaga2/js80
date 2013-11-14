@@ -40,7 +40,7 @@ SpecialInst
   = "org"i _ n:Expr                                      { return {org:n}; }
   / "map"i _ n:Expr                                      { return {map:n}; }
   / ("ds"i/"defs"i) _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
-  / ("ds"i/"defs"i) _ n:Expr                             { return {ds:{len:n,value:{num:0}}}; }
+  / ("ds"i/"defs"i) _ n:Expr                             { return {ds:{len:n,value:0}}; }
   / ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / ("db"i/"defb"i) _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
   / "module"i _ i:Identifier                             { return {module:i}; }
@@ -133,7 +133,7 @@ ExprPrimary
   = "-" e:ExprPrimary { return {neg:e}; }
   / "@" _ e:Expr      { return {arg:e}; }
   / "#" _ e:Expr      { return {map:e}; }
-  / num:Number        { return {num:num}; }
+  / num:Number        { return num; }
   / id:Identifier     { return {id:id}; }
   / "$"               { return {id:'$'}; }
   / "(" e:ExprAdd ")" { return {paren:e}; }
