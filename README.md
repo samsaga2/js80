@@ -173,6 +173,7 @@ macro withargs i, j
 endmacro
 ```
 
+```
 macro withdefaults i, j:1, k:2
     ld a,i+j+k
 endmacro
