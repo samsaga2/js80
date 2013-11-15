@@ -10,7 +10,7 @@ describe('funcs', function() {
         js80.asm('org 8000h\nnop');
         js80.secondPass();
         should(js80.buildImage()).be.eql([0]);
-        should(js80.image.page.origin + js80.image.page.offset).be.eql(0x8001);
+        should(js80.image.currentPage.origin + js80.image.currentPage.offset).be.eql(0x8001);
     });
 
     it('db 1,2,3', function() {
