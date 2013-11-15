@@ -239,4 +239,11 @@ describe('expr', function() {
         js80.secondPass();
         should(js80.buildImage()).be.eql([0x21, 3, 0x80, 0]);
     });
+
+    it('forward expr', function() {
+        var js80 = new JS80();
+        js80.asm('org $8000\nld hl,label+l2\nlabel: nop\nl2 equ 1');
+        js80.secondPass();
+        should(js80.buildImage()).be.eql([0x21, 4, 0x80, 0]);
+    });
 });

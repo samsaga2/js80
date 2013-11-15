@@ -17,11 +17,13 @@ Int3
   = n:Number { if(n<0||n>7) throw new Error('Value overflow'); else return n; }
 
 Int8
-  = n:Number     { if(n<-127||n>256) throw new Error('Value overflow'); else return n; }
+  = '$nn'        { return {type:'byte', expr:'$nn'}; }
+  / n:Number     { return {type:'byte', expr:n}; }
   / i:Identifier { return {type:'byte', expr:{id:i}}; }
 
 Int16
-  = n:Number     { return [{type:'word', expr:n}, 0]; }
+  = '$nn'        { return [{type:'word', expr:'$nn'}, 0]; }
+  / n:Number     { return [{type:'word', expr:n}, 0]; }
   / i:Identifier { return [{type:'word', expr:{id:i}}, 0]; }
 
 Offset8
