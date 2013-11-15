@@ -9,12 +9,14 @@
 
 **js80** is a library and an assembler for **z80** cpu.
 
-Installation
-=================
+
+# Installation #
+
 `npm install js80 -g`
 
-Command line
-================
+
+# Command line #
+
 js80asm help:
 ```
   Usage: js80asm [options] <file ...>
@@ -37,66 +39,80 @@ js80asm test2.asm -o test2.rom -s test2.sym
 js80asm test3.asm -I include:../include2
 ```
 
-Javascript module
-=======================
-Examples:
+
+# JS80 class #
+
+## Creation ##
+
+```javascript
+var JS80 = require('js80');
+var js80 = new JS80();
 ```
+
+## Class functions ##
+
+* *asm* _js80.asm(code)_
+··Compile assembler code.
+* *defineLabel* _js80.defineLabel(label, value)_
+·· Defines a new label.
+* *secondPass* _js80.secondPass()_
+··Execute the second pass. The compiler evaluates the expressions because labels can be declared later.
+* *buildImage* _js80.buildImage()_
+··Returns an array of bytes with the compiled code.
+* *saveImage* _js80.saveImage(fileName)_
+··Save compiled code to a file.
+* *saveSymbols* _js80.saveSymbols(fileName)_
+··Save symbols to a file (useful for debugging).
+
+Example:
+```javascript
 var JS80 = require('js80');
 var js80 = new JS80();
 js80.asm('xor a');
+js80.secondPass();
 js80.saveImage('a.out');
 ```
 
-Assembler
-============
 
-Code
------
-```
-label: xor a
+# Assembler #
 
-xor a\ld b,1\label2: ld d,2\ret
+| Inst | Desc |
+|------|------|
+| *label:* | Declares a variable |
+| *.label:* | Declares a local label |
+| *`// comment //`* | Comment code |
+| *`/* comment */`* | Comment code |
+| *; comment* | Comment code |
+| *inst1\inst2\···\inst-n* | Multipe instructions per line |
+| *module <name>* | Declares a module |
+| *endmodule* | Ends module declaration |
+| *macro <args>* | Declares a macro |
+| *endmacro* | Ends macro declaration |
+| *ifdef <label>* | Branch if label is defined |
+| *ifndef <label>* | Branch if label is not defined |
+| *if <cond>* | Branch if cond is not zero |
+| *else* | Else branch |
+| *endif* | Ends branching |
+| *repeat <num>* | Repeat block of code <num> times |
+| *endrepeat* | End repeats code block |
+| *include "filename"* | Include another source file |
+| *incbin "filename"* | Include a binary file |
+| *rotate <arg>* | Rotate macro variable arguments |
+| *map <num>* | TODO |
+| *# <num>* | TODO |
+| *org <num>* | TODO |
+| *defpage <page>, <origin>, <size>* | TODO |
+| *page <page>* | TODO |
+| *echo e1, e2, ...* | TODO |
+| *error "msg"* | TODO |
+| *db e1, e2, ...* | TODO |
+| *dw e1, e2, ...* | TODO |
+| *dw* | TODO |
+| *equ* | TODO |
 
-const1: equ 666
 
-; comment 1
+## Expressions ##
 
-// comment 2
-
-/*
- * comment 3
- */
-```
-
-**Note**: You must use *:* to declare labels (compiler don't use spaces to detect code).
-
-Local labels
----------------
-```
-run: ld b,100
-.1:  ld a,(hl)
-     inc a
-     ld (hl),a
-     inc hl
-     djnz .1
-     ret
-```
-
-Modules
----------
-
-```
-      module mod1
-util: xor a
-      ret
-      endmodule
-
-main: call mod1.util
-      ret
-```
-
-Expressions
---------------
 | Expr |  Desc |
 |------|-------|
 | 11001100b, 0b11001100b | binary number |
@@ -119,31 +135,61 @@ Expressions
 | @0 | macro arguments length |
 | @number | get macro argument (start from 1) |
 
-Macros
---------
+
+## Examples ##
+
+```
+run: ld b,100
+.1:  ld a,(hl)
+     inc a
+     ld (hl),a
+     inc hl
+     djnz .1
+     ret
+unuseful:
+     jr run.1
+```
+
+```
+      module mod1
+util: xor a
+      ret
+      endmodule
+
+      // no module
+main: call mod1.util ; calling a module label
+      ret
+```
+
 ```
 macro noargs
-  xor a
-endmacro
-
-macro withargs i, j
-  ld a,i+j
-endmacro
-
-macro withdefaults i, j:1, k:2
-  ld a,i+j+k
-endmacro
-
-macro varargs i, 1..*
-  repeat @0
-    ld a,i+@1
-    rotate 1
-  endrepeat
+    xor a
 endmacro
 ```
 
-Modules
----------
+```
+macro withargs i, j
+    ld a,i+j
+endmacro
+```
+
+macro withdefaults i, j:1, k:2
+    ld a,i+j+k
+endmacro
+```
+
+```
+macro varargs i, 1..*
+    repeat @0
+        ld a,i+@1
+        rotate 1
+    endrepeat
+endmacro
+```
+
+
+# Assembler modules #
+
 * bios.asm:
   MSX 2 Bios functions and variables (bios.WRTVRM, bios.H_KEYI, ...)
 * rom16k.asm:
@@ -151,29 +197,11 @@ Modules
 * rom32k.asm:
   MSX 32kb rom setup (start label is the entry point)
 * extensions.asm:
-  Utility macros:
-  * push r1, r2, r3, ...:
-    Push multiple registers at once
-  * pop r1, r2, r3, ...:
-    Pop multiple registers at once in reverse order
-    `push bc, hl\add hl,bc\ld (test),hl\pop bc, hl`
+  Misc utility macros
 
-Other
-------
-| TODO |
-|------|
-| include "FILENAME" |
-| incbin "FILENAME" |
-| rotate ARG |
-| map OFFSET |
-| org OFFSET |
-| repeat/rept NUM ... endrepeat/endr |
-| defpage PAGE, ORIGIN, SIZE |
-| page PAGE |
-| echo EXPR1, EXPR2, ... |
 
-Opcodes
----------
+# Opcodes #
+
 | Mnemonic | Z80 Timing | R800 Timing | Opcodes |
 |----------|------------|-------------|---------|
 |ADC A,(HL)|7|2|8E|
