@@ -45,7 +45,7 @@ macro dbg_echo msg
         ld hl,.data
         call debug._print_text
         jr .exit
-.data:  db text, 32
+.data:  db msg, 32
 .exit:  pop hl
         pop bc
 endmacro

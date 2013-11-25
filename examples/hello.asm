@@ -1,3 +1,4 @@
+DEBUG: equ 1
         include "debug.asm"
 	include "rom16k.asm"
         include "bios.asm"
@@ -5,7 +6,6 @@
 
         ;; rom entry
 start:  call bios.INITXT
-        dbg_echo "hola"
         ld hl,text
         call print
 .1:     jr .1
