@@ -48,7 +48,7 @@ SpecialInst
   / ("ds"i/"defs"i) _ n:Expr _ "," _ v:Expr              { return ast.defineSpace(n, v); }
   / ("ds"i/"defs"i) _ n:Expr                             { return ast.defineSpace(n, 0); }
   / ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*     { return ast.defineWords(compactList(head, tail)); }
-  / ("db"i/"defb"i) _ head:DbExpr tail:(_ "," _ DbExpr)* { return ast.defineBytes(compactList(head, tail)); }
+  / ("db"i/"defb"i) _ head:Expr tail:(_ "," _ Expr)*     { return ast.defineBytes(compactList(head, tail)); }
   / "module"i _ i:Identifier                             { return ast.defineModule(i); }
   / "endmodule"i                                         { return ast.endModule(i); }
   / "include"i _ s:String                                { return ast.include(s); }
@@ -73,10 +73,6 @@ SpecialInst
 PageArg
   = s:Expr _ ".." _ e:Expr      { return ast.macro.range(s, e); }
   / e:Expr                      { return e; }
-
-DbExpr
-  = Expr
-  / s:String { return ast.expr.str(s); }
 
 InstArgs
   = head:Expr tail:(_ "," _ Expr)* { return compactList(head, tail); }
