@@ -86,18 +86,18 @@ Expr
   / e:String     { return ast.expr.str(e); }
 
 ExprLogic
-  = left:ExprCmp _ "^" _ right:ExprLogic { return ast.expr.binaryOperator("^", left, right); }
-  / left:ExprCmp _ "|" _ right:ExprLogic { return ast.expr.binaryOperator("|", left, right); }
-  / left:ExprCmp _ "&" _ right:ExprLogic { return ast.expr.binaryOperator("&", left, right); }
+  = left:ExprCmp _ "^" _ right:ExprLogic { return ast.expr.op("^", left, right); }
+  / left:ExprCmp _ "|" _ right:ExprLogic { return ast.expr.op("|", left, right); }
+  / left:ExprCmp _ "&" _ right:ExprLogic { return ast.expr.op("&", left, right); }
   / ExprCmp
 
 ExprCmp
-  = left:ExprAdd _ "==" _ right:ExprAdd { return ast.expr.binaryOperator("=", left, right); }
-  / left:ExprAdd _ "!=" _ right:ExprAdd { return ast.expr.binaryOperator("!=", left, right); }
-  / left:ExprAdd _ "<=" _ right:ExprAdd { return ast.expr.binaryOperator("<=", left, right); }
-  / left:ExprAdd _ ">=" _ right:ExprAdd { return ast.expr.binaryOperator(">=", left, right); }
-  / left:ExprAdd _ "<"  _ right:ExprAdd { return ast.expr.binaryOperator("<", left, right); }
-  / left:ExprAdd _ ">"  _ right:ExprAdd { return ast.expr.binaryOperator(">", left, right); }
+  = left:ExprAdd _ "==" _ right:ExprAdd { return ast.expr.op("=", left, right); }
+  / left:ExprAdd _ "!=" _ right:ExprAdd { return ast.expr.op("!=", left, right); }
+  / left:ExprAdd _ "<=" _ right:ExprAdd { return ast.expr.op("<=", left, right); }
+  / left:ExprAdd _ ">=" _ right:ExprAdd { return ast.expr.op(">=", left, right); }
+  / left:ExprAdd _ "<"  _ right:ExprAdd { return ast.expr.op("<", left, right); }
+  / left:ExprAdd _ ">"  _ right:ExprAdd { return ast.expr.op(">", left, right); }
   / ExprAdd
 
 ExprAdd
@@ -114,13 +114,13 @@ ExprAdd
   / ExprMul
 
 ExprMul
-  = left:ExprShift _ "*" _ right:ExprMul { return ast.expr.binaryOperator("*", left, right); }
-  / left:ExprShift _ "/" _ right:ExprMul { return ast.expr.binaryOperator("/", left, right); }
+  = left:ExprShift _ "*" _ right:ExprMul { return ast.expr.op("*", left, right); }
+  / left:ExprShift _ "/" _ right:ExprMul { return ast.expr.op("/", left, right); }
   / ExprShift
 
 ExprShift
-  = left:ExprPrimary _ "<<" _ right:ExprShift { return ast.expr.binaryOperator("<<", left, right); }
-  / left:ExprPrimary _ ">>" _ right:ExprShift { return ast.expr.binaryOperator(">>", left, right); }
+  = left:ExprPrimary _ "<<" _ right:ExprShift { return ast.expr.op("<<", left, right); }
+  / left:ExprPrimary _ ">>" _ right:ExprShift { return ast.expr.op(">>", left, right); }
   / ExprPrimary
 
 ExprPrimary
