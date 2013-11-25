@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-var JS80 = require('../lib/js80')
+var JS80 = require('js80')
   , program = require('commander')
   , _ = require('underscore');
 
