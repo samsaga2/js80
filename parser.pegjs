@@ -2,7 +2,6 @@
   var _ = require('underscore'),
       ast = require('./ast');
 
-  var macro = null;
   var repeat = [];
   var astif = [];
 
@@ -25,8 +24,7 @@ ProgLine
     if(astif.length && !_.isUndefined(_.last(astif).elseBody)) { _.last(astif).elseBody.push(l); return []; }
     if(astif.length)  { _.last(astif).thenBody.push(l); return []; }
     if(repeat.length) { _.last(repeat).body.push(l); return []; }
-    if(macro)         { macro.body.push(l); return []; }
-    return l;
+    return ast.line(l);
   }
 
 Line
@@ -55,8 +53,8 @@ SpecialInst
   / "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr   { return ast.includeBinary(s, k, l); }
   / "incbin"i _ s:String _ "," _ k:Expr                  { return ast.includebinary(s, k); }
   / "incbin"i _ s:String                                 { return ast.includeBinary(s); }
-  / "macro"i _ i:Identifier _ a:MacroArgs?               { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
-  / "endmacro"i                                          { var m = macro; macro = null; return {macro:m}; }
+  / "macro"i _ i:Identifier _ a:MacroArgs?               { return ast.defineMacro(i, a); }
+  / "endmacro"i                                          { return ast.endMacro(); }
   / ("repeat"i/"rept"i) _ n:Expr                         { repeat.push({count:n, body:[]}); return {}; }
   / ("endrepeat"i/"endr"i)                               { var r = repeat.pop(); return {repeat:r}; }
   / "ifdef"i _ i:Identifier                              { astif.push({defined:i, thenBody:[]}); return {}; }
