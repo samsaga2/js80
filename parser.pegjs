@@ -81,9 +81,7 @@ MacroArg
 // Expr
 //
 Expr
-  = e:ExprLogic  { return e; }
-  / e:ExprChar   { return ast.expr.chr(e); }
-  / e:String     { return ast.expr.str(e); }
+  = e:ExprLogic        { return e; }
 
 ExprLogic
   = left:ExprCmp _ "^" _ right:ExprLogic { return ast.expr.op("^", left, right); }
@@ -124,13 +122,15 @@ ExprShift
   / ExprPrimary
 
 ExprPrimary
-  = "-" e:ExprPrimary { return ast.expr.neg(e); }
-  / "@" _ e:Expr      { return ast.expr.arg(e); }
-  / "#" _ e:Expr      { return ast.expr.map(e); }
-  / num:Number        { return ast.expr.num(num); }
-  / id:Identifier     { return ast.expr.id(id); }
-  / "$"               { return ast.expr.here(); }
-  / "(" e:ExprAdd ")" { return ast.expr.paren(e); }
+  = "-" e:ExprPrimary  { return ast.expr.neg(e); }
+  / "@" _ e:Expr       { return ast.expr.arg(e); }
+  / "#" _ e:Expr       { return ast.expr.map(e); }
+  / s:String           { return ast.expr.str(s); }
+  / "'" t:(!"'" .) "'" { return ast.expr.chr(t[1]); }
+  / num:Number         { return ast.expr.num(num); }
+  / id:Identifier      { return ast.expr.id(id); }
+  / "$"                { return ast.expr.here(); }
+  / "(" e:ExprAdd ")"  { return ast.expr.paren(e); }
 
 Number
   = text:[0-9]+ "h"              { return parseInt(text.join(""), 16); }
@@ -141,9 +141,6 @@ Number
 
 String
   = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }
-
-ExprChar
-  = "'" t:(!"'" .) "'" { return t[1]; }
 
 Identifier
   = p:"."? s:[a-zA-Z_0-9\.]+ { return (p||'') + s.join(''); }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-var JS80 = require('js80')
+var JS80 = require('../lib/js80')
   , program = require('commander')
   , _ = require('underscore');
 
@@ -10,11 +10,16 @@ function list(val) {
 }
 
 function printError(err) {
-  console.log(
-      '%s:%s: %s',
-      err.environment.get('__filename__'),
-      err.environment.get('__lineIndex__'),
-      err.msg);
+    if(err.macro) {
+        console.log(
+            '%s:%s: %s while executing macro %s',
+            err.fileName,
+            err.lineIndex,
+            err.msg,
+            err.macro);
+    } else {
+        console.log('%s:%s: %s', err.fileName, err.lineIndex, err.msg);
+    }
 }
 
 // parse args
@@ -27,28 +32,28 @@ program
   .parse(process.argv);
 
 if(!program.args[0]) {
-  console.error('Missing input file');
-  program.help();
+    console.error('Missing input file');
+    program.help();
 }
 
 // compile
 var js80 = new JS80();
 if(program.include) {
-  js80.searchPath = js80.searchPath.concat(program.include);
+    js80.searchPath = js80.searchPath.concat(program.include);
 }
 _.each(program.args, function(arg) {
-  js80.compileFile(arg);
+    js80.compileFile(arg);
 });
 js80.secondPass();
 if(!_.isEmpty(js80.errors)) {
-  _.each(js80.errors, printError);
-  process.exit(1);
+    _.each(js80.errors, printError);
+    process.exit(1);
 }
 
 // output
 js80.saveImage(program.output || 'a.out');
 if(program.sym) {
-  js80.saveSymbols(program.sym);
+    js80.saveSymbols(program.sym);
 }
 
 process.exit(0);

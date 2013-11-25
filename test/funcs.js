@@ -20,6 +20,13 @@ describe('funcs', function() {
         should(js80.buildImage()).be.eql([1, 2, 3]);
     });
 
+    it('db "hello", 0', function() {
+        var js80 = new JS80();
+        js80.asm('db "hello", 0');
+        js80.secondPass();
+        should(js80.buildImage()).be.eql([104,101,108,108,111,0]);
+    });
+
     it('dw 1,2,3', function() {
         var js80 = new JS80();
         js80.asm('dw 1,2,3');

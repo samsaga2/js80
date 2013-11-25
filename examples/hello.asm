@@ -1,3 +1,4 @@
+        include "debug.asm"
 	include "rom16k.asm"
         include "bios.asm"
         include "extensions.asm"
