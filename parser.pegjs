@@ -45,7 +45,7 @@ SpecialInst
   / "endmodule"i                                         { return ast.endModule(i); }
   / "include"i _ s:String                                { return ast.include(s); }
   / "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr   { return ast.includeBinary(s, k, l); }
-  / "incbin"i _ s:String _ "," _ k:Expr                  { return ast.includebinary(s, k); }
+  / "incbin"i _ s:String _ "," _ k:Expr                  { return ast.includeBinary(s, k); }
   / "incbin"i _ s:String                                 { return ast.includeBinary(s); }
   / "macro"i _ i:Identifier _ a:MacroArgs?               { return ast.defineMacro(i, a); }
   / "endmacro"i                                          { return ast.endMacro(); }
