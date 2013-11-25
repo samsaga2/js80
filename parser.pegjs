@@ -63,7 +63,7 @@ SpecialInst
   / "error"i _ msg:Expr                                  { return ast.error(msg); }
 
 PageArg
-  = s:Expr _ ".." _ e:Expr      { return ast.macro.range(s, e); }
+  = s:Expr _ ".." _ e:Expr      { return ast.macroArgRange(s, e); }
   / e:Expr                      { return e; }
 
 InstArgs
@@ -73,9 +73,9 @@ MacroArgs
   = head:MacroArg tail:(_ "," _ MacroArg)* { return compactList(head, tail); }
 
 MacroArg
-  = "1" _ ".." _ "*" __         { return ast.macro.rest(); }
-  / i:Identifier _ ":" _ e:Expr { return ast.macro.arg(i, e); }
-  / i:Identifier                { return ast.macro.arg(i); }
+  = "1" _ ".." _ "*" __         { return ast.macroArgRest(); }
+  / i:Identifier _ ":" _ e:Expr { return ast.macroArg(i, e); }
+  / i:Identifier                { return ast.macroArg(i); }
 
 //
 // Expr
