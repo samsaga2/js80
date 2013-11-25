@@ -246,4 +246,11 @@ describe('expr', function() {
         js80.secondPass();
         should(js80.buildImage()).be.eql([0x21, 4, 0x80, 0]);
     });
+
+    it('forward str', function() {
+        var js80 = new JS80();
+        js80.asm('org $8000\nld hl,text\ntext: db "hello", 0');
+        js80.secondPass();
+        should(js80.buildImage()).be.eql([0x21, 3, 0x80, 104, 101, 108, 108, 111, 0]);
+    });
 });
