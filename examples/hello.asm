@@ -1,9 +1,11 @@
+        include "debug.asm"
 	include "rom16k.asm"
         include "bios.asm"
         include "extensions.asm"
 
         ;; rom entry
 start:  call bios.INITXT
+        dbg_echo "hola"
         ld hl,text
         call print
 .1:     jr .1
