@@ -22,10 +22,10 @@ ProgLine
   }
 
 Line
-  = l:Identifier _ "equ"i _ e:Expr { return ast.equ(l, e, line); }
-  / l:Label _ i:Inst               { return ast.label(l, [i], line); }
-  / l:Label                        { return ast.label(l, null, line); }
-  / i:Inst                         { return ast.label(null, [i], line); }
+  = l:Identifier _ ":" _ "equ"i _ e:Expr { return ast.equ(l, e, line); }
+  / l:Label _ i:Inst                     { return ast.label(l, [i], line); }
+  / l:Label                              { return ast.label(l, null, line); }
+  / i:Inst                               { return ast.label(null, [i], line); }
 
 Label
   = l:Identifier ":" { return l; }

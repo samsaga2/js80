@@ -43,7 +43,7 @@ describe('funcs', function() {
 
     it('pepe equ 123\nld a,pepe', function() {
         var js80 = new JS80();
-        js80.asm('pepe equ 123\nld a,pepe');
+        js80.asm('pepe: equ 123\nld a,pepe');
         js80.secondPass();
         should(js80.buildImage()).be.eql([0x3e, 123]);
     });
@@ -137,7 +137,7 @@ describe('funcs', function() {
 
     it('map', function() {
         var js80 = new JS80();
-        js80.asm('map 0xc000\ntest equ # 1\ntest2 equ # 2\nld hl,test\nld hl,test2');
+        js80.asm('map 0xc000\ntest: equ # 1\ntest2: equ # 2\nld hl,test\nld hl,test2');
         js80.secondPass();
         should(js80.buildImage()).be.eql([0x21, 0, 0xc0, 0x21, 1, 0xc0]);
     });
