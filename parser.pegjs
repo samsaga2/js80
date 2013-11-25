@@ -1,8 +1,14 @@
 {
-  var _ = require('underscore');
+  var _ = require('underscore'),
+      ast = require('./ast');
+
   var macro = null;
   var repeat = [];
   var astif = [];
+
+  function compactList(head, tail) {
+    return [head].concat(_.map(tail, function(i) { return i[3]; }));
+  }
 }
 
 Start
@@ -24,31 +30,31 @@ ProgLine
   }
 
 Line
-  = l:Identifier _ "equ"i _ e:Expr { return {equ:{label:l, value:e}, line:line}; }
-  / l:Label _ i:Inst               { return [{label:l, line:line}, i] }
-  / l:Label                        { return {label:l, line:line}; }
-  / i:Inst                         { return _.isEmpty(i) ? i :_.extend(i, {line:line}); }
+  = l:Identifier _ "equ"i _ e:Expr { return ast.equ(l, e, line); }
+  / l:Label _ i:Inst               { return ast.label(l, [i], line); }
+  / l:Label                        { return ast.label(l, null, line); }
+  / i:Inst                         { return ast.label(null, [i], line); }
 
 Label
   = l:Identifier ":" { return l; }
 
 Inst
-  = "."? s:SpecialInst                    { return s; }
-  / m:"@@"? asm:Identifier _ args:InstArgs?       { return {asm:{inst:asm, args:args, execmacro:_.isEmpty(m)}}; }
+  = "."? s:SpecialInst                      { return s; }
+  / m:"@@"? asm:Identifier _ args:InstArgs? { return ast.asmInst(asm, args, _.isEmpty(m)); }
 
 SpecialInst
-  = "org"i _ n:Expr                                      { return {org:n}; }
-  / "map"i _ n:Expr                                      { return {map:n}; }
-  / ("ds"i/"defs"i) _ n:Expr _ "," _ v:Expr              { return {ds:{len:n,value:v}}; }
-  / ("ds"i/"defs"i) _ n:Expr                             { return {ds:{len:n,value:0}}; }
-  / ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*     { return {dw:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / ("db"i/"defb"i) _ head:DbExpr tail:(_ "," _ DbExpr)* { return {db:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / "module"i _ i:Identifier                             { return {module:i}; }
-  / "endmodule"i                                         { return {endmodule:true}; }
-  / "include"i _ s:String                                { return {include:s}; }
-  / "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr   { return {incbin:{file:s, skip:k, len:l}}; }
-  / "incbin"i _ s:String _ "," _ k:Expr                  { return {incbin:{file:s, skip:k}}; }
-  / "incbin"i _ s:String                                 { return {incbin:{file:s}}; }
+  = "org"i _ n:Expr                                      { return ast.org(n); }
+  / "map"i _ n:Expr                                      { return ast.map(n); }
+  / ("ds"i/"defs"i) _ n:Expr _ "," _ v:Expr              { return ast.defineSpace(n, v); }
+  / ("ds"i/"defs"i) _ n:Expr                             { return ast.defineSpace(n, 0); }
+  / ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*     { return ast.defineWords(compactList(head, tail)); }
+  / ("db"i/"defb"i) _ head:DbExpr tail:(_ "," _ DbExpr)* { return ast.defineBytes(compactList(head, tail)); }
+  / "module"i _ i:Identifier                             { return ast.defineModule(i); }
+  / "endmodule"i                                         { return ast.endModule(i); }
+  / "include"i _ s:String                                { return ast.include(s); }
+  / "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr   { return ast.includeBinary(s, k, l); }
+  / "incbin"i _ s:String _ "," _ k:Expr                  { return ast.includebinary(s, k); }
+  / "incbin"i _ s:String                                 { return ast.includeBinary(s); }
   / "macro"i _ i:Identifier _ a:MacroArgs?               { if(macro) { throw new Error('Forbidden macro declaration'); } macro = {id:i, args:a, body:[]}; return {}; }
   / "endmacro"i                                          { var m = macro; macro = null; return {macro:m}; }
   / ("repeat"i/"rept"i) _ n:Expr                         { repeat.push({count:n, body:[]}); return {}; }
@@ -58,85 +64,85 @@ SpecialInst
   / "if"i _ e:Expr                                       { astif.push({expr:e, thenBody:[]}); return {}; }
   / "else"i                                              { _.last(astif).elseBody = []; return {}; }
   / "endif"i                                             { var i = astif.pop(); return {if:i}; }
-  / "rotate"i _ n:Expr                                   { return {rotate:n}; }
-  / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return {defpage:{index:p, origin:o, size:s}}; }
-  / "page"i _ p:PageArg                                  { return {page:p}; }
-  / "echo"i _ head:Expr tail:(_ "," _ Expr)*             { return {echo:[head].concat(_.map(tail, function(i) { return i[3]; }))}; }
-  / "error"i _ msg:Expr                                  { return {error:msg}; }
+  / "rotate"i _ n:Expr                                   { return ast.rotate(n); }
+  / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return ast.definePage(p, o, s); }
+  / "page"i _ p:PageArg                                  { return ast.page(p); }
+  / "echo"i _ head:Expr tail:(_ "," _ Expr)*             { return ast.echo(compactList(head, tail)); }
+  / "error"i _ msg:Expr                                  { return ast.error(msg); }
 
 PageArg
-  = s:Expr _ ".." _ e:Expr      { return {start:s, end:e}; }
-  / e:Expr                      { return e };
+  = s:Expr _ ".." _ e:Expr      { return ast.macro.range(s, e); }
+  / e:Expr                      { return e; }
 
 DbExpr
   = Expr
-  / s:String { return {str:s}; }
+  / s:String { return ast.expr.str(s); }
 
 InstArgs
-  = head:Expr tail:(_ "," _ Expr)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = head:Expr tail:(_ "," _ Expr)* { return compactList(head, tail); }
 
 MacroArgs
-  = head:MacroArg tail:(_ "," _ MacroArg)* { return [head].concat(_.map(tail, function(i) { return i[3]; })); }
+  = head:MacroArg tail:(_ "," _ MacroArg)* { return compactList(head, tail); }
 
 MacroArg
-  = "1" _ ".." _ "*" __         { return {rest:true}; }
-  / i:Identifier _ ":" _ e:Expr { return {id:i, default:e}; }
-  / i:Identifier                { return {id:i}; }
+  = "1" _ ".." _ "*" __         { return ast.macro.rest(); }
+  / i:Identifier _ ":" _ e:Expr { return ast.macro.arg(i, e); }
+  / i:Identifier                { return ast.macro.arg(i); }
 
 //
 // Expr
 //
 Expr
   = e:ExprLogic  { return e; }
-  / e:ExprChar   { return {chr:e}; }
-  / e:String     { return {str:e}; }
+  / e:ExprChar   { return ast.expr.chr(e); }
+  / e:String     { return ast.expr.str(e); }
 
 ExprLogic
-  = left:ExprCmp _ "^" _ right:ExprLogic { return {unary:"^", args:[left, right]}; }
-  / left:ExprCmp _ "|" _ right:ExprLogic { return {unary:"|", args:[left, right]}; }
-  / left:ExprCmp _ "&" _ right:ExprLogic { return {unary:"&", args:[left, right]}; }
+  = left:ExprCmp _ "^" _ right:ExprLogic { return ast.expr.binaryOperator("^", left, right); }
+  / left:ExprCmp _ "|" _ right:ExprLogic { return ast.expr.binaryOperator("|", left, right); }
+  / left:ExprCmp _ "&" _ right:ExprLogic { return ast.expr.binaryOperator("&", left, right); }
   / ExprCmp
 
 ExprCmp
-  = left:ExprAdd _ "==" _ right:ExprAdd { return {eq: {left:left, right:right}}; }
-  / left:ExprAdd _ "!=" _ right:ExprAdd { return {neq:{left:left, right:right}}; }
-  / left:ExprAdd _ "<=" _ right:ExprAdd { return {le: {left:left, right:right}}; }
-  / left:ExprAdd _ ">=" _ right:ExprAdd { return {ge: {left:left, right:right}}; }
-  / left:ExprAdd _ "<"  _ right:ExprAdd { return {lt: {left:left, right:right}}; }
-  / left:ExprAdd _ ">"  _ right:ExprAdd { return {gt: {left:left, right:right}}; }
+  = left:ExprAdd _ "==" _ right:ExprAdd { return ast.expr.binaryOperator("=", left, right); }
+  / left:ExprAdd _ "!=" _ right:ExprAdd { return ast.expr.binaryOperator("!=", left, right); }
+  / left:ExprAdd _ "<=" _ right:ExprAdd { return ast.expr.binaryOperator("<=", left, right); }
+  / left:ExprAdd _ ">=" _ right:ExprAdd { return ast.expr.binaryOperator(">=", left, right); }
+  / left:ExprAdd _ "<"  _ right:ExprAdd { return ast.expr.binaryOperator("<", left, right); }
+  / left:ExprAdd _ ">"  _ right:ExprAdd { return ast.expr.binaryOperator(">", left, right); }
   / ExprAdd
 
 ExprAdd
   = left:ExprMul _ right:([+-] ExprMul)+ {
     var n=[left].concat(_.map(right, function(i) {
       if(i[0]==='-') {
-       return {neg:i[1]};
+       return ast.expr.neg(i[1]);
       } else {
        return i[1];
       }
     }));
-    return {unary:"+", args:n};
+    return {binary:"+", args:n};
   }
   / ExprMul
 
 ExprMul
-  = left:ExprShift _ "*" _ right:ExprMul { return {unary:"*", args:[left, right]}; }
-  / left:ExprShift _ "/" _ right:ExprMul { return {unary:"/", args:[left, right]}; }
+  = left:ExprShift _ "*" _ right:ExprMul { return ast.expr.binaryOperator("*", left, right); }
+  / left:ExprShift _ "/" _ right:ExprMul { return ast.expr.binaryOperator("/", left, right); }
   / ExprShift
 
 ExprShift
-  = left:ExprPrimary _ "<<" _ right:ExprShift { return {unary:"<<", args:[left, right]}; }
-  / left:ExprPrimary _ ">>" _ right:ExprShift { return {unary:">>", args:[left, right]}; }
+  = left:ExprPrimary _ "<<" _ right:ExprShift { return ast.expr.binaryOperator("<<", left, right); }
+  / left:ExprPrimary _ ">>" _ right:ExprShift { return ast.expr.binaryOperator(">>", left, right); }
   / ExprPrimary
 
 ExprPrimary
-  = "-" e:ExprPrimary { return {neg:e}; }
-  / "@" _ e:Expr      { return {arg:e}; }
-  / "#" _ e:Expr      { return {map:e}; }
-  / num:Number        { return num; }
-  / id:Identifier     { return {id:id}; }
-  / "$"               { return {id:'$'}; }
-  / "(" e:ExprAdd ")" { return {paren:e}; }
+  = "-" e:ExprPrimary { return ast.expr.neg(e); }
+  / "@" _ e:Expr      { return ast.expr.arg(e); }
+  / "#" _ e:Expr      { return ast.expr.map(e); }
+  / num:Number        { return ast.expr.num(num); }
+  / id:Identifier     { return ast.expr.id(id); }
+  / "$"               { return ast.expr.here(); }
+  / "(" e:ExprAdd ")" { return ast.expr.paren(e); }
 
 Number
   = text:[0-9]+ "h"              { return parseInt(text.join(""), 16); }
