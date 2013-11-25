@@ -2,8 +2,6 @@
   var _ = require('underscore'),
       ast = require('./ast');
 
-  var astif = [];
-
   function compactList(head, tail) {
     return [head].concat(_.map(tail, function(i) { return i[3]; }));
   }
@@ -20,8 +18,6 @@ Lines
 
 ProgLine
   = l:Line {
-    if(astif.length && !_.isUndefined(_.last(astif).elseBody)) { _.last(astif).elseBody.push(l); return []; }
-    if(astif.length)  { _.last(astif).thenBody.push(l); return []; }
     return ast.line(l);
   }
 
@@ -55,11 +51,11 @@ SpecialInst
   / "endmacro"i                                          { return ast.endMacro(); }
   / ("repeat"i/"rept"i) _ n:Expr                         { return ast.defineRepeat(n); }
   / ("endrepeat"i/"endr"i)                               { return ast.endRepeat(); }
-  / "ifdef"i _ i:Identifier                              { astif.push({defined:i, thenBody:[]}); return {}; }
-  / "ifndef"i _ i:Identifier                             { astif.push({undefined:i, thenBody:[]}); return {}; }
-  / "if"i _ e:Expr                                       { astif.push({expr:e, thenBody:[]}); return {}; }
-  / "else"i                                              { _.last(astif).elseBody = []; return {}; }
-  / "endif"i                                             { var i = astif.pop(); return {if:i}; }
+  / "ifdef"i _ i:Identifier                              { return ast.ifDef(i); }
+  / "ifndef"i _ i:Identifier                             { return ast.ifNotDef(i); }
+  / "if"i _ e:Expr                                       { return ast.if(e); }
+  / "else"i                                              { return ast.else(); }
+  / "endif"i                                             { return ast.endIf(); }
   / "rotate"i _ n:Expr                                   { return ast.rotate(n); }
   / "defpage"i _ p:PageArg _ "," _ o:Expr _ "," _ s:Expr { return ast.definePage(p, o, s); }
   / "page"i _ p:PageArg                                  { return ast.page(p); }
