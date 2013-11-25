@@ -42,7 +42,7 @@ SpecialInst
   / ("dw"i/"defw"i) _ head:Expr tail:(_ "," _ Expr)*     { return ast.defineWords(compactList(head, tail)); }
   / ("db"i/"defb"i) _ head:Expr tail:(_ "," _ Expr)*     { return ast.defineBytes(compactList(head, tail)); }
   / "module"i _ i:Identifier                             { return ast.defineModule(i); }
-  / "endmodule"i                                         { return ast.endModule(i); }
+  / "endmodule"i                                         { return ast.endModule(); }
   / "include"i _ s:String                                { return ast.include(s); }
   / "incbin"i _ s:String _ "," _ k:Expr _ "," _ l:Expr   { return ast.includeBinary(s, k, l); }
   / "incbin"i _ s:String _ "," _ k:Expr                  { return ast.includeBinary(s, k); }
