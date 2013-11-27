@@ -192,4 +192,18 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.length).be.eql(1);
     });
+
+    it('if inside macro', function() {
+        var js80 = new JS80();
+        js80.asm('macro jarl\nifdef TEST\ndb 0\nelse\ndb 1\nendif\nendmacro\njarl');
+        js80.secondPass();
+        should(js80.buildImage()).be.eql([1]);
+    });
+
+    it('macro inside if', function() {
+        var js80 = new JS80();
+        js80.asm('TEST: equ 1\nifdef TEST\nmacro test2 msg\nld hl,msg\nendmacro\nendif\ntest2 msg\nmsg: db "hello"');
+        js80.secondPass();
+        should(js80.buildImage()).be.eql([0x21, 3, 0, 104, 101, 108, 108, 111]);
+    });
 });

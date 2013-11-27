@@ -27,7 +27,8 @@ Int16
   / i:Identifier { return [{type:'word', expr:{id:i}}, 0]; }
 
 Offset8
-  = "+" n:Number { return n; }
+  = '$nn'        { return {type:'relative', expr:'$nn'}; }
+  / "+" n:Number { return n; }
   / "-" n:Number { return -n; }
   / n:Number     { return {type:'relative', expr:n}; }
   / i:Identifier { return {type:'relative', expr:{id:i}}; }

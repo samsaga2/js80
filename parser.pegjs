@@ -5,6 +5,8 @@
   function compactList(head, tail) {
     return [head].concat(_.map(tail, function(i) { return i[3]; }));
   }
+
+  ast.init();
 }
 
 Start
