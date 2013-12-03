@@ -113,7 +113,7 @@ ExprAdd
        return i[1];
       }
     }));
-    return {binary:"+", args:n};
+    return {binary:{op:"+", args:n}};
   }
   / ExprMul
 
