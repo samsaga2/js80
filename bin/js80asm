@@ -9,19 +9,6 @@ function list(val) {
     return val.split(':');
 }
 
-function printError(err) {
-    if(err.macro) {
-        console.log(
-            '%s:%s: %s while executing macro %s',
-            err.fileName,
-            err.lineIndex,
-            err.msg,
-            err.macro);
-    } else {
-        console.log('%s:%s: %s', err.fileName, err.lineIndex, err.msg);
-    }
-}
-
 // parse args
 program
   .version('0.0.1')
@@ -46,7 +33,7 @@ _.each(program.args, function(arg) {
 });
 js80.secondPass();
 if(!_.isEmpty(js80.errors)) {
-    _.each(js80.errors, printError);
+    js80.errors.print();
     process.exit(1);
 }
 

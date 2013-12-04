@@ -8,6 +8,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('set 2,(iy+10+1+2)');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0xfd, 0xcb, 10 + 1 + 2, 0xc6 + 8 * 2]);
     });
 
@@ -15,6 +16,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('set 2,(iy-10-1-2)');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0xfd, 0xcb, 256 + (-10 - 1 - 2), 0xc6 + 8 * 2]);
     });
 
@@ -22,6 +24,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1+2+3');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1 + 2 + 3]);
     });
 
@@ -29,6 +32,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,3-2-1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 3 - 2 - 1]);
     });
 
@@ -36,6 +40,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,10+1-4+5');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 10 + 1 - 4 + 5]);
     });
 
@@ -43,6 +48,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,2*3+4*5');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 2 * 3 + 4 * 5]);
     });
 
@@ -50,6 +56,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,(1+2)-3');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, (1 + 2) - 3]);
     });
 
@@ -57,6 +64,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,(1+2)-(3+4)');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 256 + ((1 + 2) - (3 + 4))]);
     });
 
@@ -64,6 +72,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1<<1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1 << 1]);
     });
 
@@ -71,6 +80,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1<<1+2');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, (1 << 1) + 2]);
     });
 
@@ -78,6 +88,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('org 8000h\nld hl,$\nld hl,$');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 0, 0x80, 0x21, 3, 0x80]);
     });
 
@@ -85,12 +96,14 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,"jarl"');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.true;
     });
 
     it('ld char', function() {
         var js80 = new JS80();
         js80.asm("ld a,'a'");
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.image.build().length).not.be.eql([0x3e, 65]);
     });
 
@@ -98,6 +111,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1|2');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1 | 2]);
     });
 
@@ -105,6 +119,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,3&2');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 3 & 2]);
     });
 
@@ -112,6 +127,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,3^2');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 3 ^ 2]);
     });
 
@@ -119,6 +135,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,$20');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0x20]);
     });
 
@@ -126,6 +143,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0x20');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0x20]);
     });
 
@@ -133,6 +151,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,20h');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0x20]);
     });
 
@@ -140,6 +159,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0b100');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 4]);
     });
 
@@ -147,6 +167,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0==0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -154,6 +175,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0==1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -161,6 +183,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0!=0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -168,6 +191,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0!=1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -175,6 +199,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0==0 & 1==1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -182,6 +207,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0<0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -189,6 +215,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0<1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -196,6 +223,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0>0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -203,12 +231,14 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1>0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
     it('<= false', function() {
         var js80 = new JS80();
         js80.asm('ld a,1<=0');
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -216,6 +246,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0<=1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -223,6 +254,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,0>=1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 0]);
     });
 
@@ -230,6 +262,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('ld a,1>=0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 1]);
     });
 
@@ -237,6 +270,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('org $8000\nld hl,label\nlabel: nop');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 3, 0x80, 0]);
     });
 
@@ -244,6 +278,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('org $8000\nld hl,label+l2\nlabel: nop\nl2: equ 1');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 4, 0x80, 0]);
     });
 
@@ -251,6 +286,7 @@ describe('expr', function() {
         var js80 = new JS80();
         js80.asm('org $8000\nld hl,text\ntext: db "hello", 0');
         js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 3, 0x80, 104, 101, 108, 108, 111, 0]);
     });
 });
