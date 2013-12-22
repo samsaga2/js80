@@ -47,7 +47,7 @@ describe('macro', function() {
 
     it('inside if', function() {
         var js80 = new JS80();
-        js80.asm('TEST: equ 1\nifdef TEST\nmacro test2 msg\nld hl,msg\nendmacro\nendif\ntest2 msg\nmsg: db "hello"');
+        js80.asm('TEST: equ 1\nifdef TEST\nmacro test2 tt\nld hl,tt\nendmacro\nendif\ntest2 msg\nmsg: db "hello"');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 3, 0, 104, 101, 108, 108, 111]);
