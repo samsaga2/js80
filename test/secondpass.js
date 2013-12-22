@@ -43,4 +43,12 @@ describe('second pass', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 4, 0, 0xa8 + 7, 0]);
     });
+
+    it('forward module local label', function() {
+        var js80 = new JS80();
+        js80.asm('module mtest\nld hl,test.1\ntest: xor a\n.1: nop\nendmodule');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x21, 4, 0, 0xa8 + 7, 0]);
+    });
 });

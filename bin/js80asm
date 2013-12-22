@@ -37,7 +37,7 @@ _.each(program.args, function(arg) {
     js80.compileFile(arg);
 });
 js80.secondPass();
-if(!_.isEmpty(js80.errors)) {
+if(js80.errors.hasErrors()) {
     js80.errors.print();
     process.exit(1);
 }
