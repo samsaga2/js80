@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-var JS80 = require('../lib/js80')
-  , program = require('commander')
+if(process.env.DEBUG === 'true') {
+    var JS80 = require('../lib/js80');
+} else {
+    var JS80 = require('js80');
+}
+
+var program = require('commander')
   , _ = require('underscore');
 
 function list(val) {

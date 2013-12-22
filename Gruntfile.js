@@ -34,7 +34,12 @@ module.exports = function (grunt) {
             hello: {
                 options: {
                     stdout: true,
-                    stderr: true
+                    stderr: true,
+                    execOptions: {
+                        env: {
+                            DEBUG: true
+                        }
+                    }
                 },
                 command: './bin/js80asm examples/hello.asm'
             }
