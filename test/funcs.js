@@ -113,30 +113,6 @@ describe('funcs', function() {
         should(js80.image.build().length).not.be.eql([0, 0, 0xcd, 0, 0, 0xcd, 1, 0]);
     });
 
-    it('macro noargs', function() {
-        var js80 = new JS80();
-        js80.asm('macro test\nnop\nnop\nendmacro\ntest\ntest');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.image.build().length).not.be.eql([0, 0, 0, 0]);
-    });
-
-    it('macro with fixed args', function() {
-        var js80 = new JS80();
-        js80.asm('macro test arg1,arg2\nld a,arg1+arg2\nendmacro\ntest 1,2');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.image.build().length).not.be.eql([0x3e, 1 + 2]);
-    });
-
-    it('macro with default args', function() {
-        var js80 = new JS80();
-        js80.asm('macro test arg1,arg2:10\nld a,arg1+arg2\nendmacro\ntest 1');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.image.build().length).not.be.eql([0x3e, 1 + 10]);
-    });
-
     it('repeat', function() {
         var js80 = new JS80();
         js80.asm('repeat 2\nnop\nnop\nendrepeat');
@@ -151,14 +127,6 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0, 0, 0, 0]);
-    });
-
-    it('macro with variable args', function() {
-        var js80 = new JS80();
-        js80.asm('macro test base,1..*\nrepeat @0\ndb base+@1\nrotate 1\nendrepeat\nendmacro\ntest 10,1,2,3');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([11, 12, 13]);
     });
 
     it('map', function() {
@@ -216,21 +184,5 @@ describe('funcs', function() {
         js80.asm('error "jarl"');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.true;
-    });
-
-    it('if inside macro', function() {
-        var js80 = new JS80();
-        js80.asm('macro jarl\nifdef TEST\ndb 0\nelse\ndb 1\nendif\nendmacro\njarl');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([1]);
-    });
-
-    it('macro inside if', function() {
-        var js80 = new JS80();
-        js80.asm('TEST: equ 1\nifdef TEST\nmacro test2 msg\nld hl,msg\nendmacro\nendif\ntest2 msg\nmsg: db "hello"');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([0x21, 3, 0, 104, 101, 108, 108, 111]);
     });
 });
