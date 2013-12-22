@@ -52,4 +52,11 @@ describe('macro', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 3, 0, 104, 101, 108, 108, 111]);
     });
+
+    it('override arg name', function() {
+        var js80 = new JS80();
+        js80.asm('arg: equ 10\nmacro test arg\nld hl,arg\nendmacro\ntest arg');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.true;
+    });
 });
