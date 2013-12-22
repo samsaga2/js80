@@ -1,6 +1,7 @@
-DEBUG: equ 1
+DEBUG:  equ 1
+
         include "debug.asm"
-	include "rom16k.asm"
+        include "rom16k.asm"
         include "bios.asm"
         include "extensions.asm"
 

@@ -29,8 +29,20 @@ module.exports = function (grunt) {
                     quiet: true
                 }
             }
+        },
+        shell: {
+            hello: {
+                options: {
+                    stdout: true,
+                    stderr: true
+                },
+                command: './bin/js80asm examples/hello.asm'
+            }
         }
     });
 
+    grunt.loadNpmTasks('grunt-shell');
+
     grunt.registerTask('default', 'mochaTest');
+    grunt.registerTask('hello', ['shell:hello']);
 };

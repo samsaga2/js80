@@ -29,6 +29,7 @@
     "mocha": "~1.13.0",
     "should": "~2.0.1",
     "grunt": "~0.4.2",
-    "grunt-peg": "~1.0.0"
+    "grunt-peg": "~1.0.0",
+    "grunt-shell": "~0.6.1"
   }
 }
