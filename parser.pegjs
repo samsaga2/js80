@@ -65,6 +65,8 @@ SpecialInst
   / "page"i ws p:PageArg                                  { return ast.page(p); }
   / "echo"i ws head:Expr tail:(_ "," _ Expr)*             { return ast.echo(compactList(head, tail)); }
   / "error"i ws msg:Expr                                  { return ast.error(msg); }
+  / "struct"i ws i:Identifier                             { return ast.defineStruct(i); }
+  / "endstruct"i                                          { return ast.endStruct(); }
 
 PageArg
   = s:Expr _ ".." _ e:Expr      { return ast.macroArgRange(s, e); }

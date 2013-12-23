@@ -185,4 +185,28 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.true;
     });
+
+    it('struct', function() {
+        var js80 = new JS80();
+        js80.asm('struct test\nv1: equ # 1\nv2: equ # 2\nendstruct\ndb test.v1, test.v2, test.size');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0, 1, 3]);
+    });
+
+    it('module struct', function() {
+        var js80 = new JS80();
+        js80.asm('module m1\nstruct test\nv1: equ # 1\nv2: equ # 2\nendstruct\nendmodule\ndb test.v1, test.v2, test.size');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0, 1, 3]);
+    });
+
+    it('struct map', function() {
+        var js80 = new JS80();
+        js80.asm('map 100\nstruct test\nv1: equ # 1\nv2: equ # 2\nendstruct\npp: equ # 3\ndb test.v1, test.v2, test.size, pp');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0, 1, 3, 100]);
+    });
 });
