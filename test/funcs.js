@@ -209,4 +209,12 @@ describe('funcs', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0, 1, 3, 100]);
     });
+
+    it('struct shortcut map', function() {
+        var js80 = new JS80();
+        js80.asm('map 100\nstruct test\nv1: # 1\nv2: # 2\nendstruct\npp: # 3\ndb test.v1, test.v2, test.size, pp');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0, 1, 3, 100]);
+    });
 });
