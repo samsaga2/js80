@@ -50,7 +50,7 @@ GICINI: equ 0x0090
 WRTPSG: equ 0x0093
 RDPSG:  equ 0x0096
 STRTMS: equ 0x0099
-        ;;:Keyboard, CRT, printer input-output
+        ;; Keyboard, CRT, printer input-output
 CHSNS:  equ 0x009c
 CHGET:  equ 0x009f
 CHPUT:  equ 0x00a2
