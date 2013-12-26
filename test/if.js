@@ -83,4 +83,12 @@ describe('if', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0xa8 + 7]);
     });
+
+    it('chained if', function() {
+        var js80 = new JS80();
+        js80.asm('test: equ 0\nif test==0\nnop\nelse\nif test==1\nxor a\nelse\nld a,1\nendif\nendif');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0]);
+    });
 });
