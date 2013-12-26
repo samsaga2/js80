@@ -351,28 +351,28 @@ Z80
   / "RET"i                                                                          		{ return [0xC9]; } // RET
   / "RETI"i                                                                         		{ return [0xED,0x4D]; } // RETI
   / "RETN"i                                                                         		{ return [0xED,0x45]; } // RETN
-  / "RL"i _ "(HL)"i                                                                 		{ return [0xCB,0x16]; } // RL (HL)
-  / "RL"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xCB,oo,0x16]; } // RL (IX+o)
-  / "RL"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xCB,oo,0x16]; } // RL (IY+o)
-  / "RL"i _ r:TableR                                                                		{ return [0xCB,0x10+r]; } // RL r
   / "RLA"i                                                                          		{ return [0x17]; } // RLA
+  / "RLCA"i                                                                         		{ return [0x07]; } // RLCA
   / "RLC"i _ "(HL)"i                                                                		{ return [0xCB,0x06]; } // RLC (HL)
   / "RLC"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0xCB,oo,0x06]; } // RLC (IX+o)
   / "RLC"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0xCB,oo,0x06]; } // RLC (IY+o)
   / "RLC"i _ r:TableR                                                               		{ return [0xCB,0x00+r]; } // RLC r
-  / "RLCA"i                                                                         		{ return [0x07]; } // RLCA
+  / "RL"i _ "(HL)"i                                                                 		{ return [0xCB,0x16]; } // RL (HL)
+  / "RL"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xCB,oo,0x16]; } // RL (IX+o)
+  / "RL"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xCB,oo,0x16]; } // RL (IY+o)
+  / "RL"i _ r:TableR                                                                		{ return [0xCB,0x10+r]; } // RL r
   / "RLD"i                                                                          		{ return [0xED,0x6F]; } // RLD
-  / "RR"i _ "(HL)"i                                                                 		{ return [0xCB,0x1E]; } // RR (HL)
-  / "RR"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xCB,oo,0x1E]; } // RR (IX+o)
-  / "RR"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xCB,oo,0x1E]; } // RR (IY+o)
-  / "RR"i _ r:TableR                                                                		{ return [0xCB,0x18+r]; } // RR r
+  / "RRCA"i                                                                         		{ return [0x0F]; } // RRCA
   / "RRA"i                                                                          		{ return [0x1F]; } // RRA
   / "RRC"i _ "(HL)"i                                                                		{ return [0xCB,0x0E]; } // RRC (HL)
   / "RRC"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                         		{ return [0xDD,0xCB,oo,0x0E]; } // RRC (IX+o)
   / "RRC"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                         		{ return [0xFD,0xCB,oo,0x0E]; } // RRC (IY+o)
   / "RRC"i _ r:TableR                                                               		{ return [0xCB,0x08+r]; } // RRC r
-  / "RRCA"i                                                                         		{ return [0x0F]; } // RRCA
   / "RRD"i                                                                          		{ return [0xED,0x67]; } // RRD
+  / "RR"i _ "(HL)"i                                                                 		{ return [0xCB,0x1E]; } // RR (HL)
+  / "RR"i _ "(" _ "IX"i _ oo:Offset8 _ ")"                                          		{ return [0xDD,0xCB,oo,0x1E]; } // RR (IX+o)
+  / "RR"i _ "(" _ "IY"i _ oo:Offset8 _ ")"                                          		{ return [0xFD,0xCB,oo,0x1E]; } // RR (IY+o)
+  / "RR"i _ r:TableR                                                                		{ return [0xCB,0x18+r]; } // RR r
   / "RST"i _ "0"i                                                                   		{ return [0xC7]; } // RST 0
   / "RST"i _ "8H"i                                                                  		{ return [0xCF]; } // RST 8H
   / "RST"i _ "10H"i                                                                 		{ return [0xD7]; } // RST 10H
