@@ -13,32 +13,25 @@ Start
   = l:Lines __ LineTerminator* { return l; }
 
 Lines
-  = __ head:ProgLine? tail:(__ (LineTerminator/"\\")+ __ ProgLine?)* __ {
+  = __ head:Line? tail:(__ (LineTerminator/"\\")+ __ Line?)* __ {
     tail = _.map(tail, function(i) { return i[3]; });
     return _.flatten([head, tail]);
-  }
-
-ProgLine
-  = l:Line {
-    return ast.line(l);
   }
 
 Line
   = l:Label _ "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
   / l:Label _ "equ"i ws e:Expr { return ast.equ(l, e, line); }
-  / l:Label _ i:Inst           { return ast.label(l, [i], line); }
-  / l:Label                    { return ast.label(l, null, line); }
-  / i:Inst                     { return ast.label(null, [i], line); }
+  / l:Label? _ i:Inst?         { return ast.label(l, i, line); }
 
 Label
   = l:Identifier _ ":" { return l; }
 
 Inst
-  = "."? s:SpecialInst                     { return s; }
+  = "."? s:InternalInst                    { return s; }
   / m:"@@"? id:Identifier ws args:InstArgs { return ast.asmInst(id, args, _.isEmpty(m)); }
   / m:"@@"? id:Identifier                  { return ast.asmInst(id, null, _.isEmpty(m)); }
 
-SpecialInst
+InternalInst
   = "org"i ws n:Expr                                      { return ast.org(n); }
   / "map"i ws n:Expr                                      { return ast.map(n); }
   / ("ds"i/"defs"i) ws n:Expr _ "," _ v:Expr              { return ast.defineSpace(n, v); }
