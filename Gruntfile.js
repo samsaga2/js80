@@ -41,7 +41,7 @@ module.exports = function (grunt) {
                         }
                     }
                 },
-                command: './bin/js80asm examples/hello.asm'
+                command: './bin/js80asm examples/hello16k.asm'
             }
         }
     });
