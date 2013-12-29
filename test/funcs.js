@@ -91,7 +91,7 @@ describe('funcs', function() {
 
     it('incbin', function() {
         var js80 = new JS80();
-        js80.asm('incbin "examples/hello.asm"');
+        js80.asm('incbin "examples/hello16k.asm"');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.image.build().length).not.be.eql(0);
@@ -99,7 +99,7 @@ describe('funcs', function() {
 
     it('incbin len', function() {
         var js80 = new JS80();
-        js80.asm('incbin "examples/hello.asm",10,10');
+        js80.asm('incbin "examples/hello16k.asm",10,10');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.image.build().length).be.eql(10);
