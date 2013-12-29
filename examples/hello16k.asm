@@ -1,4 +1,7 @@
-	    include "rom32k.asm"
+DEBUG:  equ 1
+
+        include "rom16k.asm"
+        include "debug.asm"
         include "bios.asm"
         include "extensions.asm"
 
@@ -18,4 +21,5 @@ print:  push af, hl
         jr .1
 .2:     pop af, hl
         ret
+
 text:   db "Hello world!", 0

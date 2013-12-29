@@ -1,5 +1,5 @@
-	    include "rom32k.asm"
         include "bios.asm"
+	    include "megarom.asm"
         include "extensions.asm"
 
         ;; rom entry
@@ -19,3 +19,4 @@ print:  push af, hl
 .2:     pop af, hl
         ret
 text:   db "Hello world!", 0
+
