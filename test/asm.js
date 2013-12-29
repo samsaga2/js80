@@ -194,4 +194,12 @@ describe('asm', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.true;
     });
+
+    it('ld (3),a', function() {
+        var js80 = new JS80();
+        js80.asm('var: equ 3\nld (var),a');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x32, 3, 0]);
+    });
 });
