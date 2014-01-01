@@ -5,25 +5,9 @@ bank1:  equ 0x7000
 bank2:  equ 0x9000
 bank3:  equ 0xb000
 
-macro setpage bank,slot
+macro setpage slot
     ld a,slot
-    if bank==0
-        ld (megarom.bank0),a
-    else
-        if bank==1
-            ld (megarom.bank1),a
-        else
-            if bank==2
-                ld (megarom.bank2),a
-            else
-                if bank==3
-                    ld (megarom.bank3),a
-                else
-                    error "wrong slot"
-                endif
-            endif
-        endif
-    endif
+    ld (megarom.bank3),a
 endmacro
 
         defpage 0, 0x4000, 0x2000
@@ -59,10 +43,14 @@ init:   call bios.RSLREG
         call bios.ENASLT
 
         ;; default slots
-        setpage 0,0
-        setpage 1,1
-        setpage 2,2
-        setpage 3,3
+        xor a
+        ld (megarom.bank0),a
+        inc a
+        ld (megarom.bank1),a
+        inc a
+        ld (megarom.bank2),a
+        inc a
+        ld (megarom.bank3),a
         jp start
 
 endmodule
