@@ -116,6 +116,7 @@ ExprAdd
 ExprMul
   = left:ExprShift _ "*" _ right:ExprMul { return ast.expr.binary("*", left, right); }
   / left:ExprShift _ "/" _ right:ExprMul { return ast.expr.binary("/", left, right); }
+  / left:ExprShift _ "%" _ right:ExprMul { return ast.expr.binary("%", left, right); }
   / ExprShift
 
 ExprShift

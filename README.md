@@ -123,6 +123,7 @@ js80.saveImage('a.out');
 | i+j | sum two numbers |
 | i*j | mult two numbers |
 | i/j | div two numbers |
+| i4j | division module |
 | (i) | group expression |
 | i<<j | shift left |
 | i>>j | shift right |
@@ -197,8 +198,14 @@ endmacro
   MSX 16kb rom setup (start label is the entry point)
 * rom32k.asm:
   MSX 32kb rom setup (start label is the entry point)
+* megarom.asm:
+  MSX megarom setup (start label is the entry point)
 * extensions.asm:
   Misc utility macros
+* math.asm:
+  Misc math funcs
+* debug.asm:
+  OpenMSX debug output
 
 
 # Opcodes #

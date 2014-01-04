@@ -289,4 +289,12 @@ describe('expr', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x21, 3, 0x80, 104, 101, 108, 108, 111, 0]);
     });
+
+    it('ld a,3%2', function() {
+        var js80 = new JS80();
+        js80.asm('ld a,3%2');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x3e, 3%2]);
+    });
 });
