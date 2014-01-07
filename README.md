@@ -12,7 +12,14 @@
 
 # Installation #
 
+Use NPM:
+
 `npm install js80 -g`
+
+Windows only:
+
+1. Download [https://github.com/samsaga2/js80/releases]
+2. Add the directory bin to your PATH.
 
 
 # Command line #
@@ -123,7 +130,7 @@ js80.saveImage('a.out');
 | i+j | sum two numbers |
 | i*j | mult two numbers |
 | i/j | div two numbers |
-| i4j | division module |
+| i%j | division module |
 | (i) | group expression |
 | i<<j | shift left |
 | i>>j | shift right |
