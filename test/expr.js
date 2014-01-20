@@ -297,4 +297,20 @@ describe('expr', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x3e, 3%2]);
     });
+
+    it('db str(hl)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl)');
+        js80.secondPass();
+        js80.errors.print();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([104, 108]);
+    });
+
+    it('db str(hl, 10)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl, 10)');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.true;
+    });
 });

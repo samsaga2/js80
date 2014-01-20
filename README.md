@@ -122,28 +122,29 @@ js80.saveImage('a.out');
 
 ## Expressions ##
 
-| Expr |  Desc |
-|------|-------|
-| 11001100b, 0b11001100b | binary number |
-| 0x1a, 01ah, $1a | hexadecimal number |
-| $ | current address |
-| -n |  negate a number |
-| i-j | substract two numbers |
-| i+j | sum two numbers |
-| i*j | mult two numbers |
-| i/j | div two numbers |
-| i%j | division module |
-| (i) | group expression |
-| i<<j | shift left |
-| i>>j | shift right |
-| i^j | xor |
-| i|j | or |
-| i&j | and |
-| "str" | string |
-| 'i' | char |
-| # nbytes | get map and move it nbytes |
-| @0 | macro arguments length |
-| @number | get macro argument (start from 1) |
+| Expr                   | Desc                              |
+| ------                 | -------                           |
+| 11001100b, 0b11001100b | binary number                     |
+| 0x1a, 01ah, $1a        | hexadecimal number                |
+| $                      | current address                   |
+| -n                     | negate a number                   |
+| i-j                    | substract two numbers             |
+| i+j                    | sum two numbers                   |
+| i*j                    | mult two numbers                  |
+| i/j                    | div two numbers                   |
+| i%j                    | division module                   |
+| (i)                    | group expression                  |
+| i<<j                   | shift left                        |
+| i>>j                   | shift right                       |
+| i^j                    | xor                               |
+| i&#124;j               | or                                |
+| i&j                    | and                               |
+| "str"                  | string                            |
+| 'i'                    | char                              |
+| # nbytes               | get map and move it nbytes        |
+| @0                     | macro arguments length            |
+| @number                | get macro argument (start from 1) |
+| *str*(<expr>)          | convert identifier to string      |
 
 
 ## Examples ##

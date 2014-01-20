@@ -129,9 +129,22 @@ ExprPrimary
   / "@" _ e:Expr       { return ast.expr.arg(e); }
   / "#" _ e:Expr       { return ast.expr.map(e); }
   / num:Number         { return ast.expr.num(num); }
+  / func:ExprFunc      { return func; }
   / id:Identifier      { return ast.expr.id(id); }
   / "$"                { return ast.expr.here(); }
   / "(" e:ExprAdd ")"  { return ast.expr.paren(e); }
+
+ExprFunc
+  = id:Identifier _ "(" args:ExprFuncArgs ")"   { return ast.expr.func(id, args); }
+
+ExprFuncArgs
+  = head:Expr tail:(_ "," _ Expr)* { return compactList(head, tail); }
+
+MacroArg
+  = "1" _ ".." _ "*" __         { return ast.macroArgRest(); }
+  / i:Identifier _ ":" _ e:Expr { return ast.macroArg(i, e); }
+  / i:Identifier                { return ast.macroArg(i); }
+
 
 Number
   = text:[0-9]+ "h"              { return parseInt(text.join(""), 16); }
