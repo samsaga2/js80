@@ -145,7 +145,12 @@ js80.saveImage('a.out');
 | @0                     | macro arguments length            |
 | @number                | get macro argument (start from 1) |
 | *str*(<expr>)          | convert identifier to string      |
-
+| i==j                   | compare two expressions           |
+| i!=j                   | compare two expressions           |
+| i<=j                   | compare two expressions           |
+| i>=j                   | compare two expressions           |
+| i<j                    | compare two expressions           |
+| i>j                    | compare two expressions           |
 
 ## Examples ##
 

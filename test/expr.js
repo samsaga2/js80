@@ -313,4 +313,36 @@ describe('expr', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.true;
     });
+
+    it('db str(hl)==str(hl)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl)==str(hl)');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([1]);
+    });
+
+    it('db str(hl)==str(de)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl)==str(de)');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0]);
+    });
+
+    it('db str(hl)!=str(hl)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl)!=str(hl)');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0]);
+    });
+
+    it('db str(hl)!=str(de)', function() {
+        var js80 = new JS80();
+        js80.asm('db str(hl)!=str(de)');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([1]);
+    });
 });
