@@ -159,7 +159,7 @@ String
   = '"' text:(!'"' .)* '"' { return _.map(text, function(i) { return i[1]; }).join(""); }
 
 Identifier
-  = p:"."? s:[a-zA-Z_0-9\.]+ { return (p||'') + s.join(''); }
+  = p:"."? s:[a-zA-Z_0-9\.]+      { return (p||'') + s.join(''); }
 
 //
 // chars
