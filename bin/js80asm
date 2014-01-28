@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-if(process.env.DEBUG === 'true') {
+try {
     var JS80 = require('../lib/js80');
-} else {
+} catch(e) {
     var JS80 = require('js80');
 }
 
