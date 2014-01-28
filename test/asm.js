@@ -195,11 +195,19 @@ describe('asm', function() {
         should(js80.errors.hasErrors()).be.true;
     });
 
-    it('ld (3),a', function() {
+    it('ld (0x1020),a', function() {
         var js80 = new JS80();
-        js80.asm('var: equ 3\nld (var),a');
+        js80.asm('var: equ 0x1020\nld (var),a');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([0x32, 3, 0]);
+        should(js80.buildImage()).be.eql([0x32, 0x20, 0x10]);
+    });
+
+    it('ld (0x1020),a', function() {
+        var js80 = new JS80();
+        js80.asm('ld (var),a\nvar: equ 0x1020');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x32, 0x20, 0x10]);
     });
 });
