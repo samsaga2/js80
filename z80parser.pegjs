@@ -296,10 +296,10 @@ Z80
   / "LD"i _ "SP"i _ "," _ "IX"i                                                     		{ return [0xDD,0xF9]; } // LD SP,IX
   / "LD"i _ "SP"i _ "," _ "IY"i                                                     		{ return [0xFD,0xF9]; } // LD SP,IY
   / "LD"i _ "SP"i _ "," _ nn:Int16                                                  		{ return [0x31,nn[0],nn[1]]; } // LD SP,nn
-  / "LDD"i                                                                          		{ return [0xED,0xA8]; } // LDD
   / "LDDR"i                                                                         		{ return [0xED,0xB8]; } // LDDR
-  / "LDI"i                                                                          		{ return [0xED,0xA0]; } // LDI
+  / "LDD"i                                                                          		{ return [0xED,0xA8]; } // LDD
   / "LDIR"i                                                                         		{ return [0xED,0xB0]; } // LDIR
+  / "LDI"i                                                                          		{ return [0xED,0xA0]; } // LDI
   / "MULUB"i _ "A"i _ "," _ r:TableR                                                		{ return [0xED,0xC1+0x8*r]; } // MULUB A,r
   / "MULUW"i _ "HL"i _ "," _ "BC"i                                                  		{ return [0xED,0xC3]; } // MULUW HL,BC
   / "MULUW"i _ "HL"i _ "," _ "SP"i                                                  		{ return [0xED,0xF3]; } // MULUW HL,SP
