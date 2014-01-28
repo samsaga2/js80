@@ -258,9 +258,9 @@ Z80
   / "LD"i _ "A"i _ "," _ r:TableR                                                   		{ return [0x78+r]; } // LD A,r
   / "LD"i _ "A"i _ "," _ p:TableIXp                                                 		{ return [0xDD,0x78+p]; } // LD A,IXp
   / "LD"i _ "A"i _ "," _ q:TableIYq                                                 		{ return [0xFD,0x78+q]; } // LD A,IYq
-  / "LD"i _ "A"i _ "," _ nn:Int8                                                    		{ return [0x3E,nn]; } // LD A,n
   / "LD"i _ "A"i _ "," _ "I"i                                                       		{ return [0xED,0x57]; } // LD A,I
   / "LD"i _ "A"i _ "," _ "R"i                                                       		{ return [0xED,0x5F]; } // LD A,R
+  / "LD"i _ "A"i _ "," _ nn:Int8                                                    		{ return [0x3E,nn]; } // LD A,n
   / "LD"i _ "B"i _ "," _ "(HL)"i                                                    		{ return [0x46]; } // LD B,(HL)
   / "LD"i _ "B"i _ "," _ "(" _ "IX"i _ oo:Offset8 _ ")"                             		{ return [0xDD,0x46,oo]; } // LD B,(IX+o)
   / "LD"i _ "B"i _ "," _ "(" _ "IY"i _ oo:Offset8 _ ")"                             		{ return [0xFD,0x46,oo]; } // LD B,(IY+o)
