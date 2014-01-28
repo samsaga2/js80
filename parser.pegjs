@@ -61,6 +61,8 @@ InternalInst
   / "error"i ws msg:Expr                                  { return ast.error(msg); }
   / "struct"i ws i:Identifier                             { return ast.defineStruct(i); }
   / "endstruct"i                                          { return ast.endStruct(); }
+  / "code"i						  { }
+  / "data"i						  { }
 
 PageArg
   = s:Expr _ ".." _ e:Expr      { return ast.macroArgRange(s, e); }

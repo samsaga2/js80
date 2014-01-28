@@ -118,6 +118,8 @@ js80.saveImage('a.out');
 | <label> *equ* <expr> | TODO |
 | *struct* <name> | Declares a struct |
 | *endstruct* | Ends struct declaration |
+| *code* | Does nothing (for sjasm compatibility) |
+| *data* | Does nothing (for sjasm compatibility) |
 
 
 ## Expressions ##
