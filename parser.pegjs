@@ -19,7 +19,9 @@ Lines
   }
 
 Line
-  = l:Label _ "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
+  = l:Identifier ws "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
+  / l:Identifier ws "equ"i ws e:Expr { return ast.equ(l, e, line); }
+  / l:Label _ "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
   / l:Label _ "equ"i ws e:Expr { return ast.equ(l, e, line); }
   / l:Label? _ i:Inst?         { return ast.label(l, i, line); }
 

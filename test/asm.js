@@ -210,4 +210,12 @@ describe('asm', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x32, 0x20, 0x10]);
     });
+
+    it('ld (0x1020),a', function() {
+        var js80 = new JS80();
+        js80.asm('var equ 0x1020\nld (var),a');
+        js80.secondPass();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x32, 0x20, 0x10]);
+    });
 });
