@@ -218,4 +218,13 @@ describe('asm', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0x32, 0x20, 0x10]);
     });
+
+    it('var=10 - var=var+1 - ld (var),a', function() {
+        var js80 = new JS80();
+        js80.asm('var=10\nvar=var+1\nld (var),a');
+        js80.secondPass();
+        js80.errors.print();
+        should(js80.errors.hasErrors()).be.false;
+        should(js80.buildImage()).be.eql([0x32, 11, 0x00]);
+    });
 });

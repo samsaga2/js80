@@ -21,9 +21,10 @@ Lines
 Line
   = l:Identifier ws "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
   / l:Identifier ws "equ"i ws e:Expr { return ast.equ(l, e, line); }
-  / l:Label _ "#" ws e:Expr    { return ast.equ(l, ast.expr.map(e), line); }
-  / l:Label _ "equ"i ws e:Expr { return ast.equ(l, e, line); }
-  / l:Label? _ i:Inst?         { return ast.label(l, i, line); }
+  / l:IdentifierNoDot _ "=" _ e:Expr { return ast.assign(l, e, line); }
+  / l:Label _ "#" ws e:Expr          { return ast.equ(l, ast.expr.map(e), line); }
+  / l:Label _ "equ"i ws e:Expr       { return ast.equ(l, e, line); }
+  / l:Label? _ i:Inst?               { return ast.label(l, i, line); }
 
 Label
   = l:Identifier _ ":" { return l; }
@@ -63,8 +64,8 @@ InternalInst
   / "error"i ws msg:Expr                                  { return ast.error(msg); }
   / "struct"i ws i:Identifier                             { return ast.defineStruct(i); }
   / "endstruct"i                                          { return ast.endStruct(); }
-  / "code"i						  { }
-  / "data"i						  { }
+  / "code"i                                               { }
+  / "data"i                                               { }
 
 PageArg
   = s:Expr _ ".." _ e:Expr      { return ast.macroArgRange(s, e); }
@@ -162,6 +163,9 @@ String
 
 Identifier
   = p:"."? s:[a-zA-Z_0-9\.]+      { return (p||'') + s.join(''); }
+
+IdentifierNoDot
+  = h:[a-zA-Z] t:[a-zA-Z_0-9\.]*      { return h + t.join(''); }
 
 //
 // chars

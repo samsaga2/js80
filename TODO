@@ -1,0 +1,2 @@
+- move js80.defineLabel to environment module
+- add while/endwhile instr
