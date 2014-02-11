@@ -105,7 +105,7 @@ describe('asm', function() {
         js80.asm('org 8000h\ntest_label: nop');
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
-        should(js80.environment.get('test_label')).be.eql(0x8000);
+        should(js80.env.get('test_label')).be.eql(0x8000);
     });
 
     it('multiple inst per line', function() {
