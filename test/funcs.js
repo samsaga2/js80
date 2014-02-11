@@ -11,7 +11,7 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0]);
-        should(js80.image.currentPage.origin + js80.image.currentPage.offset).be.eql(0x8001);
+        should(js80.image.currentPage.here()).be.eql(0x8001);
     });
 
     it('db 1,2,3', function() {
@@ -224,7 +224,7 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0]);
-        should(js80.image.currentPage.origin + js80.image.currentPage.offset).be.eql(0x8001);
+        should(js80.image.currentPage.here()).be.eql(0x8001);
     });
 
     it('data', function() {
@@ -233,6 +233,6 @@ describe('funcs', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0]);
-        should(js80.image.currentPage.origin + js80.image.currentPage.offset).be.eql(0x8001);
+        should(js80.image.currentPage.here()).be.eql(0x8001);
     });
 });
