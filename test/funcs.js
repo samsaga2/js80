@@ -217,22 +217,4 @@ describe('funcs', function() {
         should(js80.errors.hasErrors()).be.false;
         should(js80.buildImage()).be.eql([0, 1, 3, 100]);
     });
-
-    it('code', function() {
-        var js80 = new JS80();
-        js80.asm('org 8000h\ncode\nnop');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([0]);
-        should(js80.image.currentPage.here()).be.eql(0x8001);
-    });
-
-    it('data', function() {
-        var js80 = new JS80();
-        js80.asm('org 8000h\ndata\nnop');
-        js80.secondPass();
-        should(js80.errors.hasErrors()).be.false;
-        should(js80.buildImage()).be.eql([0]);
-        should(js80.image.currentPage.here()).be.eql(0x8001);
-    });
 });

@@ -57,12 +57,23 @@ macro dbg_byte byte
         pop af
 endmacro
 
+macro dbg_word word
+	push hl
+	ld hl,word
+	dbg_byte h
+	dbg_byte l
+	pop hl
+endmacro
+
 else
 
 macro dbg_echo text
 endmacro
 
 macro dbg_byte b
+endmacro
+
+macro dbg_word w
 endmacro
 
 endif

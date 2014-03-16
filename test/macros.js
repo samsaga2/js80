@@ -59,4 +59,14 @@ describe('macro', function() {
         js80.secondPass();
         should(js80.errors.hasErrors()).be.true;
     });
+
+    it('macro reg arg', function() {
+        var js80 = new JS80();
+        js80.asm('macro m1 arg\nld a,arg\nendmacro');
+	js80.asm('macro m2 arg\nxor a\nm1 arg\nendmacro');
+	js80.asm('m2 b');
+        js80.secondPass();
+	js80.errors.print();
+        should(js80.buildImage()).be.eql([0xa8+7,0x78]);
+    });
 });
